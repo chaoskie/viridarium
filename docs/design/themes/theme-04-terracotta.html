@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terracotta — Theme 04</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#faf3e7; --clay:#c4593a; --clay-deep:#9c3f26; --choc:#3d2a20;
+  --sage:#7da27a; --sage-deep:#547752; --mustard:#e3a72f; --blush:#f3d9c4;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Atkinson Hyperlegible',sans-serif;background:var(--cream);color:var(--choc);
+  min-height:100vh;padding-bottom:64px;
+  background-image:radial-gradient(rgba(61,42,32,.05) 1.3px, transparent 1.3px);
+  background-size:26px 26px;
+}
+.frame{max-width:1060px;margin:0 auto;padding:0 36px}
+header{display:flex;justify-content:space-between;align-items:center;padding:26px 0}
+.brand{display:flex;align-items:center;gap:12px}
+.potmark{
+  width:46px;height:46px;border-radius:14px;background:var(--clay);display:grid;place-items:center;
+  font-size:23px;border:3px solid var(--choc);box-shadow:4px 4px 0 var(--choc);transform:rotate(-4deg);
+}
+.brand h1{font-family:'Baloo 2',cursive;font-weight:800;font-size:28px;letter-spacing:-.01em}
+.brand h1 span{color:var(--clay)}
+nav{display:flex;gap:8px}
+nav a{
+  font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;color:var(--choc);text-decoration:none;
+  padding:9px 18px;border-radius:999px;border:2.5px solid transparent;
+}
+nav a.on{background:#fff;border-color:var(--choc);box-shadow:3px 3px 0 var(--choc)}
+.hero{padding:34px 0 26px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.hero h2{font-family:'Baloo 2',cursive;font-weight:800;font-size:46px;line-height:1.05;max-width:17ch}
+.hero h2 .hl{color:var(--clay);position:relative;white-space:nowrap}
+.hero h2 .hl::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:10px;background:rgba(227,167,47,.45);z-index:-1;border-radius:4px}
+.hero p{margin-top:8px;font-size:16px;color:#6b554a}
+.statpods{display:flex;gap:12px}
+.pod{
+  background:#fff;border:3px solid var(--choc);border-radius:18px;padding:14px 18px;text-align:center;
+  box-shadow:4px 4px 0 var(--choc);min-width:96px;transform:rotate(1.5deg);
+}
+.pod:nth-child(2){transform:rotate(-1.5deg)} .pod:nth-child(3){transform:rotate(2deg)}
+.pod .n{font-family:'Baloo 2',cursive;font-weight:800;font-size:30px;line-height:1}
+.pod.bad .n{color:var(--clay)} .pod.ok .n{color:var(--sage-deep)}
+.pod .l{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-top:4px;color:#6b554a}
+h3.band{
+  font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;margin:30px 0 16px;
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--choc);color:var(--cream);padding:8px 20px;border-radius:999px;transform:rotate(-1deg);
+}
+h3.band.thirsty{background:var(--clay)}
+h3.band.todays{background:var(--sage-deep)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.tile{
+  background:#fff;border:3px solid var(--choc);border-radius:22px;padding:20px;
+  box-shadow:5px 5px 0 var(--choc);position:relative;transition:.15s;
+}
+.tile:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--choc)}
+.tile .sticker{
+  position:absolute;top:-13px;right:16px;font-family:'Baloo 2',cursive;font-weight:700;font-size:12.5px;
+  padding:5px 14px;border-radius:999px;border:2.5px solid var(--choc);transform:rotate(3deg);
+}
+.tile.late .sticker{background:var(--clay);color:#fff}
+.tile.today .sticker{background:var(--sage);color:#fff}
+.tile.feed .sticker{background:var(--mustard);color:var(--choc)}
+.tile .face{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.planty{
+  width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:26px;
+  border:3px solid var(--choc);background:var(--blush);
+}
+.tile h4{font-family:'Baloo 2',cursive;font-weight:800;font-size:21px;line-height:1.05}
+.tile .latin{font-style:italic;font-size:13.5px;color:#8a7060}
+.factrow{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.fact{
+  font-size:12px;font-weight:700;background:var(--cream);border:2px solid var(--choc);
+  border-radius:999px;padding:4px 12px;
+}
+.bigbtn{
+  width:100%;font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;cursor:pointer;
+  background:var(--sage);color:#fff;border:3px solid var(--choc);border-radius:16px;padding:12px;
+  box-shadow:3px 3px 0 var(--choc);transition:.12s;
+}
+.bigbtn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--choc);background:var(--sage-deep)}
+.tile.late .bigbtn{background:var(--clay)} .tile.late .bigbtn:hover{background:var(--clay-deep)}
+.roomrow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:6px}
+.roomtile{
+  background:#fff;border:3px solid var(--choc);border-radius:18px;padding:16px;box-shadow:4px 4px 0 var(--choc);
+  display:flex;align-items:center;gap:12px;
+}
+.roomtile .ic{font-size:24px}
+.roomtile h5{font-family:'Baloo 2',cursive;font-weight:800;font-size:16px}
+.roomtile p{font-size:12px;color:#6b554a;font-weight:700}
+.roomtile p b{color:var(--clay)}
+footer{margin-top:46px;text-align:center;font-size:13px;color:#8a7060}
+footer b{font-family:'Baloo 2',cursive;color:var(--choc)}
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <div class="brand"><div class="potmark">🪴</div><h1>plant<span>keep</span></h1></div>
+    <nav><a class="on">Today</a><a>Plants</a><a>Rooms</a><a>Journal</a></nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h2>Hey! <span class="hl">5 green friends</span> need a little love today.</h2>
+      <p>Sunday 7 June — mostly water, one snack for the orchid.</p>
+    </div>
+    <div class="statpods">
+      <div class="pod"><div class="n">24</div><div class="l">plants</div></div>
+      <div class="pod ok"><div class="n">3</div><div class="l">due</div></div>
+      <div class="pod bad"><div class="n">2</div><div class="l">late</div></div>
+    </div>
+  </div>
+
+  <h3 class="band thirsty">😅 Oops, running late</h3>
+  <div class="grid">
+    <div class="tile late"><span class="sticker">2 days late!</span>
+      <div class="face"><div class="planty">🌿</div><div><h4>Monstera</h4><div class="latin">Monstera deliciosa</div></div></div>
+      <div class="factrow"><span class="fact">🛋️ Living room</span><span class="fact">💧 every 7d</span><span class="fact">last: 9d ago</span></div>
+      <button class="bigbtn">💧 Just watered it!</button>
+    </div>
+    <div class="tile late"><span class="sticker">1 day late!</span>
+      <div class="face"><div class="planty">🍃</div><div><h4>Calathea</h4><div class="latin">Calathea orbifolia</div></div></div>
+      <div class="factrow"><span class="fact">🛏️ Bedroom</span><span class="fact">💧 every 4d</span><span class="fact">last: 5d ago</span></div>
+      <button class="bigbtn">💧 Just watered it!</button>
+    </div>
+  </div>
+
+  <h3 class="band todays">📋 On today's list</h3>
+  <div class="grid">
+    <div class="tile today"><span class="sticker">water day</span>
+      <div class="face"><div class="planty">🌱</div><div><h4>Fiddle-leaf fig</h4><div class="latin">Ficus lyrata</div></div></div>
+      <div class="factrow"><span class="fact">🛋️ Living room</span><span class="fact">💧 every 7d</span></div>
+      <button class="bigbtn">💧 Just watered it!</button>
+    </div>
+    <div class="tile today"><span class="sticker">water day</span>
+      <div class="face"><div class="planty">🌿</div><div><h4>Golden pothos</h4><div class="latin">Epipremnum aureum</div></div></div>
+      <div class="factrow"><span class="fact">💻 Office</span><span class="fact">💧 every 10d</span></div>
+      <button class="bigbtn">💧 Just watered it!</button>
+    </div>
+    <div class="tile feed"><span class="sticker">snack time</span>
+      <div class="face"><div class="planty">🌸</div><div><h4>Moth orchid</h4><div class="latin">Phalaenopsis</div></div></div>
+      <div class="factrow"><span class="fact">🍳 Kitchen</span><span class="fact">🌾 every 30d</span></div>
+      <button class="bigbtn">🌾 Fed it!</button>
+    </div>
+  </div>
+
+  <h3 class="band">🏠 Around the house</h3>
+  <div class="roomrow">
+    <div class="roomtile"><span class="ic">🛋️</span><div><h5>Living room</h5><p>8 plants · <b>2 due</b></p></div></div>
+    <div class="roomtile"><span class="ic">💻</span><div><h5>Office</h5><p>6 plants · <b>1 due</b></p></div></div>
+    <div class="roomtile"><span class="ic">🛏️</span><div><h5>Bedroom</h5><p>5 plants · <b>1 late</b></p></div></div>
+    <div class="roomtile"><span class="ic">🍳</span><div><h5>Kitchen</h5><p>5 plants · <b>1 due</b></p></div></div>
+  </div>
+
+  <footer>made with <b>plantkeep</b> · talks to your calendar &amp; home automation 🏡</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greenhouse — Theme 03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,500;12..96,700;12..96,800&family=Karla:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#eef6ee; --mist:#ffffff; --glass:rgba(255,255,255,.62); --glass-edge:rgba(255,255,255,.9);
+  --ink:#21372b; --soft:#5d7466;
+  --leaf:#3e8c5d; --leaf-deep:#2c6b45; --sun:#f2b544; --clay:#e0734f; --sprout:#a8d8b0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Karla',sans-serif;color:var(--ink);min-height:100vh;padding-bottom:64px;
+  background:
+    radial-gradient(900px 700px at 80% -15%, rgba(242,181,68,.18), transparent 55%),
+    radial-gradient(1100px 800px at -10% 30%, rgba(168,216,176,.4), transparent 60%),
+    radial-gradient(700px 600px at 105% 80%, rgba(62,140,93,.14), transparent 55%),
+    linear-gradient(180deg,#f3f9f1, #e8f3ea 60%, #e2efe6);
+}
+.frame{max-width:1080px;margin:0 auto;padding:0 36px}
+header{display:flex;justify-content:space-between;align-items:center;padding:28px 0}
+.brand{display:flex;align-items:center;gap:12px}
+.sprig{
+  width:42px;height:42px;border-radius:50% 50% 50% 6px;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--leaf),var(--leaf-deep));color:#fff;font-size:20px;
+  box-shadow:0 8px 20px rgba(44,107,69,.25); transform:rotate(-8deg);
+}
+.brand h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:25px;letter-spacing:-.02em}
+nav{display:flex;gap:6px;background:var(--glass);border:1px solid var(--glass-edge);backdrop-filter:blur(10px);border-radius:999px;padding:6px;box-shadow:0 4px 18px rgba(33,55,43,.06)}
+nav a{font-size:14px;font-weight:500;color:var(--soft);padding:9px 18px;border-radius:999px;text-decoration:none}
+nav a.on{background:var(--ink);color:#fff}
+.hello{padding:42px 0 30px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.hello h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:300;font-size:54px;line-height:1.03;letter-spacing:-.025em;max-width:16ch}
+.hello h2 b{font-weight:800;color:var(--leaf-deep)}
+.hello .day{font-size:15px;color:var(--soft);margin-top:12px}
+.chiprow{display:flex;gap:10px}
+.chip{
+  display:flex;align-items:baseline;gap:8px;background:var(--glass);border:1px solid var(--glass-edge);
+  backdrop-filter:blur(10px);border-radius:999px;padding:10px 18px;box-shadow:0 4px 18px rgba(33,55,43,.06);
+  font-size:13.5px;color:var(--soft);
+}
+.chip b{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:700;color:var(--ink)}
+.chip.bad b{color:var(--clay)} .chip.due b{color:var(--leaf-deep)}
+h3.sect{
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px;margin:28px 0 14px;
+  display:flex;align-items:center;gap:10px;
+}
+h3.sect .tagn{
+  font-family:'Karla',sans-serif;font-weight:600;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 12px;border-radius:999px;
+}
+h3.sect .tagn.late{background:rgba(224,115,79,.15);color:var(--clay)}
+h3.sect .tagn.today{background:rgba(62,140,93,.14);color:var(--leaf-deep)}
+.pots{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.pot{
+  background:var(--glass);border:1px solid var(--glass-edge);backdrop-filter:blur(14px);
+  border-radius:26px;padding:22px;box-shadow:0 10px 30px rgba(33,55,43,.07);
+  position:relative;overflow:hidden;transition:.25s;
+}
+.pot:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(33,55,43,.12)}
+.pot .blob{position:absolute;width:160px;height:160px;border-radius:50%;filter:blur(34px);opacity:.5;right:-40px;top:-50px}
+.pot.late .blob{background:var(--clay)} .pot.today .blob{background:var(--sprout)} .pot.feed .blob{background:var(--sun)}
+.pot .toprow{display:flex;justify-content:space-between;align-items:flex-start;position:relative}
+.pot h4{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:22px;letter-spacing:-.01em}
+.pot .latin{font-style:italic;color:var(--soft);font-size:14px;margin-top:2px}
+.pip{
+  font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:6px 12px;border-radius:999px;white-space:nowrap;
+}
+.pip.late{background:var(--clay);color:#fff} .pip.today{background:var(--leaf);color:#fff} .pip.feed{background:var(--sun);color:#5c4308}
+.pot .where{display:flex;gap:14px;margin:14px 0 18px;font-size:13.5px;color:var(--soft);position:relative}
+.pot .where b{color:var(--ink);font-weight:600}
+.waterline{height:8px;border-radius:999px;background:rgba(93,116,102,.14);overflow:hidden;margin-bottom:16px;position:relative}
+.waterline i{display:block;height:100%;border-radius:999px}
+.pot.late .waterline i{width:100%;background:linear-gradient(90deg,#f0a387,var(--clay))}
+.pot.today .waterline i{width:95%;background:linear-gradient(90deg,var(--sprout),var(--leaf))}
+.pot.feed .waterline i{width:97%;background:linear-gradient(90deg,#f8d489,var(--sun))}
+.done{
+  width:100%;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;
+  border:none;border-radius:16px;padding:13px;cursor:pointer;transition:.2s;position:relative;
+  background:var(--ink);color:#fff;
+}
+.done:hover{background:var(--leaf-deep)}
+.rooms{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.room{
+  background:var(--glass);border:1px solid var(--glass-edge);backdrop-filter:blur(10px);
+  border-radius:20px;padding:18px;box-shadow:0 6px 20px rgba(33,55,43,.05);
+}
+.room .emoji{font-size:22px}
+.room h5{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;margin:8px 0 3px}
+.room p{font-size:12.5px;color:var(--soft)}
+.room p b{color:var(--leaf-deep)} .room.warn p b{color:var(--clay)}
+footer{margin-top:48px;display:flex;justify-content:space-between;font-size:12.5px;color:var(--soft)}
+footer .links{display:flex;gap:18px} footer a{color:var(--leaf-deep);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <div class="brand"><div class="sprig">☘</div><h1>plantkeep</h1></div>
+    <nav><a class="on">Today</a><a>Plants</a><a>Rooms</a><a>Journal</a><a>Settings</a></nav>
+  </header>
+
+  <div class="hello">
+    <div>
+      <h2>Good morning. <b>Five plants</b> are waiting for you.</h2>
+      <p class="day">Sunday 7 June · summer schedule active</p>
+    </div>
+    <div class="chiprow">
+      <div class="chip"><b>24</b> plants</div>
+      <div class="chip due"><b>3</b> due</div>
+      <div class="chip bad"><b>2</b> overdue</div>
+    </div>
+  </div>
+
+  <h3 class="sect">Needs you now <span class="tagn late">2 overdue</span></h3>
+  <div class="pots">
+    <div class="pot late"><div class="blob"></div>
+      <div class="toprow"><div><h4>Monstera</h4><div class="latin">Monstera deliciosa</div></div><span class="pip late">2 days late</span></div>
+      <div class="where"><span>📍 <b>Living room</b></span><span>💧 every <b>7 d</b></span><span>last <b>9 d</b> ago</span></div>
+      <div class="waterline"><i></i></div>
+      <button class="done">💧 Watered today</button>
+    </div>
+    <div class="pot late"><div class="blob"></div>
+      <div class="toprow"><div><h4>Calathea</h4><div class="latin">Calathea orbifolia</div></div><span class="pip late">1 day late</span></div>
+      <div class="where"><span>📍 <b>Bedroom</b></span><span>💧 every <b>4 d</b></span><span>last <b>5 d</b> ago</span></div>
+      <div class="waterline"><i></i></div>
+      <button class="done">💧 Watered today</button>
+    </div>
+  </div>
+
+  <h3 class="sect">Today <span class="tagn today">3 due</span></h3>
+  <div class="pots">
+    <div class="pot today"><div class="blob"></div>
+      <div class="toprow"><div><h4>Fiddle-leaf fig</h4><div class="latin">Ficus lyrata</div></div><span class="pip today">water</span></div>
+      <div class="where"><span>📍 <b>Living room</b></span><span>💧 every <b>7 d</b></span></div>
+      <div class="waterline"><i></i></div>
+      <button class="done">💧 Watered today</button>
+    </div>
+    <div class="pot today"><div class="blob"></div>
+      <div class="toprow"><div><h4>Golden pothos</h4><div class="latin">Epipremnum aureum</div></div><span class="pip today">water</span></div>
+      <div class="where"><span>📍 <b>Office</b></span><span>💧 every <b>10 d</b></span></div>
+      <div class="waterline"><i></i></div>
+      <button class="done">💧 Watered today</button>
+    </div>
+    <div class="pot feed"><div class="blob"></div>
+      <div class="toprow"><div><h4>Moth orchid</h4><div class="latin">Phalaenopsis</div></div><span class="pip feed">feed</span></div>
+      <div class="where"><span>📍 <b>Kitchen</b></span><span>🌾 every <b>30 d</b></span></div>
+      <div class="waterline"><i></i></div>
+      <button class="done">🌾 Fed today</button>
+    </div>
+  </div>
+
+  <h3 class="sect">Around the house</h3>
+  <div class="rooms">
+    <div class="room warn"><div class="emoji">🛋️</div><h5>Living room</h5><p>8 plants · <b>2 need care</b></p></div>
+    <div class="room"><div class="emoji">💻</div><h5>Office</h5><p>6 plants · <b>1 due</b></p></div>
+    <div class="room warn"><div class="emoji">🛏️</div><h5>Bedroom</h5><p>5 plants · <b>1 late</b></p></div>
+    <div class="room"><div class="emoji">🍳</div><h5>Kitchen</h5><p>5 plants · <b>1 due</b></p></div>
+  </div>
+
+  <footer>
+    <span>plantkeep · your plants, your network</span>
+    <div class="links"><a>calendar feed</a><a>api docs</a><a>webhooks</a></div>
+  </footer>
+</div>
+</body>
+</html>

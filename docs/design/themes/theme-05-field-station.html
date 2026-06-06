@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field Station — Theme 05</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Martian+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f3ef; --panel:#fbfcf9; --ink:#171d19; --mid:#5a665e; --line:#c8cec6;
+  --sig:#0e7a47; --sig-bright:#12a35e; --warn:#d8451f; --amber:#c98a12; --tape:#e8ebe4;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Martian Mono',monospace;background:var(--bg);color:var(--ink);min-height:100vh;
+  background-image:linear-gradient(rgba(23,29,25,.035) 1px, transparent 1px),linear-gradient(90deg, rgba(23,29,25,.035) 1px, transparent 1px);
+  background-size:28px 28px;padding-bottom:56px;font-size:13px;
+}
+.frame{max-width:1100px;margin:0 auto;padding:0 32px}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:2px solid var(--ink);padding:20px 0 14px;
+}
+.id{display:flex;align-items:center;gap:14px}
+.mark{
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:20px;letter-spacing:.02em;
+  background:var(--ink);color:var(--panel);padding:6px 12px;
+}
+.mark b{color:var(--sig-bright)}
+.sysline{font-size:10px;color:var(--mid);letter-spacing:.08em;text-transform:uppercase;line-height:1.7}
+.sysline .ok{color:var(--sig)}
+nav{display:flex;gap:0;border:1.5px solid var(--ink)}
+nav a{
+  font-family:'Archivo',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  padding:9px 18px;color:var(--ink);text-decoration:none;border-right:1.5px solid var(--ink);
+}
+nav a:last-child{border-right:none}
+nav a.on{background:var(--ink);color:var(--panel)}
+.readout{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:0;border:2px solid var(--ink);margin:26px 0 0;background:var(--panel)}
+.cell{padding:18px 20px;border-right:2px solid var(--ink)}
+.cell:last-child{border-right:none}
+.cell .k{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mid);margin-bottom:8px}
+.cell .v{font-family:'Archivo',sans-serif;font-weight:800;font-size:40px;line-height:.95}
+.cell .v small{font-size:14px;font-weight:600;color:var(--mid)}
+.cell.alert .v{color:var(--warn)} .cell.due .v{color:var(--sig)}
+.cell h2{font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;line-height:1.1;letter-spacing:-.01em}
+.cell .sub{font-size:11px;color:var(--mid);margin-top:8px;line-height:1.6}
+.blocktitle{
+  display:flex;align-items:center;gap:12px;margin:28px 0 0;
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+}
+.blocktitle .chip{padding:3px 10px;font-size:10px}
+.chip.red{background:var(--warn);color:#fff} .chip.grn{background:var(--sig);color:#fff}
+.blocktitle::after{content:"";flex:1;border-top:1.5px dashed var(--line)}
+table{width:100%;border-collapse:collapse;margin-top:10px;background:var(--panel);border:2px solid var(--ink)}
+thead th{
+  font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);text-align:left;
+  padding:9px 14px;border-bottom:2px solid var(--ink);background:var(--tape);
+}
+tbody td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#f4f7f1}
+.pname{font-family:'Archivo',sans-serif;font-weight:700;font-size:15px}
+.platin{font-size:10.5px;color:var(--mid);font-style:italic;font-family:'Martian Mono',monospace}
+.tag{font-size:10px;padding:3px 9px;letter-spacing:.06em}
+.tag.water{background:#dceef3;color:#11556b;border:1px solid #9cc6d3}
+.tag.feed{background:#f6ecd4;color:#7a5408;border:1px solid #ddc285}
+.delta{font-weight:700;font-size:12px}
+.delta.bad{color:var(--warn)} .delta.now{color:var(--sig)}
+.bars{display:inline-flex;gap:2.5px;align-items:flex-end;height:16px;margin-right:8px}
+.bars i{width:4px;background:var(--line)}
+.bars i.f{background:var(--sig)} .bars i.x{background:var(--warn)}
+.logbtn{
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--panel);border:1.5px solid var(--ink);padding:8px 16px;cursor:pointer;
+  box-shadow:2.5px 2.5px 0 var(--ink);transition:.1s;color:var(--ink);
+}
+.logbtn:hover{background:var(--sig);border-color:var(--sig);color:#fff;box-shadow:2.5px 2.5px 0 var(--ink)}
+.footgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:2px solid var(--ink);border-top:none;background:var(--tape)}
+.footgrid .fcell{padding:12px 16px;border-right:1px solid var(--line);font-size:10px;letter-spacing:.06em}
+.footgrid .fcell:last-child{border-right:none}
+.footgrid b{font-family:'Archivo',sans-serif;font-size:12px;letter-spacing:.04em}
+.footgrid .due-ct{color:var(--sig);font-weight:700} .footgrid .late-ct{color:var(--warn);font-weight:700}
+.apifoot{
+  margin-top:30px;border:1.5px dashed var(--mid);padding:12px 18px;display:flex;justify-content:space-between;
+  font-size:10px;color:var(--mid);letter-spacing:.06em;background:rgba(251,252,249,.7);
+}
+.apifoot code{color:var(--sig);font-weight:500}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="topbar">
+    <div class="id">
+      <div class="mark">PLANT<b>KEEP</b></div>
+      <div class="sysline">
+        field station · house unit 01<br>
+        <span class="ok">● all systems nominal</span> · db: sqlite · uptime 14d
+      </div>
+    </div>
+    <nav><a class="on">Today</a><a>Plants</a><a>Rooms</a><a>Log</a><a>API</a></nav>
+  </div>
+
+  <div class="readout">
+    <div class="cell">
+      <div class="k">Care manifest · Sun 2026-06-07</div>
+      <h2>5 OPERATIONS PENDING</h2>
+      <div class="sub">2 watering overdue · 2 watering due · 1 feeding due<br>season profile: SUMMER (winter window inactive)</div>
+    </div>
+    <div class="cell"><div class="k">Inventory</div><div class="v">24</div></div>
+    <div class="cell due"><div class="k">Due today</div><div class="v">3</div></div>
+    <div class="cell alert"><div class="k">Overdue</div><div class="v">2</div></div>
+  </div>
+
+  <div class="blocktitle">Overdue <span class="chip red">action required</span></div>
+  <table>
+    <thead><tr><th style="width:30%">Specimen</th><th>Zone</th><th>Op</th><th>Interval</th><th>Last done</th><th>Δ</th><th></th></tr></thead>
+    <tbody>
+      <tr>
+        <td><div class="pname">Monstera</div><div class="platin">Monstera deliciosa · #007</div></td>
+        <td>living-room</td>
+        <td><span class="tag water">WATER</span></td>
+        <td>7d</td>
+        <td>2026-05-29</td>
+        <td><span class="bars"><i class="x" style="height:16px"></i><i class="x" style="height:13px"></i><i class="x" style="height:10px"></i></span><span class="delta bad">+2d</span></td>
+        <td><button class="logbtn">Log ✓</button></td>
+      </tr>
+      <tr>
+        <td><div class="pname">Calathea</div><div class="platin">Calathea orbifolia · #012</div></td>
+        <td>bedroom</td>
+        <td><span class="tag water">WATER</span></td>
+        <td>4d</td>
+        <td>2026-06-02</td>
+        <td><span class="bars"><i class="x" style="height:13px"></i><i class="x" style="height:10px"></i><i style="height:7px"></i></span><span class="delta bad">+1d</span></td>
+        <td><button class="logbtn">Log ✓</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="blocktitle">Due today <span class="chip grn">scheduled</span></div>
+  <table>
+    <thead><tr><th style="width:30%">Specimen</th><th>Zone</th><th>Op</th><th>Interval</th><th>Last done</th><th>Δ</th><th></th></tr></thead>
+    <tbody>
+      <tr>
+        <td><div class="pname">Fiddle-leaf fig</div><div class="platin">Ficus lyrata · #003</div></td>
+        <td>living-room</td>
+        <td><span class="tag water">WATER</span></td>
+        <td>7d</td>
+        <td>2026-05-31</td>
+        <td><span class="bars"><i class="f" style="height:16px"></i><i class="f" style="height:12px"></i><i style="height:8px"></i></span><span class="delta now">0d</span></td>
+        <td><button class="logbtn">Log ✓</button></td>
+      </tr>
+      <tr>
+        <td><div class="pname">Golden pothos</div><div class="platin">Epipremnum aureum · #018</div></td>
+        <td>office</td>
+        <td><span class="tag water">WATER</span></td>
+        <td>10d</td>
+        <td>2026-05-28</td>
+        <td><span class="bars"><i class="f" style="height:16px"></i><i class="f" style="height:12px"></i><i style="height:8px"></i></span><span class="delta now">0d</span></td>
+        <td><button class="logbtn">Log ✓</button></td>
+      </tr>
+      <tr>
+        <td><div class="pname">Moth orchid</div><div class="platin">Phalaenopsis · #021</div></td>
+        <td>kitchen</td>
+        <td><span class="tag feed">FEED</span></td>
+        <td>30d</td>
+        <td>2026-05-08</td>
+        <td><span class="bars"><i class="f" style="height:16px"></i><i class="f" style="height:12px"></i><i style="height:8px"></i></span><span class="delta now">0d</span></td>
+        <td><button class="logbtn">Log ✓</button></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="blocktitle">Zone summary</div>
+  <div class="footgrid">
+    <div class="fcell"><b>LIVING-ROOM</b><br>8 units · <span class="due-ct">2 due</span></div>
+    <div class="fcell"><b>OFFICE</b><br>6 units · <span class="due-ct">1 due</span></div>
+    <div class="fcell"><b>BEDROOM</b><br>5 units · <span class="late-ct">1 overdue</span></div>
+    <div class="fcell"><b>KITCHEN</b><br>5 units · <span class="due-ct">1 due</span></div>
+  </div>
+
+  <div class="apifoot">
+    <span>machine access: <code>GET /api/v1/due</code> · <code>calendar.ics</code> · <code>webhooks→ntfy</code></span>
+    <span>plantkeep field station · AGPL-3.0</span>
+  </div>
+</div>
+</body>
+</html>

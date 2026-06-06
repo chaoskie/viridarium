@@ -1,0 +1,45 @@
+# Environment / secrets — never commit real config
+.env
+.env.*
+!.env.example
+*.local
+secrets/
+*.pem
+*.key
+
+# Local-only knowledge vault and Claude session state (stays off the public repo)
+.claude/docs/
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+*.egg-info/
+
+# Node
+node_modules/
+frontend/dist/
+.vite/
+
+# Databases (local dev SQLite lives outside the repo or here, never committed)
+*.sqlite3
+*.db
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Playwright
+test-results/
+playwright-report/

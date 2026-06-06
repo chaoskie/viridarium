@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & support
+    url: https://github.com/OWNER/REPO/discussions
+    about: Please use Discussions for setup help and questions. Issues are for actionable bugs and scoped feature requests.

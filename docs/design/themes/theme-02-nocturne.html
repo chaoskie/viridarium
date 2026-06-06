@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nocturne — Theme 02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#0a120d; --deep:#0f1a13; --pane:rgba(22,38,28,.65); --edge:rgba(110,231,153,.14);
+  --txt:#d8e8dc; --dim:#7d9485;
+  --bio:#6ee799; --bio-soft:rgba(110,231,153,.55); --cyan:#54d8c8;
+  --amber:#e8b75a; --alert:#ff7a6b;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Manrope',sans-serif; background:var(--void); color:var(--txt); min-height:100vh;
+  background-image:
+    radial-gradient(900px 500px at 15% -5%, rgba(84,216,200,.10), transparent 60%),
+    radial-gradient(700px 600px at 95% 20%, rgba(110,231,153,.07), transparent 60%),
+    radial-gradient(600px 500px at 50% 110%, rgba(110,231,153,.05), transparent 60%);
+  padding-bottom:60px;
+}
+.frame{max-width:1080px;margin:0 auto;padding:0 36px}
+header{display:flex;justify-content:space-between;align-items:center;padding:30px 0 0}
+.brand{display:flex;align-items:center;gap:13px}
+.glyph{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg, rgba(110,231,153,.18), rgba(84,216,200,.08));
+  border:1px solid var(--edge); box-shadow:0 0 24px rgba(110,231,153,.18), inset 0 0 12px rgba(110,231,153,.1);
+  color:var(--bio); font-size:18px;
+}
+.brand h1{font-family:'Syne',sans-serif;font-weight:700;font-size:22px;letter-spacing:.04em}
+.brand h1 span{color:var(--bio)}
+nav{display:flex;gap:8px;background:rgba(15,26,19,.7);border:1px solid var(--edge);border-radius:14px;padding:5px}
+nav a{font-size:13.5px;color:var(--dim);padding:8px 16px;border-radius:10px;text-decoration:none}
+nav a.on{background:rgba(110,231,153,.12);color:var(--bio);box-shadow:inset 0 0 0 1px rgba(110,231,153,.25)}
+.hero{padding:52px 0 34px;display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+.hero h2{font-family:'Syne',sans-serif;font-weight:800;font-size:50px;line-height:1.04;max-width:13ch}
+.hero h2 .glow{color:var(--bio);text-shadow:0 0 28px var(--bio-soft)}
+.hero .sub{color:var(--dim);font-size:15.5px;margin-top:14px;max-width:42ch;font-weight:300}
+.vitals{display:flex;gap:12px}
+.vital{
+  background:var(--pane);border:1px solid var(--edge);border-radius:16px;padding:16px 20px;min-width:108px;
+  backdrop-filter:blur(8px);
+}
+.vital .n{font-family:'Syne',sans-serif;font-weight:700;font-size:30px}
+.vital.alert .n{color:var(--alert);text-shadow:0 0 18px rgba(255,122,107,.45)}
+.vital.due .n{color:var(--bio);text-shadow:0 0 18px var(--bio-soft)}
+.vital .l{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+.lane-label{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--dim);margin:30px 0 14px;display:flex;align-items:center;gap:12px;
+}
+.lane-label::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent)}
+.lane-label .pulse{width:7px;height:7px;border-radius:50%;background:var(--alert);box-shadow:0 0 12px var(--alert);animation:pulse 1.6s infinite}
+.lane-label .pulse.ok{background:var(--bio);box-shadow:0 0 12px var(--bio)}
+@keyframes pulse{50%{opacity:.45}}
+.rows{display:flex;flex-direction:column;gap:10px}
+.row{
+  display:grid;grid-template-columns:46px 1.4fr 1fr 1fr auto;align-items:center;gap:18px;
+  background:var(--pane);border:1px solid var(--edge);border-radius:16px;padding:14px 18px;
+  backdrop-filter:blur(8px);transition:.2s;
+}
+.row:hover{border-color:rgba(110,231,153,.4);box-shadow:0 0 30px rgba(110,231,153,.07)}
+.row.late{border-left:3px solid var(--alert)}
+.row.now{border-left:3px solid var(--bio)}
+.row.fd{border-left:3px solid var(--amber)}
+.orb{
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:19px;
+  background:radial-gradient(circle at 35% 30%, rgba(110,231,153,.25), rgba(15,26,19,.9));
+  border:1px solid var(--edge);
+}
+.row .nm{font-weight:600;font-size:16px}
+.row .lat{color:var(--dim);font-size:12.5px;font-style:italic}
+.row .loc{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--cyan);letter-spacing:.06em}
+.gauge{height:5px;border-radius:3px;background:rgba(125,148,133,.18);position:relative;overflow:visible}
+.gauge i{position:absolute;inset:0;border-radius:3px;display:block}
+.row.late .gauge i{width:100%;background:linear-gradient(90deg,#9b4438,var(--alert));box-shadow:0 0 12px rgba(255,122,107,.5)}
+.row.now .gauge i{width:96%;background:linear-gradient(90deg,#2a6b45,var(--bio));box-shadow:0 0 12px var(--bio-soft)}
+.row.fd .gauge i{width:97%;background:linear-gradient(90deg,#8a6a28,var(--amber));box-shadow:0 0 12px rgba(232,183,90,.5)}
+.gauge .tag{position:absolute;top:-21px;right:0;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em}
+.row.late .tag{color:var(--alert)} .row.now .tag{color:var(--bio)} .row.fd .tag{color:var(--amber)}
+.zap{
+  font-family:'Syne',sans-serif;font-weight:600;font-size:13.5px;letter-spacing:.03em;
+  background:linear-gradient(135deg, rgba(110,231,153,.2), rgba(84,216,200,.12));
+  color:var(--bio); border:1px solid rgba(110,231,153,.35); border-radius:12px;
+  padding:10px 20px; cursor:pointer; transition:.2s;
+}
+.zap:hover{box-shadow:0 0 22px rgba(110,231,153,.35);background:rgba(110,231,153,.28);color:#eafff2}
+.rooms{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px}
+.roomcard{
+  background:var(--pane);border:1px solid var(--edge);border-radius:16px;padding:16px 18px;backdrop-filter:blur(8px);
+}
+.roomcard .rn{font-family:'Syne',sans-serif;font-weight:600;font-size:15px;margin-bottom:6px}
+.roomcard .rs{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim);letter-spacing:.1em}
+.roomcard .rs b{color:var(--bio);font-weight:500}
+.roomcard.warn .rs b{color:var(--alert)}
+footer{margin-top:46px;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+footer .api{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <div class="brand"><div class="glyph">❧</div><h1>plant<span>keep</span></h1></div>
+    <nav><a class="on">Today</a><a>Plants</a><a>Rooms</a><a>Journal</a><a>API</a></nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h2>The greenhouse <span class="glow">hums</span> at night.</h2>
+      <p class="sub">Sunday 07 June · two waters running late, three rituals due before sundown.</p>
+    </div>
+    <div class="vitals">
+      <div class="vital"><div class="n">24</div><div class="l">plants</div></div>
+      <div class="vital due"><div class="n">3</div><div class="l">due today</div></div>
+      <div class="vital alert"><div class="n">2</div><div class="l">overdue</div></div>
+    </div>
+  </div>
+
+  <div class="lane-label"><span class="pulse"></span>Overdue</div>
+  <div class="rows">
+    <div class="row late">
+      <div class="orb">🌿</div>
+      <div><div class="nm">Monstera</div><div class="lat">Monstera deliciosa</div></div>
+      <div class="loc">⌂ living-room</div>
+      <div class="gauge"><span class="tag">water · +2d</span><i></i></div>
+      <button class="zap">Watered</button>
+    </div>
+    <div class="row late">
+      <div class="orb">🍃</div>
+      <div><div class="nm">Calathea</div><div class="lat">Calathea orbifolia</div></div>
+      <div class="loc">⌂ bedroom</div>
+      <div class="gauge"><span class="tag">water · +1d</span><i></i></div>
+      <button class="zap">Watered</button>
+    </div>
+  </div>
+
+  <div class="lane-label"><span class="pulse ok"></span>Due today</div>
+  <div class="rows">
+    <div class="row now">
+      <div class="orb">🌱</div>
+      <div><div class="nm">Fiddle-leaf fig</div><div class="lat">Ficus lyrata</div></div>
+      <div class="loc">⌂ living-room</div>
+      <div class="gauge"><span class="tag">water · today</span><i></i></div>
+      <button class="zap">Watered</button>
+    </div>
+    <div class="row now">
+      <div class="orb">🌿</div>
+      <div><div class="nm">Golden pothos</div><div class="lat">Epipremnum aureum</div></div>
+      <div class="loc">⌂ office</div>
+      <div class="gauge"><span class="tag">water · today</span><i></i></div>
+      <button class="zap">Watered</button>
+    </div>
+    <div class="row fd">
+      <div class="orb">🌸</div>
+      <div><div class="nm">Moth orchid</div><div class="lat">Phalaenopsis</div></div>
+      <div class="loc">⌂ kitchen</div>
+      <div class="gauge"><span class="tag">feed · today</span><i></i></div>
+      <button class="zap">Fed</button>
+    </div>
+  </div>
+
+  <div class="lane-label">Rooms</div>
+  <div class="rooms">
+    <div class="roomcard warn"><div class="rn">Living room</div><div class="rs">8 plants · <b>2 due</b></div></div>
+    <div class="roomcard"><div class="rn">Office</div><div class="rs">6 plants · <b>1 due</b></div></div>
+    <div class="roomcard warn"><div class="rn">Bedroom</div><div class="rs">5 plants · <b>1 late</b></div></div>
+    <div class="roomcard"><div class="rn">Kitchen</div><div class="rs">5 plants · <b>1 due</b></div></div>
+  </div>
+
+  <footer><span>nocturne terrarium</span><span class="api">/api/v1 · ics · webhooks</span></footer>
+</div>
+</body>
+</html>
