@@ -98,7 +98,9 @@ jobs:
         if: matrix.engine == 'postgres'
         # psycopg is a CI-only concern until PostgreSQL is a first-class runtime path in
         # the image; not declared in pyproject.toml to avoid a runtime dep for it.
-        run: uv pip install --project backend "psycopg[binary]>=3.2,<4.0"
+        # Runs from backend/ so uv resolves the project venv created by backend-install.
+        working-directory: backend
+        run: uv pip install "psycopg[binary]>=3.2,<4.0"
       - name: alembic upgrade head (${{ matrix.engine }})
         working-directory: backend
         env:
@@ -115,8 +117,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          # Full history so the scan covers every commit on the PR branch.
+          # Full history so the scan covers every commit.
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+      # The gitleaks CLI is invoked directly on the full history instead of via
+      # gitleaks-action: the action derives a commit range from the push event,
+      # which breaks on a branch's initial push (root-commit^ is not a revision).
+      # A full scan is also the stronger guarantee for a public repo.
+      - name: Run gitleaks over the full history
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: 8.24.3
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar xz -C /tmp gitleaks
+          /tmp/gitleaks detect --source . --redact --verbose

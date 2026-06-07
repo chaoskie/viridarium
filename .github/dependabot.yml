@@ -22,3 +22,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # Base-image majors (python 3.12, node 20) are deliberate platform pins,
+      # bumped by hand with a tested migration. Digest and minor bumps stay automated.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
