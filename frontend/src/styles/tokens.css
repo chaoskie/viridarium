@@ -1,0 +1,57 @@
+/*
+ * Theme-token contract (FE-002 / FE-010).
+ *
+ * This file is the ONLY place colors, fonts, radii, shadows, and the tap-target
+ * baseline are defined as literal values. Tailwind (tailwind.config.ts) maps
+ * each token onto a utility class; components consume the classes.
+ *
+ * To apply one of the candidate designs in docs/design/themes/, override the
+ * values in this :root block (or ship a `[data-theme="..."]` block that does).
+ * Do not add new token NAMES here without a design decision (FE-010 ADR):
+ * a new semantic token is a design-system change, not dev discretion.
+ *
+ * The defaults below are deliberately NEUTRAL (stone greys + a restrained
+ * green accent). They are a placeholder, not a chosen theme.
+ */
+:root {
+  /* Surfaces */
+  --color-surface: #ffffff;
+  --color-surface-raised: #f5f5f4;
+  --color-surface-sunken: #e7e5e4;
+
+  /* Text / ink */
+  --color-ink: #1c1917;
+  --color-ink-muted: #57534e;
+  --color-ink-inverse: #fafaf9;
+
+  /* Brand / interactive */
+  --color-accent: #15803d;
+  --color-accent-strong: #166534;
+  --color-accent-soft: #dcfce7;
+
+  /* Semantic status */
+  --color-danger: #b91c1c;
+  --color-warning: #b45309;
+  --color-success: #15803d;
+
+  /* Structure */
+  --color-border: #d6d3d1;
+  --color-ring: #15803d;
+
+  /* Typography */
+  --font-display: system-ui, sans-serif;
+  --font-body: system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Radii */
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+  --radius-pill: 9999px;
+
+  /* Elevation */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+  /* Sizing baselines */
+  --size-tap-min: 44px;
+}
