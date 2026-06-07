@@ -4,6 +4,41 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>plant-care</title>
+
+    <!--
+      Theme fonts for both themes (FE-001 lock):
+        Terracotta -> Baloo 2 (display) + Atkinson Hyperlegible (body)
+        Herbarium  -> Fraunces (display) + Spectral (body) + IBM Plex Mono (labels)
+      Loaded from Google Fonts with preconnect. Follow-up: self-host via
+      @fontsource for offline-first (see specs/changes/dual-themes/tasks.md).
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+      Pre-paint theme application (avoids flash of the default theme).
+      Mirrors src/lib/theme/themeController.ts; kept inline + tiny so it runs
+      before the bundle. Key + valid values must match the controller.
+    -->
+    <script>
+      (function () {
+        var KEY = "plant-care.theme";
+        var THEMES = ["terracotta", "herbarium"];
+        var DEFAULT = "terracotta";
+        var stored;
+        try {
+          stored = window.localStorage.getItem(KEY);
+        } catch (e) {
+          stored = null;
+        }
+        var theme = THEMES.indexOf(stored) >= 0 ? stored : DEFAULT;
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

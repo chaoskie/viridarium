@@ -1,56 +1,156 @@
 /*
  * Theme-token contract (FE-002 / FE-010).
  *
- * This file is the ONLY place colors, fonts, radii, shadows, and the tap-target
- * baseline are defined as literal values. Tailwind (tailwind.config.ts) maps
- * each token onto a utility class; components consume the classes.
+ * This file is the ONLY place colors, fonts, radii, shadows, textures, and the
+ * tap-target baseline are defined as literal values. Tailwind
+ * (tailwind.config.ts) maps each token onto a utility class; components consume
+ * the classes and never reference raw hex / px / font names.
  *
- * To apply one of the candidate designs in docs/design/themes/, override the
- * values in this :root block (or ship a `[data-theme="..."]` block that does).
- * Do not add new token NAMES here without a design decision (FE-010 ADR):
- * a new semantic token is a design-system change, not dev discretion.
+ * Multi-theme model:
+ *   - :root and [data-theme="terracotta"] both carry the DEFAULT theme
+ *     (Terracotta - warm clay, sticker shapes, hard-offset shadows).
+ *   - [data-theme="herbarium"] OVERRIDES the same token NAMES with the
+ *     Herbarium values (botanical editorial, double-rule, engraved calm).
  *
- * The defaults below are deliberately NEUTRAL (stone greys + a restrained
- * green accent). They are a placeholder, not a chosen theme.
+ * The theme controller sets data-theme on <html>; absent the attribute the
+ * :root defaults render, so Terracotta is the no-JS / pre-paint default.
+ *
+ * Adding a NEW token NAME is a design decision (FE-010 ADR), not dev
+ * discretion. Adding a new [data-theme="..."] block that only re-binds the
+ * existing names is normal dev work (see frontend/README.md recipe).
  */
-:root {
+
+/* ------------------------------------------------------------------------- *
+ * DEFAULT THEME - Terracotta (warm clay)
+ * Mockup: docs/design/themes/theme-04-terracotta.html
+ * ------------------------------------------------------------------------- */
+:root,
+[data-theme="terracotta"] {
   /* Surfaces */
-  --color-surface: #ffffff;
-  --color-surface-raised: #f5f5f4;
-  --color-surface-sunken: #e7e5e4;
+  --color-surface: #faf3e7; /* cream page */
+  --color-surface-raised: #ffffff; /* sticker-white tiles */
+  --color-surface-sunken: #f3d9c4; /* blush wells */
 
   /* Text / ink */
-  --color-ink: #1c1917;
-  --color-ink-muted: #57534e;
-  --color-ink-inverse: #fafaf9;
+  --color-ink: #3d2a20; /* chocolate */
+  --color-ink-muted: #6b554a;
+  --color-ink-inverse: #faf3e7; /* cream on dark fills */
 
   /* Brand / interactive */
-  --color-accent: #15803d;
-  --color-accent-strong: #166534;
-  --color-accent-soft: #dcfce7;
+  --color-accent: #c4593a; /* clay */
+  --color-accent-strong: #9c3f26; /* clay-deep (hover) */
+  --color-accent-soft: #f3d9c4; /* blush tint (active nav) */
+
+  /* Secondary + tertiary accents (multi-accent themes) */
+  --color-accent-2: #7da27a; /* sage */
+  --color-accent-2-strong: #547752; /* sage-deep */
+  --color-accent-3: #e3a72f; /* mustard */
 
   /* Semantic status */
-  --color-danger: #b91c1c;
-  --color-warning: #b45309;
-  --color-success: #15803d;
+  --color-danger: #9c3f26; /* clay-deep doubles as late/danger */
+  --color-warning: #e3a72f; /* mustard */
+  --color-success: #547752; /* sage-deep */
 
   /* Structure */
-  --color-border: #d6d3d1;
-  --color-ring: #15803d;
+  --color-border: #3d2a20; /* chunky chocolate outline */
+  --color-ring: #c4593a;
 
   /* Typography */
-  --font-display: system-ui, sans-serif;
-  --font-body: system-ui, sans-serif;
+  --font-display: "Baloo 2", system-ui, cursive;
+  --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-label: "Baloo 2", system-ui, sans-serif; /* uppercase sticker labels */
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Radii */
-  --radius-card: 0.75rem;
-  --radius-control: 0.5rem;
+  /* Radii - chunky, sticker-like */
+  --radius-card: 1.375rem; /* 22px */
+  --radius-control: 1rem; /* 16px buttons */
   --radius-pill: 9999px;
 
-  /* Elevation */
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.12);
+  /* Structure widths */
+  --border-width-card: 3px;
+  --border-width-control: 3px;
+
+  /* Elevation - HARD offset shadow (no blur) */
+  --shadow-card: 5px 5px 0 var(--color-border);
+  --shadow-raised: 4px 4px 0 var(--color-border);
+
+  /* Background texture - dot grid */
+  --bg-texture: radial-gradient(
+    rgba(61, 42, 32, 0.05) 1.3px,
+    transparent 1.3px
+  );
+  --bg-texture-size: 26px 26px;
+
+  /* Sizing baselines */
+  --size-tap-min: 44px;
+}
+
+/* ------------------------------------------------------------------------- *
+ * SECONDARY THEME - Herbarium (botanical editorial)
+ * Mockup: docs/design/themes/theme-01-herbarium.html
+ * Same token NAMES, re-bound values.
+ * ------------------------------------------------------------------------- */
+[data-theme="herbarium"] {
+  /* Surfaces */
+  --color-surface: #f4efe3; /* paper */
+  --color-surface-raised: #ece4d2; /* paper-deep cards */
+  --color-surface-sunken: #ece4d2;
+
+  /* Text / ink */
+  --color-ink: #2b2b23;
+  --color-ink-muted: #5c5a4a;
+  --color-ink-inverse: #f4efe3; /* paper on dark fills */
+
+  /* Brand / interactive */
+  --color-accent: #a8502c; /* rust */
+  --color-accent-strong: #8a3f20; /* darker rust (hover) */
+  --color-accent-soft: #ece4d2;
+
+  /* Secondary + tertiary accents */
+  --color-accent-2: #4a5d3a; /* moss */
+  --color-accent-2-strong: #36482a; /* moss-deep */
+  --color-accent-3: #9a7b2d; /* gold */
+
+  /* Semantic status */
+  --color-danger: #a8502c; /* rust */
+  --color-warning: #9a7b2d; /* gold */
+  --color-success: #4a5d3a; /* moss */
+
+  /* Structure */
+  --color-border: #c9bfa6; /* hairline rule */
+  --color-ring: #a8502c;
+
+  /* Typography */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Spectral", Georgia, serif;
+  --font-label: "IBM Plex Mono", ui-monospace, monospace; /* tracked caps labels */
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Radii - crisp, plate-like */
+  --radius-card: 0.1875rem; /* 3px */
+  --radius-control: 0.125rem; /* 2px */
+  --radius-pill: 0.125rem; /* squared "pills" / badges */
+
+  /* Structure widths - hairlines */
+  --border-width-card: 1px;
+  --border-width-control: 1.5px;
+
+  /* Elevation - soft, low engraved-plate shadow */
+  --shadow-card: 2px 3px 0 rgba(43, 43, 35, 0.08);
+  --shadow-raised: 2px 3px 0 rgba(43, 43, 35, 0.12);
+
+  /* Background texture - faint ruled paper + corner wash */
+  --bg-texture: radial-gradient(
+      ellipse 800px 600px at 85% -10%,
+      rgba(154, 123, 45, 0.07),
+      transparent
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 27px,
+      rgba(92, 90, 74, 0.045) 27px 28px
+    );
+  --bg-texture-size: auto;
 
   /* Sizing baselines */
   --size-tap-min: 44px;

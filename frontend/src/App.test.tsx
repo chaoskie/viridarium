@@ -45,7 +45,7 @@ describe("App shell", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "Today" }),
+      screen.getByRole("heading", { level: 1, name: /the garden needs/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/backend status/i)).toBeInTheDocument();
   });

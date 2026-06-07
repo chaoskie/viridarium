@@ -7,5 +7,9 @@
 @layer base {
   body {
     @apply bg-surface font-body text-ink antialiased;
+    /* Per-theme decorative texture (dot grid / ruled paper) lives in tokens. */
+    background-image: var(--bg-texture, none);
+    background-size: var(--bg-texture-size, auto);
+    background-attachment: fixed;
   }
 }

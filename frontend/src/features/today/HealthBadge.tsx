@@ -33,10 +33,10 @@ export function HealthBadge(): ReactNode {
 
   return (
     <div
-      className="rounded-card border border-border bg-surface-raised p-4 shadow-card"
+      className="rounded-card border-card border-border bg-surface-raised p-5 shadow-card"
       aria-live="polite"
     >
-      <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-ink-muted">
+      <h2 className="font-label text-xs font-bold uppercase tracking-wide text-ink-muted">
         Backend status
       </h2>
       <p className="mt-1 text-base">
