@@ -13,7 +13,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1: build the frontend
 # ---------------------------------------------------------------------------
-FROM node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS frontend-build
+FROM node:26-bookworm-slim@sha256:79723b41edbedf595f62e943a9f8b0ba9af5b1e61045c5f8f59c2c02c1212a16 AS frontend-build
 
 WORKDIR /build
 # The committed package-lock.json is lockfileVersion 3 produced by npm 11; node:20's
