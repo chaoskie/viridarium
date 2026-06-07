@@ -1,0 +1,166 @@
+[project]
+name = "plant-care-backend"
+version = "0.1.0"
+description = "Backend for plant-care: a self-hosted houseplant care tracker."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "AGPL-3.0-or-later" }
+dependencies = [
+    # fastapi >=0.119 admits the patched starlette line (>=0.49) that fixes
+    # CVE-2025-54121 / CVE-2025-62727 / PYSEC-2026-161 (SEC-009).
+    "fastapi>=0.119.0,<0.121.0",
+    "starlette>=0.49.1,<0.50.0",
+    "uvicorn[standard]>=0.34.0,<0.35.0",
+    "sqlalchemy>=2.0.36,<2.1.0",
+    "alembic>=1.14.0,<1.15.0",
+    "pydantic>=2.10.0,<3.0.0",
+    "pydantic-settings>=2.7.0,<3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.9.0,<0.10.0",
+    "mypy>=1.14.0,<2.0.0",
+    "import-linter>=2.1,<3.0",
+    # pytest >=9.0.3 fixes CVE-2025-71176 (insecure /tmp dir pattern) (SEC-009).
+    "pytest>=9.0.3,<10.0.0",
+    "pytest-cov>=6.0.0,<8.0.0",
+    "httpx>=0.28.0,<0.29.0",
+    "pip-audit>=2.7.0,<3.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/plant_care"]
+
+# ---------------------------------------------------------------------------
+# ruff: lint + format + security (S) rules (QG-001)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+src = ["src", "tests"]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",   # pycodestyle + pyflakes
+    "I",             # isort
+    "UP",            # pyupgrade
+    "B",             # bugbear
+    "S",             # bandit security rules
+    "C4",            # comprehensions
+    "SIM",           # simplify
+    "TID",           # tidy imports
+    "RUF",           # ruff-specific
+]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Tests use assert (S101) and may bind to all interfaces / use temp paths in fixtures.
+"tests/**/*.py" = ["S101"]
+# Alembic migration env + revisions follow Alembic's generated conventions.
+"src/plant_care/adapters/outbound/db/migrations/env.py" = ["S"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+# ---------------------------------------------------------------------------
+# mypy: strict on domain + application; looser on adapters/infrastructure (QG-001)
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+explicit_package_bases = true
+namespace_packages = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+module = ["plant_care.domain.*", "plant_care.application.*"]
+strict = true
+
+[[tool.mypy.overrides]]
+# Adapters and infrastructure touch framework types with imperfect stubs.
+module = [
+    "plant_care.adapters.*",
+    "plant_care.infrastructure.*",
+    "plant_care.main",
+]
+disallow_untyped_defs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+# Alembic migration scripts are generated-shaped; do not strict-type them.
+module = ["plant_care.adapters.outbound.db.migrations.*"]
+ignore_errors = true
+
+# ---------------------------------------------------------------------------
+# import-linter: hexagonal boundary contracts (ARCH-003)
+# ---------------------------------------------------------------------------
+[tool.importlinter]
+root_package = "plant_care"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Hexagonal layers point inward only"
+type = "layers"
+layers = [
+    "plant_care.infrastructure",
+    "plant_care.adapters",
+    "plant_care.application",
+    "plant_care.domain",
+]
+exhaustive = false
+# The Alembic env harness reads settings to resolve the DB URL; it is migration
+# tooling wiring, not an application import, so it is excluded from layer checks.
+ignore_imports = [
+    "plant_care.adapters.outbound.db.migrations.env -> plant_care.infrastructure.settings",
+]
+
+[[tool.importlinter.contracts]]
+name = "Domain is framework-free"
+type = "forbidden"
+source_modules = ["plant_care.domain"]
+forbidden_modules = ["fastapi", "starlette", "sqlalchemy", "pydantic", "alembic"]
+
+[[tool.importlinter.contracts]]
+name = "Application has no web or persistence framework"
+type = "forbidden"
+source_modules = ["plant_care.application"]
+forbidden_modules = ["fastapi", "starlette", "sqlalchemy", "alembic"]
+
+# ---------------------------------------------------------------------------
+# pytest + coverage (QG-002, TEST-012)
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+markers = [
+    "unit: pure Python domain/application logic (no app, no DB, no I/O)",
+    "integration: a slice through application + adapters against a real database",
+]
+
+[tool.coverage.run]
+source = ["plant_care"]
+branch = true
+omit = [
+    # ASGI entry point (just builds the app from env) and the Alembic harness are
+    # exercised by running the server / migrations, not by the unit/integration suite.
+    "*/plant_care/main.py",
+    "*/plant_care/adapters/outbound/db/migrations/*",
+]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+]
