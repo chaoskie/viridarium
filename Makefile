@@ -1,4 +1,4 @@
-# plant-care - quality gates.
+# Viridarium - quality gates.
 #
 # One target per gate (QG-001/002), aggregated by `make quality-gates`. The backend
 # section below is self-contained; frontend targets are appended by the frontend agent
@@ -31,7 +31,7 @@ format-check: ## ruff format --check (QG-001)
 	$(UV_RUN) ruff format --check $(BACKEND_DIR)/src $(BACKEND_DIR)/tests
 
 typecheck: ## mypy strict on domain+application, looser on adapters (QG-001)
-	cd $(BACKEND_DIR) && uv run mypy src/plant_care
+	cd $(BACKEND_DIR) && uv run mypy src/viridarium
 
 imports: ## import-linter hexagonal boundary contracts (ARCH-003)
 	cd $(BACKEND_DIR) && uv run lint-imports --config pyproject.toml
@@ -44,7 +44,7 @@ test-integration: ## pytest integration layer (QG-002, TEST-012)
 
 test-coverage: ## full suite with coverage floor 85 (QG-002)
 	$(UV_RUN) pytest $(BACKEND_DIR)/tests \
-		--cov=plant_care --cov-report=term-missing \
+		--cov=viridarium --cov-report=term-missing \
 		--cov-config=$(BACKEND_DIR)/pyproject.toml
 
 audit: ## pip-audit dependency CVE scan (SEC-009)
@@ -60,7 +60,7 @@ quality-gates: lint format-check typecheck imports test-coverage audit fe-lint f
 	@echo "All quality gates passed."
 
 dev-backend: ## Run the backend dev server with reload
-	$(UV_RUN) uvicorn plant_care.main:app --reload \
+	$(UV_RUN) uvicorn viridarium.main:app --reload \
 		--app-dir $(BACKEND_DIR)/src --port 8000
 
 help: ## List available targets

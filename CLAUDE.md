@@ -4,7 +4,7 @@
 
 This project runs a rules-driven, spec-first workflow. The **constitution** (`rules/00-constitution.md`, imported above and always loaded) holds the principles; the **topic files** in `rules/` hold the enforceable standards. Cite rules by ID (e.g. `TEST-003`); load a topic file when your task touches it - your agent definition names your required reading.
 
-**Project:** plant-care - an open-source, self-hosted plant care web app (plant inventory, per-plant watering/feeding schedules, and an open REST API for home-automation integration). Developed in public by a solo maintainer plus AI agents. **No user authentication in v1 by design** (trusted-network deployment, `SEC-003`).
+**Project:** Viridarium - an open-source, self-hosted plant care web app (plant inventory, per-plant watering/feeding schedules, and an open REST API for home-automation integration). Developed in public by a solo maintainer plus AI agents. **No user authentication in v1 by design** (trusted-network deployment, `SEC-003`).
 
 ## Operating constraints (every agent, every task)
 

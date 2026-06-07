@@ -12,9 +12,9 @@ from logging.config import fileConfig
 
 from alembic import context
 
-from plant_care.adapters.outbound.db.base import Base
-from plant_care.adapters.outbound.db.engine import create_db_engine
-from plant_care.infrastructure.settings import get_settings
+from viridarium.adapters.outbound.db.base import Base
+from viridarium.adapters.outbound.db.engine import create_db_engine
+from viridarium.infrastructure.settings import get_settings
 
 config = context.config
 

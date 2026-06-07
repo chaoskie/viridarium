@@ -13,13 +13,13 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from plant_care.infrastructure.app import create_app
-from plant_care.infrastructure.settings import Settings
-from plant_care.infrastructure.static import mount_spa
+from viridarium.infrastructure.app import create_app
+from viridarium.infrastructure.settings import Settings
+from viridarium.infrastructure.static import mount_spa
 
 pytestmark = pytest.mark.integration
 
-_INDEX_HTML = "<!doctype html><title>plant-care</title><div id=root></div>"
+_INDEX_HTML = "<!doctype html><title>viridarium</title><div id=root></div>"
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def test_index_served_at_root(static_settings: Settings) -> None:
         response = client.get("/")
 
     assert response.status_code == 200
-    assert "plant-care" in response.text
+    assert "viridarium" in response.text
 
 
 def test_unknown_client_route_falls_back_to_index(static_settings: Settings) -> None:
@@ -61,7 +61,7 @@ def test_unknown_client_route_falls_back_to_index(static_settings: Settings) -> 
     # StaticFiles(html=True) serves index.html for unknown paths so the SPA router
     # can take over client-side.
     assert response.status_code == 200
-    assert "plant-care" in response.text
+    assert "viridarium" in response.text
 
 
 def test_static_asset_is_served(static_settings: Settings) -> None:

@@ -1,7 +1,8 @@
-<!-- NAME_PLACEHOLDER: project name pending final pick -->
-# Plant Care
+# Viridarium
 
 > Self-hosted houseplant tracker: inventory, watering and feeding schedules that adjust for the season, and an open API so your home automation handles the reminders.
+
+A *viridarium* was the green pleasure-garden of a Roman villa. Yours now lives in a container.
 
 **Status: pre-alpha, under active development.** Not ready for use yet.
 
@@ -21,28 +22,28 @@ your data and run `docker compose up -d`, then open `http://localhost:8000`.
 
 ```yaml
 services:
-  plant-care:
-    image: ghcr.io/OWNER/REPO:latest
+  viridarium:
+    image: ghcr.io/chaoskie/viridarium:latest
     # Or build from a checkout instead of pulling:
     # build: .
-    container_name: plant-care
+    container_name: viridarium
     restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
-      - plant-care-data:/data
+      - viridarium-data:/data
     environment:
       DATABASE_URL: sqlite:////data/app.db
     security_opt:
       - no-new-privileges:true
 
 volumes:
-  plant-care-data:
+  viridarium-data:
 ```
 
-`OWNER/REPO` is a placeholder until the project name is finalised. The repository ships a
-fuller [`docker-compose.yml`](docker-compose.yml) with a commented PostgreSQL block and a
-healthcheck. PostgreSQL is opt-in via a single `DATABASE_URL` (see that file).
+The repository ships a fuller [`docker-compose.yml`](docker-compose.yml) with a commented
+PostgreSQL block and a healthcheck. PostgreSQL is opt-in via a single `DATABASE_URL` (see
+that file).
 
 Deploy on a trusted network or behind your own auth proxy: there is no authentication in
 v1 by design. See [SECURITY.md](SECURITY.md) before exposing anything.

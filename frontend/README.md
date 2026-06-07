@@ -1,4 +1,4 @@
-# plant-care frontend
+# Viridarium frontend
 
 React 18 + TypeScript (strict) + Vite + Tailwind CSS. This is the **walking
 skeleton** for epic E1 (product-spec): an app shell plus a backend health
@@ -78,7 +78,7 @@ to component markup or the Tailwind config.
    (FE-002).
 4. The active theme is chosen at runtime by the **theme controller**
    (`src/lib/theme/`): an inline script in `index.html` reads
-   `localStorage["plant-care.theme"]` and sets `data-theme` before first paint
+   `localStorage["viridarium.theme"]` and sets `data-theme` before first paint
    (no flash); the typed `useTheme()` hook + the `ThemeToggle` control in the
    app-shell header let the user switch. Default is `terracotta`.
 

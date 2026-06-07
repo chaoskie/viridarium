@@ -1,5 +1,5 @@
 /**
- * Minimal typed fetch wrapper for the plant-care REST API.
+ * Minimal typed fetch wrapper for the Viridarium REST API.
  *
  * All requests target the versioned `/api/v1` base (SPEC E5: versioned path).
  * In dev, `/api` is proxied to the FastAPI backend (vite.config.ts).

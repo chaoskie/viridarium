@@ -9,9 +9,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from plant_care.adapters.inbound.web.dependencies import get_health_probe
-from plant_care.adapters.inbound.web.schemas import HealthResponse
-from plant_care.domain.health import HealthProbe
+from viridarium.adapters.inbound.web.dependencies import get_health_probe
+from viridarium.adapters.inbound.web.schemas import HealthResponse
+from viridarium.domain.health import HealthProbe
 
 router = APIRouter(tags=["health"])
 

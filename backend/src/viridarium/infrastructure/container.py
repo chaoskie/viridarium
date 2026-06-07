@@ -12,13 +12,13 @@ from dataclasses import dataclass
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from plant_care.adapters.outbound.db.engine import (
+from viridarium.adapters.outbound.db.engine import (
     create_db_engine,
     create_session_factory,
 )
-from plant_care.application.health import GetHealthStatus
-from plant_care.domain.health import HealthProbe
-from plant_care.infrastructure.settings import Settings
+from viridarium.application.health import GetHealthStatus
+from viridarium.domain.health import HealthProbe
+from viridarium.infrastructure.settings import Settings
 
 
 @dataclass(frozen=True, slots=True)

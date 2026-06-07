@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# plant-care single-container image (product-spec section 7).
+# Viridarium single-container image (product-spec section 7).
 #
 # Multi-stage:
 #   1. frontend-build - build the React SPA with Vite into /build/dist.
@@ -49,11 +49,11 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ---------------------------------------------------------------------------
 FROM python:3.12-slim-bookworm@sha256:93ab4b7fa528b25124c97bcc755415e60eb671a86b4dbe0328df2fe2d1c1193d AS runtime
 
-# OCI image labels. ${SOURCE_URL} stays a placeholder until the repo name is decided.
-LABEL org.opencontainers.image.title="plant-care" \
+# OCI image labels.
+LABEL org.opencontainers.image.title="viridarium" \
       org.opencontainers.image.description="Self-hosted houseplant care tracker: inventory, watering and feeding schedules, open REST API." \
       org.opencontainers.image.licenses="AGPL-3.0-or-later" \
-      org.opencontainers.image.source="https://github.com/OWNER/REPO"
+      org.opencontainers.image.source="https://github.com/chaoskie/viridarium"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -91,6 +91,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD ["python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3).status==200 else sys.exit(1)"]
 
-# Serve the wired app. `plant_care.main:app` builds from environment settings, including
+# Serve the wired app. `viridarium.main:app` builds from environment settings, including
 # STATIC_DIR so the SPA is served from the same origin.
-CMD ["uvicorn", "plant_care.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "viridarium.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -14,8 +14,8 @@ permissions:
   contents: read
 
 env:
-  # GHCR repository. OWNER/REPO are placeholders until the project name is finalised.
-  IMAGE_NAME: ghcr.io/OWNER/REPO
+  # GHCR repository.
+  IMAGE_NAME: ghcr.io/chaoskie/viridarium
 
 jobs:
   publish:

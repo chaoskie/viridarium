@@ -2,8 +2,8 @@
 
 import pytest
 
-from plant_care.application.health import GetHealthStatus
-from plant_care.domain.health import HealthStatus
+from viridarium.application.health import GetHealthStatus
+from viridarium.domain.health import HealthStatus
 
 pytestmark = pytest.mark.unit
 

@@ -14,8 +14,8 @@ from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
 
-from plant_care.infrastructure.app import create_app
-from plant_care.infrastructure.settings import Settings
+from viridarium.infrastructure.app import create_app
+from viridarium.infrastructure.settings import Settings
 
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
@@ -25,7 +25,7 @@ def make_alembic_config(database_url: str) -> Config:
     cfg = Config(str(_BACKEND_ROOT / "alembic.ini"))
     cfg.set_main_option(
         "script_location",
-        str(_BACKEND_ROOT / "src/plant_care/adapters/outbound/db/migrations"),
+        str(_BACKEND_ROOT / "src/viridarium/adapters/outbound/db/migrations"),
     )
     cfg.set_main_option("sqlalchemy.url", database_url)
     return cfg

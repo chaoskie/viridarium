@@ -35,7 +35,7 @@ export function AppShell({ children }: AppShellProps): ReactNode {
               🪴
             </span>
             <span className="font-display text-2xl font-extrabold tracking-tight text-ink">
-              plant<span className="text-accent">keep</span>
+              virid<span className="text-accent">arium</span>
             </span>
           </div>
 

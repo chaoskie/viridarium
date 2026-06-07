@@ -1,6 +1,6 @@
-# plant-care backend
+# Viridarium backend
 
-FastAPI + SQLAlchemy 2.x backend for plant-care, laid out as a hexagonal monolith
+FastAPI + SQLAlchemy 2.x backend for Viridarium, laid out as a hexagonal monolith
 (domain / application / adapters / infrastructure).
 
 Walking skeleton: `GET /api/v1/health` and OpenAPI docs at `/api/v1/docs`. Domain

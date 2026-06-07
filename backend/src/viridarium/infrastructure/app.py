@@ -1,6 +1,6 @@
 """FastAPI application factory.
 
-Wires the composition root (:mod:`plant_care.infrastructure.container`) onto the app,
+Wires the composition root (:mod:`viridarium.infrastructure.container`) onto the app,
 mounts the versioned API under ``/api/v1`` with OpenAPI docs at ``/api/v1/docs``, and
 installs the secure-by-default middleware (SEC-003, SEC-011).
 """
@@ -10,11 +10,11 @@ from __future__ import annotations
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from plant_care.adapters.inbound.web.health import router as health_router
-from plant_care.infrastructure.container import Container, build_container
-from plant_care.infrastructure.security import security_headers_middleware
-from plant_care.infrastructure.settings import Settings, get_settings
-from plant_care.infrastructure.static import mount_spa
+from viridarium.adapters.inbound.web.health import router as health_router
+from viridarium.infrastructure.container import Container, build_container
+from viridarium.infrastructure.security import security_headers_middleware
+from viridarium.infrastructure.settings import Settings, get_settings
+from viridarium.infrastructure.static import mount_spa
 
 API_V1_PREFIX = "/api/v1"
 
@@ -35,7 +35,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     container: Container = build_container(resolved)
 
     app = FastAPI(
-        title="plant-care API",
+        title="Viridarium API",
         version=resolved.version,
         docs_url=f"{API_V1_PREFIX}/docs",
         openapi_url=f"{API_V1_PREFIX}/openapi.json",

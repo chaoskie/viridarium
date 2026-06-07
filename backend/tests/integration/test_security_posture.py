@@ -3,8 +3,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from plant_care.infrastructure.app import create_app
-from plant_care.infrastructure.settings import Settings
+from viridarium.infrastructure.app import create_app
+from viridarium.infrastructure.settings import Settings
 
 pytestmark = pytest.mark.integration
 

@@ -13,7 +13,7 @@ export type Theme = (typeof THEMES)[number];
 
 export const DEFAULT_THEME: Theme = "terracotta";
 
-export const THEME_STORAGE_KEY = "plant-care.theme";
+export const THEME_STORAGE_KEY = "viridarium.theme";
 
 /** Human labels for the toggle control. */
 export const THEME_LABELS: Readonly<Record<Theme, string>> = {

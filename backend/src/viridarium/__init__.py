@@ -1,4 +1,4 @@
-"""plant-care backend: a self-hosted houseplant care tracker.
+"""Viridarium backend: a self-hosted houseplant care tracker.
 
 Hexagonal monolith (ARCH-002): domain (pure) <- application <- adapters/infrastructure.
 """

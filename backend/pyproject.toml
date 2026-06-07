@@ -1,7 +1,7 @@
 [project]
-name = "plant-care-backend"
+name = "viridarium-backend"
 version = "0.1.0"
-description = "Backend for plant-care: a self-hosted houseplant care tracker."
+description = "Backend for Viridarium: a self-hosted houseplant care tracker."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "AGPL-3.0-or-later" }
@@ -34,7 +34,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/plant_care"]
+packages = ["src/viridarium"]
 
 # ---------------------------------------------------------------------------
 # ruff: lint + format + security (S) rules (QG-001)
@@ -62,7 +62,7 @@ ignore = []
 # Tests use assert (S101) and may bind to all interfaces / use temp paths in fixtures.
 "tests/**/*.py" = ["S101"]
 # Alembic migration env + revisions follow Alembic's generated conventions.
-"src/plant_care/adapters/outbound/db/migrations/env.py" = ["S"]
+"src/viridarium/adapters/outbound/db/migrations/env.py" = ["S"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -81,57 +81,57 @@ warn_unused_ignores = true
 ignore_missing_imports = false
 
 [[tool.mypy.overrides]]
-module = ["plant_care.domain.*", "plant_care.application.*"]
+module = ["viridarium.domain.*", "viridarium.application.*"]
 strict = true
 
 [[tool.mypy.overrides]]
 # Adapters and infrastructure touch framework types with imperfect stubs.
 module = [
-    "plant_care.adapters.*",
-    "plant_care.infrastructure.*",
-    "plant_care.main",
+    "viridarium.adapters.*",
+    "viridarium.infrastructure.*",
+    "viridarium.main",
 ]
 disallow_untyped_defs = true
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 # Alembic migration scripts are generated-shaped; do not strict-type them.
-module = ["plant_care.adapters.outbound.db.migrations.*"]
+module = ["viridarium.adapters.outbound.db.migrations.*"]
 ignore_errors = true
 
 # ---------------------------------------------------------------------------
 # import-linter: hexagonal boundary contracts (ARCH-003)
 # ---------------------------------------------------------------------------
 [tool.importlinter]
-root_package = "plant_care"
+root_package = "viridarium"
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "Hexagonal layers point inward only"
 type = "layers"
 layers = [
-    "plant_care.infrastructure",
-    "plant_care.adapters",
-    "plant_care.application",
-    "plant_care.domain",
+    "viridarium.infrastructure",
+    "viridarium.adapters",
+    "viridarium.application",
+    "viridarium.domain",
 ]
 exhaustive = false
 # The Alembic env harness reads settings to resolve the DB URL; it is migration
 # tooling wiring, not an application import, so it is excluded from layer checks.
 ignore_imports = [
-    "plant_care.adapters.outbound.db.migrations.env -> plant_care.infrastructure.settings",
+    "viridarium.adapters.outbound.db.migrations.env -> viridarium.infrastructure.settings",
 ]
 
 [[tool.importlinter.contracts]]
 name = "Domain is framework-free"
 type = "forbidden"
-source_modules = ["plant_care.domain"]
+source_modules = ["viridarium.domain"]
 forbidden_modules = ["fastapi", "starlette", "sqlalchemy", "pydantic", "alembic"]
 
 [[tool.importlinter.contracts]]
 name = "Application has no web or persistence framework"
 type = "forbidden"
-source_modules = ["plant_care.application"]
+source_modules = ["viridarium.application"]
 forbidden_modules = ["fastapi", "starlette", "sqlalchemy", "alembic"]
 
 # ---------------------------------------------------------------------------
@@ -146,13 +146,13 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["plant_care"]
+source = ["viridarium"]
 branch = true
 omit = [
     # ASGI entry point (just builds the app from env) and the Alembic harness are
     # exercised by running the server / migrations, not by the unit/integration suite.
-    "*/plant_care/main.py",
-    "*/plant_care/adapters/outbound/db/migrations/*",
+    "*/viridarium/main.py",
+    "*/viridarium/adapters/outbound/db/migrations/*",
 ]
 
 [tool.coverage.report]
