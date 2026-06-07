@@ -44,7 +44,10 @@ One per care type per plant. Care types in v1: `water`, `feed`. (Repotting is lo
 **Due computation (the core rule):** `next_due = date(last matching CareEvent) + effective_interval`. No matching event yet → due immediately (surfaces new plants). `overdue_days = today - next_due` when positive. Effective interval = winter interval when today is in the winter window and one is set; a paused schedule is never due during the window.
 
 ### CareEvent
-The append-only history: `plant_id`, `type` (`water`, `feed`, `repot`, `observe`), `happened_on` (date, defaults today, backdating allowed), `note`, optional `photo`. Deleting is allowed (mistakes) but events are never auto-modified.
+The append-only history: `plant_id`, `type` (`water`, `feed`, `repot`, `observe`), `happened_on` (date, defaults today, backdating allowed), `note`, optional `photo`. `observe` events carry an optional `health` rating (`good`/`fair`/`bad`): a journal input, never aggregated into a judgmental score. Deleting is allowed (mistakes) but events are never auto-modified.
+
+### Due-task actions (competitive lesson, 2026-06-07 recon)
+A due task supports four actions: **done** (logs the event; next due recomputes from it, so doing it early or late self-corrects), **done with backdate**, **snooze** (shifts this occurrence by N days without logging care; stored as `snoozed_until` on the schedule), and **skip** (dismisses this occurrence; next due recomputes as if done, but no care event is logged and the skip is recorded). The schedule model stays transparent and user-editable at all times: the user always wins the argument with the algorithm. This is deliberate: the category leader's top complaint is uneditable frequencies, and the runner-up's loved feature is exactly this correction loop.
 
 ### Location
 `name` ("Living room", "Office windowsill"), optional `notes`. Deleting requires empty or reassignment.
@@ -69,6 +72,9 @@ Walking skeleton: FastAPI + React build, SQLite/Postgres via DATABASE_URL, Alemb
 - US-3.3 Due computation per the core rule, exposed on every plant read.
 - US-3.4 Care history timeline per plant (events + photos interleaved).
 - US-3.5 App settings: winter window dates.
+- US-3.6 Snooze and skip on due tasks per the due-task action model.
+- US-3.7 Bulk action: "mark all due plants in a location as watered" (one tap after the watering round).
+- US-3.8 Suggested starting intervals from plant attributes (pot size/material/drainage + light level), via a transparent lookup table; suggestions only, always editable. (v1.5)
 
 ### E4 Dashboard
 - US-4.1 "Today" view: due and overdue plants grouped by location, one-tap logging.
@@ -81,6 +87,7 @@ Walking skeleton: FastAPI + React build, SQLite/Postgres via DATABASE_URL, Alemb
 - US-5.3 ICS feed per instance and per location (`/api/v1/calendar.ics?location=<id>`): future due dates as all-day events, subscribable from any calendar app.
 - US-5.4 Outbound webhooks: configurable URL(s), fired on due/overdue transitions (daily evaluation) and optionally on logged events; JSON payload documented; retry with backoff; ntfy-compatible example in docs.
 - US-5.5 API stability rules: versioned path, additive changes only within v1, contract tests.
+- US-5.6 Full data export: one endpoint returning the complete dataset (JSON + photo archive). Your data is never stranded; this is a stated feature, not an afterthought.
 
 ### E6 Species lookup (v1.5)
 - US-6.1 Pluggable species provider port + Perenual adapter behind an optional API key.
@@ -95,7 +102,7 @@ Walking skeleton: FastAPI + React build, SQLite/Postgres via DATABASE_URL, Alemb
 
 ## 6. Out of scope (deliberate)
 
-Accounts/auth/multi-user, social features, AI care advice, native mobile apps, MQTT/sensor ingestion (possible later via the provider port pattern), push notifications (delegated to consumers via webhooks/ICS), cloud sync.
+Accounts/auth/multi-user, social features/gamification/points, AI care advice and disease diagnosis (link out at most; reviewers call the in-app versions inaccurate), computed "care scores" (the health slider is a journal input, not a grade), opaque scheduling the user cannot override, aggressive repot/fertilize nagging (repotting is logged, not scheduled, in v1), live weather integration (seasonal modifiers give most of the value; weather can arrive later through the open API), native mobile apps, MQTT/sensor ingestion (possible later via the API; a sensor-driven trailing-window light/moisture model is a natural fit once ingestion exists), push notifications (delegated to consumers via webhooks/ICS), cloud sync.
 
 ## 7. Non-functional requirements
 
