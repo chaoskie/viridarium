@@ -7,9 +7,24 @@
 @layer base {
   body {
     @apply bg-surface font-body text-ink antialiased;
-    /* Per-theme decorative texture (dot grid / ruled paper) lives in tokens. */
+    /* Per-theme decorative texture (plaster wash / dot grid / ruled paper). */
     background-image: var(--bg-texture, none);
     background-size: var(--bg-texture-size, auto);
     background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /*
+   * Greek-key meander divider (Roman / dark). A repeating SVG motif token, not
+   * expressible as a single Tailwind utility, so it lives here and reads the
+   * --motif-meander token. Themes without the motif set it to `none`, which
+   * leaves an invisible strip.
+   */
+  .meander-rule {
+    height: 14px;
+    background-image: var(--motif-meander, none);
+    background-repeat: repeat-x;
+    opacity: 0.7;
   }
 }

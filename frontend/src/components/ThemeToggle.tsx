@@ -1,42 +1,47 @@
-import type { ReactNode } from "react";
+import { useId } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 
-import { THEMES, THEME_LABELS, type Theme } from "@/lib/theme/themeController";
+import { THEMES, THEME_LABELS, isTheme } from "@/lib/theme/themeController";
 import { useTheme } from "@/lib/theme/useTheme";
 
 /**
- * Minimal theme selector for the app-shell header. Stands in as the
- * Settings-page placeholder until a real settings surface exists. Renders a
- * segmented control of all themes so switching is one tap (FE-011 tap targets).
+ * Theme selector for the app-shell header. A native <select> (one tap, fully
+ * keyboard/AT accessible, comfortably tall) - chosen over a segmented button
+ * row because four themes crowd a 390px-wide phone header. Stays reachable on
+ * every breakpoint (FE-011). Stands in as the Settings-page placeholder until a
+ * real settings surface exists.
  */
 export function ThemeToggle(): ReactNode {
   const { theme, setTheme } = useTheme();
+  const selectId = useId();
+
+  function handleChange(event: ChangeEvent<HTMLSelectElement>): void {
+    const value = event.target.value;
+    if (isTheme(value)) {
+      setTheme(value);
+    }
+  }
 
   return (
-    <div
-      role="group"
-      aria-label="Theme"
-      className="flex items-center gap-1 rounded-pill border-control border-border bg-surface p-1"
-    >
-      {THEMES.map((option: Theme) => {
-        const isActive = option === theme;
-        return (
-          <button
-            key={option}
-            type="button"
-            onClick={() => setTheme(option)}
-            aria-pressed={isActive}
-            aria-label={`Use ${THEME_LABELS[option]} theme`}
-            className={[
-              "min-h-tap-min rounded-pill px-3 font-label text-xs font-bold uppercase tracking-wide transition-colors",
-              isActive
-                ? "bg-accent text-ink-inverse"
-                : "text-ink-muted hover:text-ink",
-            ].join(" ")}
-          >
+    <div className="flex items-center gap-2">
+      <label
+        htmlFor={selectId}
+        className="font-label text-xs font-semibold uppercase tracking-widest text-ink-muted"
+      >
+        Theme
+      </label>
+      <select
+        id={selectId}
+        value={theme}
+        onChange={handleChange}
+        className="min-h-tap-min rounded-control border-control border-border bg-surface px-3 font-label text-xs font-semibold uppercase tracking-widest text-ink focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        {THEMES.map((option) => (
+          <option key={option} value={option}>
             {THEME_LABELS[option]}
-          </button>
-        );
-      })}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
