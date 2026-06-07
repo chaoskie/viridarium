@@ -50,14 +50,12 @@ First run of the hybrid workflow (rules scaffold port + ticket discipline + dete
 4. **PR flow starts at repo creation**: branch per story, PR with template, branch protection on the quality-gates workflow, maintainer merges. The bootstrap exception ends there.
 5. **npm standardization** per fork F2.
 
-## Forks for the maintainer (pending)
+## Forks resolved (maintainer, 2026-06-07)
 
-- **F1 - story parallelism.** PRIN-VI says one story at a time. This sprint ran two scaffold stories in parallel with disjoint file ownership and it worked well.
-  - (a) Keep strict serial story gating.
-  - (b) Amend: independent stories MAY run in parallel when file ownership is disjoint and a single orchestrator gates and commits the results. (Recommended)
-- **F2 - npm toolchain.** Lockfile needs npm 11; node 20's bundled npm is 10.
-  - (a) Keep the npm 11 pin in CI + Dockerfile, add an `engines` advisory in package.json. (Recommended, current state)
-  - (b) Regenerate the lockfile with npm 10 so stock node 20 works out of the box.
+- **F1 - story parallelism: (b).** PRIN-VI amended: independent stories with disjoint file ownership may run in parallel under a single gating orchestrator. Amendment recorded in the constitution's Amendments table.
+- **F2 - npm toolchain: (a).** npm 11 pin stays in CI + Dockerfile; `"npm": ">=11.0.0"` added to the frontend `engines` field.
+
+Also decided in the same review: **theme = 04 Terracotta primary, 01 Herbarium as the secondary "cleaner view"**, shipped as two token sets with a runtime switch.
 
 ## Carry-forward action items
 

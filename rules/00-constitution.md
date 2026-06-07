@@ -31,7 +31,7 @@ The spec is the contract: the implementation contains everything the spec descri
 The stack is decided once, in writing, and re-affirmed per change. Adding or replacing a locked component requires a written amendment. No ad-hoc "let me just try X". Governs `ARCH-*`, `SPEC-*`.
 
 ### PRIN-VI Story-Gated Iteration
-Work proceeds one story at a time, each on its own branch. Story N+1 MUST NOT begin until story N passes its gate. Per-story change budget ~400-500 lines new logic, 1000 LOC hard ceiling. Governs `QG-*`, `SPEC-*`.
+Work proceeds story-gated, each story on its own branch. A dependent story MUST NOT begin until the story it depends on passes its gate. Independent stories with disjoint file ownership MAY proceed in parallel when a single orchestrator gates and integrates the results; each story still passes its own gate before its result merges, and any file-ownership overlap discovered mid-flight halts the later story. Per-story change budget ~400-500 lines new logic, 1000 LOC hard ceiling. Governs `QG-*`, `SPEC-*`. *(Amended 2026-06-07, sprint-1 retro F1.)*
 
 ### PRIN-VII Pipeline Must Be Green
 Every push results in a fully green pipeline. No "pre-existing failures". A pull request MUST NOT merge on a red pipeline. Governs `CI-*`, `QG-*`.
@@ -47,3 +47,11 @@ Restated for emphasis: deviation from a MUST requires written approval and a wri
 
 ### PRIN-XI Traceability
 Every unit of work keeps a worklog capturing the AI and user steps that produced it. Work whose path from request to result cannot be reconstructed is not done. Governs `TRACE-*`.
+
+---
+
+## Amendments
+
+| Date | Principle | Change | Source |
+|---|---|---|---|
+| 2026-06-07 | PRIN-VI | Parallel execution of independent, disjoint-file stories permitted under a single gating orchestrator | Sprint-1 retro, fork F1 |
