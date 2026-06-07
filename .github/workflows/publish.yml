@@ -1,0 +1,73 @@
+# Multi-arch image publish to GHCR on release (CI-006, CI-007, SEC-012).
+#
+# Triggered when release-please publishes a GitHub release. Builds linux/amd64 +
+# linux/arm64 (product-spec section 7) and pushes immutable version tags plus `latest`.
+# Build provenance is attested so the artifact is verifiable.
+name: publish
+
+on:
+  release:
+    types: [published]
+
+# Default to least privilege; the publish job widens only what it needs.
+permissions:
+  contents: read
+
+env:
+  # GHCR repository. OWNER/REPO are placeholders until the project name is finalised.
+  IMAGE_NAME: ghcr.io/OWNER/REPO
+
+jobs:
+  publish:
+    name: Build and push multi-arch image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # push to GHCR
+      id-token: write # OIDC for provenance attestation
+      attestations: write # attest-build-provenance
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up QEMU (arm64 emulation)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute tags and labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: true
+          sbom: true
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true

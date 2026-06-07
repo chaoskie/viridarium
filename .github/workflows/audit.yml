@@ -1,0 +1,45 @@
+# Daily scheduled CVE scan (CI-005, SEC-009) against the default branch.
+#
+# The per-PR security gate lives in quality-gates.yml (`make audit`); this workflow is the
+# daily sweep that catches advisories published after a PR merged. Same ignore policy as
+# `make audit` so an accepted advisory stays accepted until its revisit date.
+name: audit
+
+on:
+  schedule:
+    # 04:17 UTC daily (off-hours, off the top of the hour to avoid the scheduler rush).
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-audit:
+    name: pip-audit (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: make backend-install
+      - name: pip-audit (same ignore policy as the gate)
+        run: make audit
+
+  npm-audit:
+    name: npm audit (JS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20.19"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm install -g npm@11
+      - run: make fe-install
+      - name: npm audit (fail on high/critical, SEC-009)
+        working-directory: frontend
+        run: npm audit --audit-level=high

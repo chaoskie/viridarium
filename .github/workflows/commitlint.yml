@@ -1,0 +1,41 @@
+# Conventional Commits enforcement (LANG-002, CI-008).
+#
+# Choice: lint the PR *title*, not every WIP commit. The repo uses squash-merge, so the
+# PR title becomes the squash commit subject and the unit release-please reads to build
+# the changelog. Enforcing the title is the correct, lightweight lever for that flow;
+# commitlint-over-every-commit would gate throwaway WIP commits that the squash discards.
+name: commitlint
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-title:
+    name: Lint PR title (Conventional Commits)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allowed types mirror the Conventional Commits set release-please groups on.
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          # Subjects are imperative and not sentence-cased (LANG-002, <=72 chars enforced
+          # by review, not this action).
+          requireScope: false

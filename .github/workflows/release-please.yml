@@ -1,0 +1,35 @@
+# Release automation (CI-006, CI-007, CI-008).
+#
+# release-please maintains a release PR from Conventional Commits; merging it tags the
+# release and updates CHANGELOG.md (CI-008). `release-type: simple` versions the whole
+# repo (polyglot py + ts, non-monorepo) and is language-agnostic. Publishing the GitHub
+# release then triggers publish.yml to build and push the image.
+#
+# Releases are immutable (CI-007): release-please never re-tags an existing version.
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: release-please
+    runs-on: ubuntu-latest
+    permissions:
+      # Create/update the release PR, tags, releases, and CHANGELOG commit.
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: simple
+          # The release PR title stays Conventional Commits compliant (LANG-002).
+          token: ${{ secrets.GITHUB_TOKEN }}

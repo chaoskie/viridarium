@@ -1,0 +1,57 @@
+# Keep the build context small and secrets/artifacts out of the image.
+
+# VCS + CI metadata
+.git
+.github
+.gitignore
+
+# Secrets / local config (never copy into an image)
+.env
+.env.*
+secrets/
+*.pem
+*.key
+
+# Node
+**/node_modules
+frontend/dist
+.vite
+
+# Python build/test artifacts and venvs
+**/__pycache__
+**/*.py[cod]
+.venv
+**/.venv
+venv
+.mypy_cache
+.ruff_cache
+.pytest_cache
+.coverage
+coverage.xml
+htmlcov
+**/*.egg-info
+
+# Local databases
+*.sqlite3
+*.db
+
+# Tests, specs, docs, agent tooling - not needed at runtime
+backend/tests
+frontend/src/**/*.test.ts
+frontend/src/**/*.test.tsx
+specs
+docs
+rules
+templates
+.claude
+.pre-commit-config.yaml
+
+# IDE / OS
+.idea
+.vscode
+*.swp
+.DS_Store
+
+# Playwright
+test-results
+playwright-report

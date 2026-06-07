@@ -16,9 +16,36 @@ The existing self-hosted options force user accounts, need a heavy database stac
 
 ## Quickstart
 
+One container, SQLite by default. Drop this `docker-compose.yml` next to where you want
+your data and run `docker compose up -d`, then open `http://localhost:8000`.
+
 ```yaml
-# docker-compose.yml (coming with the first release)
+services:
+  plant-care:
+    image: ghcr.io/OWNER/REPO:latest
+    # Or build from a checkout instead of pulling:
+    # build: .
+    container_name: plant-care
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - plant-care-data:/data
+    environment:
+      DATABASE_URL: sqlite:////data/app.db
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  plant-care-data:
 ```
+
+`OWNER/REPO` is a placeholder until the project name is finalised. The repository ships a
+fuller [`docker-compose.yml`](docker-compose.yml) with a commented PostgreSQL block and a
+healthcheck. PostgreSQL is opt-in via a single `DATABASE_URL` (see that file).
+
+Deploy on a trusted network or behind your own auth proxy: there is no authentication in
+v1 by design. See [SECURITY.md](SECURITY.md) before exposing anything.
 
 ## Features
 

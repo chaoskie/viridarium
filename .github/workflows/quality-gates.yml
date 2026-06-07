@@ -1,0 +1,122 @@
+# Quality gates (CI-001, CI-002). Mirrors `make quality-gates`: every gate runs the same
+# Makefile target locally and in CI. Pipeline shape lint -> test -> security across jobs;
+# the build (image) runs on release in publish.yml. Required status check on main.
+name: quality-gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel in-progress runs on the same ref (CI-001).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up uv (with cache)
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install backend deps
+        run: make backend-install
+      - name: Lint, format, types, imports
+        run: make lint format-check typecheck imports
+      - name: Tests with coverage
+        run: make test-coverage
+      - name: Dependency CVE audit
+        run: make audit
+
+  frontend:
+    name: Frontend gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20.19"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      # The committed lockfile (lockfileVersion 3) was produced by npm 11; node 20's
+      # bundled npm 10 rejects it as out-of-sync. Pin npm 11 so `npm ci` matches.
+      - name: Pin npm 11 (lockfile compatibility)
+        run: npm install -g npm@11
+      - name: Install frontend deps
+        run: make fe-install
+      - name: Lint, format, types, tests
+        run: make fe-lint fe-format-check fe-typecheck fe-test
+
+  cross-engine:
+    name: Cross-engine migrations + integration (${{ matrix.engine }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [sqlite, postgres]
+    services:
+      # Only used by the postgres leg; harmless (idle) on the sqlite leg.
+      postgres:
+        # Pinned by digest (CI-006). postgres:17-alpine.
+        image: postgres@sha256:979c4379dd698aba0b890599a6104e082035f98ef31d9b9291ec22f2b13059ca
+        env:
+          POSTGRES_DB: plantcare
+          POSTGRES_USER: plantcare
+          POSTGRES_PASSWORD: plantcare
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U plantcare -d plantcare"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up uv (with cache)
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install backend deps
+        run: make backend-install
+      - name: Set DATABASE_URL for the engine under test
+        run: |
+          if [ "${{ matrix.engine }}" = "postgres" ]; then
+            echo "DATABASE_URL=postgresql+psycopg://plantcare:plantcare@localhost:5432/plantcare" >> "$GITHUB_ENV"
+          else
+            echo "DATABASE_URL=sqlite:///$(pwd)/ci-app.db" >> "$GITHUB_ENV"
+          fi
+      - name: Install psycopg for the postgres leg
+        if: matrix.engine == 'postgres'
+        # psycopg is a CI-only concern until PostgreSQL is a first-class runtime path in
+        # the image; not declared in pyproject.toml to avoid a runtime dep for it.
+        run: uv pip install --project backend "psycopg[binary]>=3.2,<4.0"
+      - name: alembic upgrade head (${{ matrix.engine }})
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: uv run alembic upgrade head
+      - name: Integration tests against ${{ matrix.engine }}
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: make test-integration
+
+  gitleaks:
+    name: Secret scan (full history)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history so the scan covers every commit on the PR branch.
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

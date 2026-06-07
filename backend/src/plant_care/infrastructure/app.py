@@ -14,6 +14,7 @@ from plant_care.adapters.inbound.web.health import router as health_router
 from plant_care.infrastructure.container import Container, build_container
 from plant_care.infrastructure.security import security_headers_middleware
 from plant_care.infrastructure.settings import Settings, get_settings
+from plant_care.infrastructure.static import mount_spa
 
 API_V1_PREFIX = "/api/v1"
 
@@ -57,4 +58,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     app.include_router(_build_api_router(), prefix=API_V1_PREFIX)
+
+    # Serve the built SPA from the same origin in the single-container image. Mounted
+    # last so the catch-all static route never shadows /api/v1/*. No-op when unset
+    # (dev/test), so the API-only app is unchanged.
+    mount_spa(app, resolved.static_dir)
     return app

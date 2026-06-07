@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     # CORS (SEC-003): explicit allow-list, empty by default. No wildcard-with-creds.
     cors_allow_origins: list[str] = Field(default_factory=list)
 
+    # Built SPA directory served at "/" by the single-container image (product-spec
+    # section 7). Unset by default so dev/test runs stay API-only.
+    static_dir: str | None = Field(default=None)
+
 
 @lru_cache
 def get_settings() -> Settings:

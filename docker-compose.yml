@@ -1,0 +1,74 @@
+# plant-care quickstart.
+#
+# One container, SQLite by default (product-spec section 7). Pull the published image,
+# or uncomment `build: .` to build from this checkout instead.
+#
+# Deploy on a trusted network or behind your own auth proxy - there is no auth in v1
+# by design (SECURITY.md, SEC-003).
+
+services:
+  plant-care:
+    # Published multi-arch image (amd64 + arm64). OWNER/REPO are placeholders until the
+    # project name is finalised.
+    image: ghcr.io/OWNER/REPO:latest
+    # To build locally instead of pulling, comment out `image:` above and uncomment:
+    # build: .
+    container_name: plant-care
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # SQLite database and (later) photo storage live here.
+      - plant-care-data:/data
+    environment:
+      # SQLite on the volume is the default; no value needed. Override for PostgreSQL
+      # via the commented service below.
+      DATABASE_URL: sqlite:////data/app.db
+      # Lock down CORS to your front door if you serve the API cross-origin. Empty by
+      # default (no cross-origin access).
+      # CORS_ALLOW_ORIGINS: '["https://plants.example.lan"]'
+    # The image ships a HEALTHCHECK; this mirrors it for compose-level health reporting.
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3).status==200 else sys.exit(1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    security_opt:
+      # No privilege escalation; the image already runs as a non-root user (SEC-012).
+      - no-new-privileges:true
+
+  # ---------------------------------------------------------------------------
+  # Optional PostgreSQL. Uncomment this block AND the DATABASE_URL override to use
+  # PostgreSQL instead of SQLite. Set a real password via your own secret mechanism;
+  # never commit credentials (SEC-006).
+  # ---------------------------------------------------------------------------
+  # db:
+  #   image: postgres:17-alpine@sha256:979c4379dd698aba0b890599a6104e082035f98ef31d9b9291ec22f2b13059ca
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: plantcare
+  #     POSTGRES_USER: plantcare
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in your env}
+  #   volumes:
+  #     - plant-care-db:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U plantcare -d plantcare"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #
+  # Then on the plant-care service set:
+  #   environment:
+  #     DATABASE_URL: postgresql+psycopg://plantcare:${POSTGRES_PASSWORD}@db:5432/plantcare
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+
+volumes:
+  plant-care-data:
+  # plant-care-db:
