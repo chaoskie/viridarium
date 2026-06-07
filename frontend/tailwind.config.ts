@@ -37,6 +37,7 @@ export default {
         "accent-2": token("color-accent-2", "#7da27a"),
         "accent-2-strong": token("color-accent-2-strong", "#547752"),
         "accent-3": token("color-accent-3", "#e3a72f"),
+        "accent-3-strong": token("color-accent-3-strong", "#7a5a18"),
         // Semantic status
         danger: token("color-danger", "#b91c1c"),
         warning: token("color-warning", "#b45309"),
@@ -44,6 +45,7 @@ export default {
         // Structure
         border: token("color-border", "#d6d3d1"),
         ring: token("color-ring", "#15803d"),
+        overlay: token("color-overlay", "rgba(0, 0, 0, 0.4)"),
       },
       fontFamily: {
         display: token("font-display", "system-ui, sans-serif").split(", "),

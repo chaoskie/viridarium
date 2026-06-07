@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   applyTheme,
+  getInitialTheme,
   nextTheme,
   persistTheme,
-  readStoredTheme,
   type Theme,
 } from "./themeController";
 
@@ -18,12 +18,13 @@ export interface UseThemeResult {
 }
 
 /**
- * Typed theme hook. Initialises from the persisted value (matching the
- * pre-paint inline script), re-applies on mount, and keeps <html data-theme>
- * + localStorage in sync on every change.
+ * Typed theme hook. Initialises from the resolved initial theme (stored choice,
+ * else prefers-color-scheme, else Roman - matching the pre-paint inline
+ * script), re-applies on mount, and keeps <html data-theme> + localStorage in
+ * sync on every change.
  */
 export function useTheme(): UseThemeResult {
-  const [theme, setThemeState] = useState<Theme>(() => readStoredTheme());
+  const [theme, setThemeState] = useState<Theme>(() => getInitialTheme());
 
   // Re-assert on mount so the DOM matches state even if the inline script and
   // state ever diverge (e.g. storage changed between paint and hydration).
