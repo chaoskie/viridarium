@@ -47,3 +47,52 @@ def test_upgrade_creates_location_table_and_downgrade_drops_it(sqlite_url: str) 
         assert "schema_meta" in tables_after_downgrade
     finally:
         engine.dispose()
+
+
+def test_upgrade_creates_plant_tables_and_downgrade_drops_them(
+    sqlite_url: str,
+) -> None:
+    cfg = make_alembic_config(sqlite_url)
+    engine = create_engine(sqlite_url)
+
+    command.upgrade(cfg, "head")
+    try:
+        inspector = inspect(engine)
+        tables = set(inspector.get_table_names())
+        assert "plant" in tables
+        assert "plant_tag" in tables
+
+        plant_cols = {col["name"] for col in inspector.get_columns("plant")}
+        assert plant_cols == {
+            "id",
+            "name",
+            "species",
+            "location_id",
+            "acquired_on",
+            "pot_size_cm",
+            "pot_material",
+            "light_level",
+            "notes",
+            "archived",
+            "created_at",
+            "updated_at",
+        }
+        tag_cols = {col["name"] for col in inspector.get_columns("plant_tag")}
+        assert tag_cols == {"plant_id", "tag"}
+
+        plant_fks = inspector.get_foreign_keys("plant")
+        loc_fk = next(fk for fk in plant_fks if fk["referred_table"] == "location")
+        assert loc_fk["options"].get("ondelete") == "SET NULL"
+
+        tag_fks = inspector.get_foreign_keys("plant_tag")
+        plant_fk = next(fk for fk in tag_fks if fk["referred_table"] == "plant")
+        assert plant_fk["options"].get("ondelete") == "CASCADE"
+
+        command.downgrade(cfg, "0002")
+        after = set(inspect(engine).get_table_names())
+        assert "plant" not in after
+        assert "plant_tag" not in after
+        assert "location" in after
+        assert "schema_meta" in after
+    finally:
+        engine.dispose()

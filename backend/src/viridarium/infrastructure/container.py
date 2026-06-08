@@ -19,8 +19,12 @@ from viridarium.adapters.outbound.db.engine import (
 from viridarium.adapters.outbound.db.location_repository import (
     SqlAlchemyLocationRepository,
 )
+from viridarium.adapters.outbound.db.plant_repository import (
+    SqlAlchemyPlantRepository,
+)
 from viridarium.application.health import GetHealthStatus
 from viridarium.application.locations import LocationService
+from viridarium.application.plants import PlantService
 from viridarium.domain.health import HealthProbe
 from viridarium.infrastructure.settings import Settings
 
@@ -34,6 +38,7 @@ class Container:
     session_factory: sessionmaker[Session]
     health_probe: HealthProbe
     location_service: LocationService
+    plant_service: PlantService
 
 
 def build_container(settings: Settings) -> Container:
@@ -42,10 +47,12 @@ def build_container(settings: Settings) -> Container:
     session_factory = create_session_factory(engine)
     health_probe = GetHealthStatus(version=settings.version)
     location_service = LocationService(SqlAlchemyLocationRepository(session_factory))
+    plant_service = PlantService(SqlAlchemyPlantRepository(session_factory))
     return Container(
         settings=settings,
         engine=engine,
         session_factory=session_factory,
         health_probe=health_probe,
         location_service=location_service,
+        plant_service=plant_service,
     )
