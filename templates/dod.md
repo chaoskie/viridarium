@@ -15,7 +15,9 @@ Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/FAIL (`QG
 - [ ] Coverage: overall floor 85%; diff-cover ≥80%; domain/app branch ≥95% (`QG-002`)
 - [ ] Required pytest layer markers present in every test file (`TEST-012`)
 - [ ] Test-foundation re-audit **approved** by the test-engineer subagent (`SPEC-003`)
+- [ ] Test-first evidence: the failing run (the "red") is recorded in the worklog before the green commit (`TEST-014`)
 - [ ] Playwright acceptance green (`TEST-009`, `CI-010`); ran on both SQLite and PostgreSQL paths (`ARCH-011`)
+- [ ] UI story: verified via the **production path** - built SPA served *through the backend* (not just vite dev / in-process TestClient), **zero page/console errors** (`TEST-010`). Catches CSP-class bugs (security headers vs external assets/inline scripts) invisible to dev-mode + API-only tests. *(Added 2026-06-08, sprint-2 retro.)*
 - [ ] Audit Spaces green: a11y / perf (`FE-015`) + event-logging (`SEC-008`)
 
 ## 4. DevOps Ready
