@@ -6,9 +6,11 @@ appear here. Use cases return domain types; this layer maps them to the wire sha
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from viridarium.domain.plant import LightLevel, PotMaterial
 
 
 class HealthResponse(BaseModel):
@@ -54,5 +56,76 @@ class LocationResponse(BaseModel):
     id: int
     name: str
     notes: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+def _normalize_tags(values: list[str]) -> list[str]:
+    """Trim, drop empties, dedupe (order-preserving) the tag list (design §1)."""
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for raw in values:
+        tag = raw.strip()
+        if not tag or tag in seen:
+            continue
+        seen.add(tag)
+        cleaned.append(tag)
+    return cleaned
+
+
+class PlantCreate(BaseModel):
+    """Request body for POST /api/v1/plants (design §1).
+
+    ``name`` is trimmed and must be non-empty (whitespace-only -> 422); enums validate
+    against the domain ``StrEnum`` wire values; ``tags`` items are trimmed, non-empty,
+    capped at 50 chars, deduped, and capped at 50 items. ``location_id`` is optional
+    (``null`` = homeless); a non-existent id is rejected later as 422 by the service.
+    """
+
+    name: str = Field(min_length=1, max_length=120)
+    species: str | None = Field(default=None, max_length=200)
+    location_id: int | None = Field(default=None)
+    acquired_on: date | None = Field(default=None)
+    pot_size_cm: int | None = Field(default=None, ge=1, le=500)
+    pot_material: PotMaterial | None = Field(default=None)
+    light_level: LightLevel | None = Field(default=None)
+    notes: str | None = Field(default=None, max_length=10000)
+    tags: list[str] = Field(default_factory=list, max_length=50)
+    archived: bool = Field(default=False)
+
+    @field_validator("name")
+    @classmethod
+    def _validate_name(cls, value: str) -> str:
+        return _trim_non_empty_name(value)
+
+    @field_validator("tags")
+    @classmethod
+    def _validate_tags(cls, values: list[str]) -> list[str]:
+        for raw in values:
+            if len(raw.strip()) > 50:
+                raise ValueError("each tag must be at most 50 characters")
+        return _normalize_tags(values)
+
+
+class PlantUpdate(PlantCreate):
+    """Request body for PUT /api/v1/plants/{id} (full-replace, ADR-D)."""
+
+
+class PlantResponse(BaseModel):
+    """Public shape of a plant (security boundary, ARCH-007)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    species: str | None
+    location_id: int | None
+    acquired_on: date | None
+    pot_size_cm: int | None
+    pot_material: PotMaterial | None
+    light_level: LightLevel | None
+    notes: str | None
+    tags: list[str]
+    archived: bool
     created_at: datetime
     updated_at: datetime

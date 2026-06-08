@@ -9,9 +9,17 @@ constraint names stable for SQLite Alembic batch mode.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import DateTime, Integer, String, func
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from viridarium.adapters.outbound.db.base import Base
@@ -36,3 +44,61 @@ class LocationModel(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
+
+class PlantModel(Base):
+    """A plant row (US-2.1).
+
+    ``location_id`` is a nullable FK with ``ON DELETE SET NULL`` (D1): deleting a room
+    orphans its plants to homeless rather than cascading a delete. Enums are stored as
+    ``String(20)`` (D3, no native DB enum types - portable). ``archived`` carries a
+    DB-level ``server_default`` false. Timestamps are server-set (ADR-A), mirroring
+    ``LocationModel``. The FK action only fires on SQLite with the ``foreign_keys``
+    pragma (set in ``engine.py``).
+    """
+
+    __tablename__ = "plant"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    species: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    location_id: Mapped[int | None] = mapped_column(
+        ForeignKey("location.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    acquired_on: Mapped[date | None] = mapped_column(Date(), nullable=True)
+    pot_size_cm: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    pot_material: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    light_level: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(10000), nullable=True)
+    archived: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=func.false()
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
+class PlantTagModel(Base):
+    """A normalized plant tag row (D2): composite PK ``(plant_id, tag)``.
+
+    Owned child of ``plant`` with ``ON DELETE CASCADE`` so tags are removed with their
+    plant. A child table (not a JSON column) keeps the ``?tag=`` filter portable via a
+    SQL ``EXISTS`` subquery (ARCH-011).
+    """
+
+    __tablename__ = "plant_tag"
+
+    plant_id: Mapped[int] = mapped_column(
+        ForeignKey("plant.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    tag: Mapped[str] = mapped_column(String(50), primary_key=True)
