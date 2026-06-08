@@ -17,6 +17,8 @@ edits/reads/test runs.
 
 ## Entries
 
+- `~18:10 · orchestrator/HIGH · PR #15 pipeline fully GREEN (backend, frontend, cross-engine sqlite+postgres, commitlint, secret-scan); merge state CLEAN; awaiting maintainer merge · GitHub Actions · PRIN-VII`
+- `~18:05 · orchestrator/HIGH · PR #15 opened (feat/us-2.2-location-crud @ 6da28a7); ticket commented PR-ready, stays In Progress · GitHub/board · pt-v3 merge discipline`
 - `~17:45 · orchestrator/HIGH · DoD gate PASS posted (deviations: Playwright/Audit-Spaces deferred per approved #2; Postgres migration leg verified by CI) · templates/dod.md · QG-012`
 - `~17:42 · orchestrator/HIGH · TD filed for review MEDIUM-2 + LOW-3 (modal focus-trap, schema length-vs-trim) · project board Backlog, Foundation · REV-003`
 - `~17:40 · orchestrator/HIGH · review MEDIUM-1 fixed (notes trimmed before send) + frontend gate re-run green (58 tests); MEDIUM-2/LOWs to TD · RoomFormModal.tsx · REV-003`
