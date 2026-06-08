@@ -7,10 +7,13 @@ installs the secure-by-default middleware (SEC-003, SEC-011).
 
 from __future__ import annotations
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from viridarium.adapters.inbound.web.health import router as health_router
+from viridarium.adapters.inbound.web.locations import router as locations_router
+from viridarium.domain.location import LocationNotFoundError
 from viridarium.infrastructure.container import Container, build_container
 from viridarium.infrastructure.security import security_headers_middleware
 from viridarium.infrastructure.settings import Settings, get_settings
@@ -22,6 +25,7 @@ API_V1_PREFIX = "/api/v1"
 def _build_api_router() -> APIRouter:
     api = APIRouter()
     api.include_router(health_router)
+    api.include_router(locations_router)
     return api
 
 
@@ -45,6 +49,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # Expose wired collaborators to the inbound adapter via app.state.
     app.state.container = container
     app.state.health_probe = container.health_probe
+    app.state.location_service = container.location_service
+
+    # Error-to-HTTP via a registered handler (ADR-C): domain raises typed errors;
+    # the app factory maps each to a status. The body carries no PII (SEC-001),
+    # only the id already present in the domain error message.
+    @app.exception_handler(LocationNotFoundError)
+    async def _location_not_found(
+        _request: Request, exc: LocationNotFoundError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=404, content={"detail": str(exc)})
 
     # Secure-by-default posture (SEC-003, SEC-011).
     app.middleware("http")(security_headers_middleware)
