@@ -431,6 +431,10 @@ def test_openapi_exposes_plant_paths_query_params_and_schema(
     param_names = {p["name"] for p in list_op.get("parameters", [])}
     assert {"q", "location_id", "tag", "species", "homeless"} <= param_names
 
+    assert "/api/v1/plants/{plant_id}/archive" in schema["paths"]
+    assert "/api/v1/plants/{plant_id}/unarchive" in schema["paths"]
+    assert {"archived", "include_archived"} <= param_names
+
     response_schema = schema["components"]["schemas"]["PlantResponse"]
     assert set(response_schema["properties"].keys()) == {
         "id",
@@ -447,3 +451,133 @@ def test_openapi_exposes_plant_paths_query_params_and_schema(
         "created_at",
         "updated_at",
     }
+
+
+# ------------------------------------------ archive / unarchive (US-2.4, §3, AC1-AC6)
+def test_archive_sets_flag_and_persists(client: TestClient) -> None:
+    created = client.post(_PLANTS, json={"name": "Dead"}).json()
+
+    response = client.post(f"{_PLANTS}/{created['id']}/archive")
+
+    assert response.status_code == 200
+    assert response.json()["archived"] is True
+    assert client.get(f"{_PLANTS}/{created['id']}").json()["archived"] is True
+
+
+def test_unarchive_clears_flag_and_persists(client: TestClient) -> None:
+    created = client.post(_PLANTS, json={"name": "Back", "archived": True}).json()
+
+    response = client.post(f"{_PLANTS}/{created['id']}/unarchive")
+
+    assert response.status_code == 200
+    assert response.json()["archived"] is False
+    assert client.get(f"{_PLANTS}/{created['id']}").json()["archived"] is False
+
+
+def test_archive_unknown_id_returns_404_no_pii(client: TestClient) -> None:
+    response = client.post(f"{_PLANTS}/424242/archive")
+
+    assert response.status_code == 404
+    body = response.json()
+    assert set(body.keys()) == {"detail"}
+    assert "424242" in body["detail"]
+
+
+def test_unarchive_unknown_id_returns_404_no_pii(client: TestClient) -> None:
+    response = client.post(f"{_PLANTS}/424242/unarchive")
+
+    assert response.status_code == 404
+    body = response.json()
+    assert set(body.keys()) == {"detail"}
+    assert "424242" in body["detail"]
+
+
+def test_archive_is_idempotent(client: TestClient) -> None:
+    created = client.post(_PLANTS, json={"name": "Twice"}).json()
+
+    first = client.post(f"{_PLANTS}/{created['id']}/archive")
+    second = client.post(f"{_PLANTS}/{created['id']}/archive")
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["archived"] is True
+    assert second.json()["archived"] is True
+
+
+def test_unarchive_is_idempotent(client: TestClient) -> None:
+    created = client.post(_PLANTS, json={"name": "Active"}).json()
+
+    first = client.post(f"{_PLANTS}/{created['id']}/unarchive")
+    second = client.post(f"{_PLANTS}/{created['id']}/unarchive")
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["archived"] is False
+    assert second.json()["archived"] is False
+
+
+def test_list_excludes_archived_by_default(client: TestClient) -> None:
+    # Intended US-2.1 contract change (design D5 / proposal deviation 2): the default
+    # list switches from "all" to "active only". This is the US-2.4 deliverable US-2.1
+    # explicitly deferred, NOT a regression.
+    client.post(_PLANTS, json={"name": "Active"})
+    archived = client.post(_PLANTS, json={"name": "Archived"}).json()
+    client.post(f"{_PLANTS}/{archived['id']}/archive")
+
+    names = [p["name"] for p in client.get(_PLANTS).json()]
+
+    assert names == ["Active"]
+
+
+def test_list_archived_true_returns_archived_only(client: TestClient) -> None:
+    client.post(_PLANTS, json={"name": "Active"})
+    archived = client.post(_PLANTS, json={"name": "Archived"}).json()
+    client.post(f"{_PLANTS}/{archived['id']}/archive")
+
+    names = [p["name"] for p in client.get(f"{_PLANTS}?archived=true").json()]
+
+    assert names == ["Archived"]
+
+
+def test_list_include_archived_returns_all(client: TestClient) -> None:
+    client.post(_PLANTS, json={"name": "Active"})
+    archived = client.post(_PLANTS, json={"name": "Archived"}).json()
+    client.post(f"{_PLANTS}/{archived['id']}/archive")
+
+    names = [p["name"] for p in client.get(f"{_PLANTS}?include_archived=true").json()]
+
+    assert names == ["Active", "Archived"]
+
+
+def test_list_archived_and_tag_composes_and(client: TestClient) -> None:
+    # (a) archived + rare -> the only match for ?archived=true&tag=rare.
+    a = client.post(_PLANTS, json={"name": "ArchivedRare", "tags": ["rare"]}).json()
+    client.post(f"{_PLANTS}/{a['id']}/archive")
+    # (b) active + rare -> excluded (wrong archived state).
+    client.post(_PLANTS, json={"name": "ActiveRare", "tags": ["rare"]})
+    # (c) archived + common -> excluded (wrong tag).
+    c = client.post(_PLANTS, json={"name": "ArchivedCommon", "tags": ["common"]}).json()
+    client.post(f"{_PLANTS}/{c['id']}/archive")
+
+    names = [p["name"] for p in client.get(f"{_PLANTS}?archived=true&tag=rare").json()]
+
+    assert names == ["ArchivedRare"]
+
+
+def test_lifecycle_archive_unarchive_keeps_history(client: TestClient) -> None:
+    created = client.post(
+        _PLANTS, json={"name": "Lifecycle", "tags": ["rare", "fern"]}
+    ).json()
+
+    # Present in the default (active) list.
+    assert "Lifecycle" in [p["name"] for p in client.get(_PLANTS).json()]
+
+    # Archive -> absent from the default list.
+    assert client.post(f"{_PLANTS}/{created['id']}/archive").status_code == 200
+    assert "Lifecycle" not in [p["name"] for p in client.get(_PLANTS).json()]
+
+    # Unarchive -> present again, history (tags, created_at) intact throughout.
+    unarchived = client.post(f"{_PLANTS}/{created['id']}/unarchive").json()
+    assert "Lifecycle" in [p["name"] for p in client.get(_PLANTS).json()]
+    assert sorted(unarchived["tags"]) == ["fern", "rare"]
+    assert unarchived["created_at"] == created["created_at"]

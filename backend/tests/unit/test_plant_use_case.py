@@ -13,6 +13,7 @@ get no unit test of their own (TEST-004 #2: would pass against any implementatio
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, date, datetime
 
 import pytest
@@ -109,6 +110,18 @@ class _FakePlantRepository:
             raise PlantNotFoundError(plant_id)
         del self._rows[plant_id]
 
+    def archive(self, plant_id: int) -> Plant:
+        existing = self.get(plant_id)
+        updated = replace(existing, archived=True, updated_at=datetime.now(UTC))
+        self._rows[plant_id] = updated
+        return updated
+
+    def unarchive(self, plant_id: int) -> Plant:
+        existing = self.get(plant_id)
+        updated = replace(existing, archived=False, updated_at=datetime.now(UTC))
+        self._rows[plant_id] = updated
+        return updated
+
     def location_exists(self, location_id: int) -> bool:
         return location_id in self._location_ids
 
@@ -169,6 +182,44 @@ def test_delete_propagates_plant_not_found() -> None:
 
     with pytest.raises(PlantNotFoundError):
         service.delete(999)
+
+
+# ------------------------------------------------------- archive / unarchive (US-2.4)
+def test_archive_sets_flag() -> None:
+    service = PlantService(_FakePlantRepository())
+    created = service.create(_new_plant())
+
+    archived = service.archive(created.id)
+
+    assert archived.archived is True
+
+
+def test_unarchive_clears_flag() -> None:
+    service = PlantService(_FakePlantRepository())
+    created = service.create(_new_plant())
+    service.archive(created.id)
+
+    unarchived = service.unarchive(created.id)
+
+    assert unarchived.archived is False
+
+
+def test_archive_propagates_plant_not_found() -> None:
+    service = PlantService(_FakePlantRepository())
+
+    with pytest.raises(PlantNotFoundError) as exc_info:
+        service.archive(999)
+
+    assert exc_info.value.plant_id == 999
+
+
+def test_unarchive_propagates_plant_not_found() -> None:
+    service = PlantService(_FakePlantRepository())
+
+    with pytest.raises(PlantNotFoundError) as exc_info:
+        service.unarchive(999)
+
+    assert exc_info.value.plant_id == 999
 
 
 # A couple of round-trip assertions that exercise the enum/date carrying paths so the

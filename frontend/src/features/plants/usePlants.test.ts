@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { ApiError } from "@/lib/api/client";
 import type { Plant } from "@/lib/api/plants";
 
 import { usePlants } from "./usePlants";
@@ -26,6 +27,14 @@ function okJson(body: unknown): Response {
     ok: true,
     status: 200,
     json: () => Promise.resolve(body),
+  } as Response;
+}
+
+function failJson(status: number): Response {
+  return {
+    ok: false,
+    status,
+    json: () => Promise.resolve({ detail: "boom" }),
   } as Response;
 }
 
@@ -130,5 +139,107 @@ describe("usePlants", () => {
 
     expect(result.current.plants).toEqual([PLANT]);
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("archive POSTs the archive path then reloads with the retained filter (US-2.4)", async () => {
+    const archived: Plant = { ...PLANT, archived: true };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(okJson([PLANT])) // initial mount load
+      .mockResolvedValueOnce(okJson([PLANT])) // reload with active filter
+      .mockResolvedValueOnce(okJson(archived)) // POST /archive response
+      .mockResolvedValueOnce(okJson([])); // reload after archive (retained filter)
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => usePlants());
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // Establish an active filter the hook must retain across the archive.
+    await act(async () => {
+      await result.current.reload({ q: "mons", location_id: 3 });
+    });
+
+    await act(async () => {
+      await result.current.archive(1);
+    });
+
+    // The POST hit the archive sub-resource...
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "/api/v1/plants/1/archive",
+      expect.objectContaining({ method: "POST" }),
+    );
+    // ...and the follow-up reload carried the retained filter, not bare /plants.
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/v1/plants?q=mons&location_id=3",
+      expect.objectContaining({ headers: { Accept: "application/json" } }),
+    );
+  });
+
+  it("unarchive POSTs the unarchive path then reloads with the retained filter (US-2.4)", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(okJson([])) // initial mount load
+      .mockResolvedValueOnce(okJson([])) // reload with archived filter
+      .mockResolvedValueOnce(okJson(PLANT)) // POST /unarchive response
+      .mockResolvedValueOnce(okJson([])); // reload after unarchive (retained filter)
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => usePlants());
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    await act(async () => {
+      await result.current.reload({ archived: true });
+    });
+
+    await act(async () => {
+      await result.current.unarchive(1);
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "/api/v1/plants/1/unarchive",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/v1/plants?archived=true",
+      expect.objectContaining({ headers: { Accept: "application/json" } }),
+    );
+  });
+
+  it("archive propagates ApiError when the POST fails (sad, F4)", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(okJson([PLANT])) // mount reload
+      .mockResolvedValueOnce(failJson(500)); // POST /archive fails
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => usePlants());
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    // The hook does not trap mutation errors (JSDoc contract) -> propagates so a
+    // caller/UI can surface it. archivePlant throws before the follow-up reload.
+    await expect(result.current.archive(1)).rejects.toBeInstanceOf(ApiError);
+  });
+
+  it("unarchive propagates ApiError when the POST fails (sad, F5)", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(okJson([PLANT])) // mount reload
+      .mockResolvedValueOnce(failJson(503)); // POST /unarchive fails
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => usePlants());
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    await expect(result.current.unarchive(1)).rejects.toBeInstanceOf(ApiError);
   });
 });

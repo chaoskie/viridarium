@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ApiError } from "@/lib/api/client";
 import {
+  archivePlant,
   createPlant,
   deletePlant,
   fetchPlants,
+  unarchivePlant,
   updatePlant,
   type Plant,
   type PlantFilter,
@@ -19,6 +21,8 @@ interface UsePlantsResult {
   readonly create: (input: PlantInput) => Promise<void>;
   readonly update: (id: number, input: PlantInput) => Promise<void>;
   readonly remove: (id: number) => Promise<void>;
+  readonly archive: (id: number) => Promise<void>;
+  readonly unarchive: (id: number) => Promise<void>;
 }
 
 /** Turn any thrown value (incl. `ApiError`) into a human-readable message. */
@@ -43,7 +47,13 @@ export function usePlants(): UsePlantsResult {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // The last filter passed to `reload`, so archive/unarchive can re-fetch the
+  // SAME view (active/archived/all). Without this a row crossing the boundary
+  // would incoherently vanish/reappear (design §3, US-2.4).
+  const lastFilterRef = useRef<PlantFilter | undefined>(undefined);
+
   const reload = useCallback(async (filter?: PlantFilter): Promise<void> => {
+    lastFilterRef.current = filter;
     setLoading(true);
     setError(null);
     try {
@@ -60,10 +70,13 @@ export function usePlants(): UsePlantsResult {
     void reload();
   }, [reload]);
 
+  // All mutations reload the SAME view that is currently shown (lastFilterRef),
+  // so create/edit/delete/archive don't silently snap the list back to the
+  // default Active view while the filter controls still read otherwise.
   const create = useCallback(
     async (input: PlantInput): Promise<void> => {
       await createPlant(input);
-      await reload();
+      await reload(lastFilterRef.current);
     },
     [reload],
   );
@@ -71,7 +84,7 @@ export function usePlants(): UsePlantsResult {
   const update = useCallback(
     async (id: number, input: PlantInput): Promise<void> => {
       await updatePlant(id, input);
-      await reload();
+      await reload(lastFilterRef.current);
     },
     [reload],
   );
@@ -79,10 +92,36 @@ export function usePlants(): UsePlantsResult {
   const remove = useCallback(
     async (id: number): Promise<void> => {
       await deletePlant(id);
-      await reload();
+      await reload(lastFilterRef.current);
     },
     [reload],
   );
 
-  return { plants, loading, error, reload, create, update, remove };
+  const archive = useCallback(
+    async (id: number): Promise<void> => {
+      await archivePlant(id);
+      await reload(lastFilterRef.current);
+    },
+    [reload],
+  );
+
+  const unarchive = useCallback(
+    async (id: number): Promise<void> => {
+      await unarchivePlant(id);
+      await reload(lastFilterRef.current);
+    },
+    [reload],
+  );
+
+  return {
+    plants,
+    loading,
+    error,
+    reload,
+    create,
+    update,
+    remove,
+    archive,
+    unarchive,
+  };
 }

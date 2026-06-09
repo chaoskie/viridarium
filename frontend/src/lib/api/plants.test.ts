@@ -2,10 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "./client";
 import {
+  archivePlant,
   createPlant,
   deletePlant,
   fetchPlant,
   fetchPlants,
+  unarchivePlant,
   updatePlant,
   type Plant,
   type PlantInput,
@@ -119,6 +121,50 @@ describe("plants API client", () => {
       await fetchPlants({ homeless: true });
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/v1/plants?homeless=true",
+        expect.objectContaining({
+          headers: { Accept: "application/json" },
+        }),
+      );
+    });
+
+    it("renders archived=true when filtering to archived only (US-2.4)", async () => {
+      const fetchMock = stubFetch(okJson(200, []));
+      await fetchPlants({ archived: true });
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/plants?archived=true",
+        expect.objectContaining({
+          headers: { Accept: "application/json" },
+        }),
+      );
+    });
+
+    it("renders archived=false to scope to active only (US-2.4)", async () => {
+      const fetchMock = stubFetch(okJson(200, []));
+      await fetchPlants({ archived: false });
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/plants?archived=false",
+        expect.objectContaining({
+          headers: { Accept: "application/json" },
+        }),
+      );
+    });
+
+    it("renders include_archived=true to return all plants (US-2.4)", async () => {
+      const fetchMock = stubFetch(okJson(200, []));
+      await fetchPlants({ include_archived: true });
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/plants?include_archived=true",
+        expect.objectContaining({
+          headers: { Accept: "application/json" },
+        }),
+      );
+    });
+
+    it("omits include_archived when false (US-2.4)", async () => {
+      const fetchMock = stubFetch(okJson(200, []));
+      await fetchPlants({ include_archived: false });
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/plants",
         expect.objectContaining({
           headers: { Accept: "application/json" },
         }),
@@ -251,6 +297,53 @@ describe("plants API client", () => {
     it("throws ApiError on a non-2xx response", async () => {
       stubFetch(fail(404));
       await expect(deletePlant(99)).rejects.toBeInstanceOf(ApiError);
+    });
+  });
+
+  describe("archivePlant", () => {
+    it("posts to the archive sub-resource and parses the updated plant (US-2.4)", async () => {
+      const archived: Plant = { ...SAMPLE, archived: true };
+      const fetchMock = stubFetch(okJson(200, archived));
+      await expect(archivePlant(1)).resolves.toEqual(archived);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/plants/1/archive",
+        expect.objectContaining({
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        }),
+      );
+    });
+
+    it("throws ApiError on a non-2xx response (incl. 404)", async () => {
+      stubFetch(fail(404));
+      await expect(archivePlant(99)).rejects.toBeInstanceOf(ApiError);
+    });
+  });
+
+  describe("unarchivePlant", () => {
+    it("posts to the unarchive sub-resource and parses the updated plant (US-2.4)", async () => {
+      const fetchMock = stubFetch(okJson(200, SAMPLE));
+      await expect(unarchivePlant(1)).resolves.toEqual(SAMPLE);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/plants/1/unarchive",
+        expect.objectContaining({
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        }),
+      );
+    });
+
+    it("throws ApiError on a non-2xx response (incl. 404)", async () => {
+      stubFetch(fail(404));
+      await expect(unarchivePlant(99)).rejects.toBeInstanceOf(ApiError);
     });
   });
 });

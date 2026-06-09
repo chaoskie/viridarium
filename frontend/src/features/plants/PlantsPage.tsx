@@ -24,12 +24,16 @@ const LABEL_CLASSES =
 const HOMELESS_VALUE = "homeless";
 const ALL_VALUE = "";
 
+/** Archive-scope choice for the list view (US-2.4). Default `active`. */
+type PlantView = "active" | "archived" | "all";
+
 /** Build the `PlantFilter` from the current control state (empties dropped). */
 function buildFilter(
   q: string,
   locationChoice: string,
   tag: string,
   species: string,
+  view: PlantView,
 ): PlantFilter {
   // Build incrementally so unset fields stay absent (exactOptionalPropertyTypes).
   const filter: {
@@ -38,6 +42,8 @@ function buildFilter(
     tag?: string;
     species?: string;
     homeless?: boolean;
+    archived?: boolean;
+    include_archived?: boolean;
   } = {};
   if (q.trim().length > 0) {
     filter.q = q.trim();
@@ -53,12 +59,28 @@ function buildFilter(
   } else if (locationChoice !== ALL_VALUE) {
     filter.location_id = Number(locationChoice);
   }
+  // active -> neither param (API default); archived -> archived only;
+  // all -> include_archived overrides the scope (A2).
+  if (view === "archived") {
+    filter.archived = true;
+  } else if (view === "all") {
+    filter.include_archived = true;
+  }
   return filter;
 }
 
 export function PlantsPage(): ReactNode {
-  const { plants, loading, error, reload, create, update, remove } =
-    usePlants();
+  const {
+    plants,
+    loading,
+    error,
+    reload,
+    create,
+    update,
+    remove,
+    archive,
+    unarchive,
+  } = usePlants();
   const [rooms, setRooms] = useState<readonly Location[]>([]);
   const [modal, setModal] = useState<ModalState>({ kind: "closed" });
 
@@ -66,11 +88,13 @@ export function PlantsPage(): ReactNode {
   const [locationChoice, setLocationChoice] = useState(ALL_VALUE);
   const [tag, setTag] = useState("");
   const [species, setSpecies] = useState("");
+  const [view, setView] = useState<PlantView>("active");
 
   const qId = useId();
   const locationId = useId();
   const tagId = useId();
   const speciesId = useId();
+  const viewId = useId();
 
   useEffect(() => {
     let active = true;
@@ -103,7 +127,7 @@ export function PlantsPage(): ReactNode {
   );
 
   function applyFilter(): void {
-    void reload(buildFilter(q, locationChoice, tag, species));
+    void reload(buildFilter(q, locationChoice, tag, species, view));
   }
 
   function closeModal(): void {
@@ -127,7 +151,7 @@ export function PlantsPage(): ReactNode {
       </header>
 
       <form
-        className="grid grid-cols-1 gap-3 rounded-card border-card border-border bg-surface-raised p-4 shadow-card sm:grid-cols-2 lg:grid-cols-5"
+        className="grid grid-cols-1 gap-3 rounded-card border-card border-border bg-surface-raised p-4 shadow-card sm:grid-cols-2 lg:grid-cols-6"
         onSubmit={(event) => {
           event.preventDefault();
           applyFilter();
@@ -161,7 +185,7 @@ export function PlantsPage(): ReactNode {
             onChange={(event) => {
               const next = event.target.value;
               setLocationChoice(next);
-              void reload(buildFilter(q, next, tag, species));
+              void reload(buildFilter(q, next, tag, species, view));
             }}
           >
             <option value={ALL_VALUE}>All rooms</option>
@@ -204,6 +228,26 @@ export function PlantsPage(): ReactNode {
               setSpecies(event.target.value);
             }}
           />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={viewId} className={LABEL_CLASSES}>
+            Show
+          </label>
+          <select
+            id={viewId}
+            className={CONTROL_CLASSES}
+            value={view}
+            onChange={(event) => {
+              const next = event.target.value as PlantView;
+              setView(next);
+              void reload(buildFilter(q, locationChoice, tag, species, next));
+            }}
+          >
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+            <option value="all">All</option>
+          </select>
         </div>
 
         <div className="flex items-end">
@@ -279,6 +323,18 @@ export function PlantsPage(): ReactNode {
                   ) : null}
                 </div>
                 <div className="flex shrink-0 gap-2">
+                  <Button
+                    variant="ghost"
+                    aria-label={`${plant.archived ? "Unarchive" : "Archive"} ${plant.name}`}
+                    onClick={() => {
+                      // Reversible (A4) - no confirm dialog.
+                      void (plant.archived
+                        ? unarchive(plant.id)
+                        : archive(plant.id));
+                    }}
+                  >
+                    {plant.archived ? "Unarchive" : "Archive"}
+                  </Button>
                   <Button
                     variant="ghost"
                     aria-label={`Edit ${plant.name}`}
