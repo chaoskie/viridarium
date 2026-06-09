@@ -5,6 +5,7 @@ Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/FAIL (`QG
 ## 1. Functional
 - [ ] Every acceptance criterion met and verified (story-complete check)
 - [ ] Demo step recorded / demo-able
+- [ ] **Claims audit:** every security / logging / perf control the proposal *asserts* is actually implemented - or the proposal is corrected. No aspirational claims left standing. *(Added 2026-06-10, E2 retro: a proposal over-claimed SEC-008 logging.)*
 
 ## 2. Code Quality
 - [ ] Mechanical gate green: ruff lint+format, ruff S, mypy strict (domain+app), import-linter boundaries (`QG-001`)
