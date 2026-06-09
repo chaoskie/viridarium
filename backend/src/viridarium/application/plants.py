@@ -56,3 +56,15 @@ class PlantService:
     def delete(self, plant_id: int) -> None:
         """Delete a plant; propagates ``PlantNotFoundError`` if absent."""
         self._repository.delete(plant_id)
+
+    def archive(self, plant_id: int) -> Plant:
+        """Archive a plant (idempotent); propagates ``PlantNotFoundError`` if absent.
+
+        A pass-through to the port: archiving never touches the location, so there is
+        no FK guard (unlike create/update).
+        """
+        return self._repository.archive(plant_id)
+
+    def unarchive(self, plant_id: int) -> Plant:
+        """Unarchive a plant (idempotent); propagates ``PlantNotFoundError``."""
+        return self._repository.unarchive(plant_id)

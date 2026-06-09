@@ -82,6 +82,8 @@ export interface PlantFilter {
   readonly tag?: string;
   readonly species?: string;
   readonly homeless?: boolean;
+  readonly archived?: boolean;
+  readonly include_archived?: boolean;
 }
 
 /**
@@ -108,6 +110,16 @@ function buildQuery(filter: PlantFilter | undefined): string {
   }
   if (filter.homeless === true) {
     params.set("homeless", "true");
+  }
+  // `archived` is a tri-state scope (A2): unset -> active (server default),
+  // true -> archived only, false -> active only. Render whenever set.
+  if (filter.archived !== undefined) {
+    params.set("archived", String(filter.archived));
+  }
+  // `include_archived` overrides the scope to "all"; render only when true
+  // (mirrors `homeless`).
+  if (filter.include_archived === true) {
+    params.set("include_archived", "true");
   }
   const query = params.toString();
   return query.length > 0 ? `?${query}` : "";
@@ -139,4 +151,22 @@ export function updatePlant(id: number, input: PlantInput): Promise<Plant> {
 /** `DELETE /api/v1/plants/{id}` - remove a plant (204). Throws `ApiError` on non-2xx. */
 export function deletePlant(id: number): Promise<void> {
   return deleteResource(`/plants/${String(id)}`);
+}
+
+/**
+ * `POST /api/v1/plants/{id}/archive` - idempotent state-set action (US-2.4 / A1).
+ * Empty body; returns the updated `PlantResponse` (200). Throws `ApiError` on
+ * non-2xx (incl. 404 for an unknown id).
+ */
+export function archivePlant(id: number): Promise<Plant> {
+  return postJson<Plant>(`/plants/${String(id)}/archive`, {});
+}
+
+/**
+ * `POST /api/v1/plants/{id}/unarchive` - idempotent state-set action (US-2.4 / A1).
+ * Empty body; returns the updated `PlantResponse` (200). Throws `ApiError` on
+ * non-2xx (incl. 404 for an unknown id).
+ */
+export function unarchivePlant(id: number): Promise<Plant> {
+  return postJson<Plant>(`/plants/${String(id)}/unarchive`, {});
 }

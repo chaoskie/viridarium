@@ -63,14 +63,22 @@ def list_plants(
     tag: Annotated[str | None, Query()] = None,
     species: Annotated[str | None, Query()] = None,
     homeless: Annotated[bool, Query()] = False,
+    archived: Annotated[bool | None, Query()] = None,
+    include_archived: Annotated[bool, Query()] = False,
 ) -> list[PlantResponse]:
-    """List plants, optionally filtered (AND-combined), ordered by name."""
+    """List plants, optionally filtered (AND-combined), ordered by name.
+
+    Defaults to active plants only; ``archived=true`` returns archived only and
+    ``include_archived=true`` returns all (US-2.4).
+    """
     plant_filter = PlantFilter(
         q=q,
         location_id=location_id,
         tag=tag,
         species=species,
         homeless=homeless,
+        archived=archived,
+        include_archived=include_archived,
     )
     return [PlantResponse.model_validate(p) for p in service.list(plant_filter)]
 
@@ -99,3 +107,23 @@ def delete_plant(plant_id: int, service: ServiceDep) -> Response:
     """Delete a plant by id."""
     service.delete(plant_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/{plant_id}/archive",
+    response_model=PlantResponse,
+    summary="Archive a plant",
+)
+def archive_plant(plant_id: int, service: ServiceDep) -> PlantResponse:
+    """Archive a plant (idempotent state-set); 404 on an unknown id (A1)."""
+    return PlantResponse.model_validate(service.archive(plant_id))
+
+
+@router.post(
+    "/{plant_id}/unarchive",
+    response_model=PlantResponse,
+    summary="Unarchive a plant",
+)
+def unarchive_plant(plant_id: int, service: ServiceDep) -> PlantResponse:
+    """Unarchive a plant (idempotent state-set); 404 on an unknown id (A1)."""
+    return PlantResponse.model_validate(service.unarchive(plant_id))

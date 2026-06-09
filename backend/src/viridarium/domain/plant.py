@@ -85,10 +85,14 @@ class NewPlant:
 class PlantFilter:
     """Optional, AND-combined search/filter criteria for the plant list (D4).
 
-    All ``None``/false -> no filtering (all plants, name ASC). ``q`` is a substring
-    over name|species; ``species`` a substring over species; ``location_id`` an exact
-    match; ``tag`` an EXISTS over ``plant_tag``; ``homeless`` restricts to null-location
-    plants. Portable across SQLite/PostgreSQL (lowered-LIKE + EXISTS, ARCH-011).
+    The default (all-``None``/false) is **active only**: archived plants are excluded
+    unless ``archived`` or ``include_archived`` says otherwise (US-2.4 / A2). ``q`` is a
+    substring over name|species; ``species`` a substring over species; ``location_id``
+    an exact match; ``tag`` an EXISTS over ``plant_tag``; ``homeless`` restricts to
+    null-location plants. ``archived`` (``None``/``False`` -> active only; ``True`` ->
+    archived only) and ``include_archived`` (``True`` -> no archived clause, return all)
+    drive the archived filter. Portable across SQLite/PostgreSQL (lowered-LIKE + EXISTS,
+    ARCH-011).
     """
 
     q: str | None = None
@@ -96,6 +100,8 @@ class PlantFilter:
     tag: str | None = None
     species: str | None = None
     homeless: bool = False
+    archived: bool | None = None
+    include_archived: bool = False
 
 
 class PlantNotFoundError(Exception):
@@ -143,6 +149,14 @@ class PlantRepository(Protocol):
 
     def delete(self, plant_id: int) -> None:
         """Delete the plant (and cascade its tags) or raise the not-found error."""
+        ...
+
+    def archive(self, plant_id: int) -> Plant:
+        """Set ``archived`` true (idempotent) or raise :class:`PlantNotFoundError`."""
+        ...
+
+    def unarchive(self, plant_id: int) -> Plant:
+        """Set ``archived`` false (idempotent) or raise :class:`PlantNotFoundError`."""
         ...
 
     def location_exists(self, location_id: int) -> bool:

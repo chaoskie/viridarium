@@ -115,6 +115,8 @@ class SqlAlchemyPlantRepository:
                         & (PlantTagModel.tag == plant_filter.tag)
                     )
                 )
+            if not plant_filter.include_archived:
+                stmt = stmt.where(PlantModel.archived.is_(bool(plant_filter.archived)))
             stmt = stmt.order_by(PlantModel.name)
             models = session.scalars(stmt).all()
             return [_to_domain(m, _load_tags(session, m.id)) for m in models]
@@ -149,6 +151,27 @@ class SqlAlchemyPlantRepository:
                 raise PlantNotFoundError(plant_id)
             session.delete(model)
             session.commit()
+
+    def archive(self, plant_id: int) -> Plant:
+        return self._set_archived(plant_id, archived=True)
+
+    def unarchive(self, plant_id: int) -> Plant:
+        return self._set_archived(plant_id, archived=False)
+
+    def _set_archived(self, plant_id: int, *, archived: bool) -> Plant:
+        """Set the archived flag (idempotent) or raise ``PlantNotFoundError``.
+
+        Tags are untouched, so the plant's history is retained; ``updated_at`` bumps
+        via the model's existing ``onupdate``.
+        """
+        with self._session_factory() as session:
+            model = session.get(PlantModel, plant_id)
+            if model is None:
+                raise PlantNotFoundError(plant_id)
+            model.archived = archived
+            session.commit()
+            session.refresh(model)
+            return _to_domain(model, _load_tags(session, plant_id))
 
     def location_exists(self, location_id: int) -> bool:
         with self._session_factory() as session:
