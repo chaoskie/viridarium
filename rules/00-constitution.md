@@ -31,7 +31,10 @@ The spec is the contract: the implementation contains everything the spec descri
 The stack is decided once, in writing, and re-affirmed per change. Adding or replacing a locked component requires a written amendment. No ad-hoc "let me just try X". Governs `ARCH-*`, `SPEC-*`.
 
 ### PRIN-VI Story-Gated Iteration
-Work proceeds story-gated, each story on its own branch. A dependent story MUST NOT begin until the story it depends on passes its gate. Independent stories with disjoint file ownership MAY proceed in parallel when a single orchestrator gates and integrates the results; each story still passes its own gate before its result merges, and any file-ownership overlap discovered mid-flight halts the later story. Per-story change budget ~400-500 lines new logic, 1000 LOC hard ceiling. Governs `QG-*`, `SPEC-*`. *(Amended 2026-06-07, sprint-1 retro F1.)*
+Work proceeds story-gated, each story on its own branch. A dependent story MUST NOT begin until the story it depends on passes its gate. Independent stories with disjoint file ownership MAY proceed in parallel when a single orchestrator gates and integrates the results; each story still passes its own gate before its result merges, and any file-ownership overlap discovered mid-flight halts the later story. Per-story change budget ~400-500 lines new logic, 1000 LOC hard ceiling. **When one story is delivered as parallel disjoint-file lanes (e.g. a backend lane and a frontend lane), the ~400-500 soft budget applies per lane; the 1000 LOC hard ceiling remains per story.** Governs `QG-*`, `SPEC-*`. *(Amended 2026-06-07 sprint-1 retro F1; per-lane budget added 2026-06-08 sprint-2 retro.)*
+
+### PRIN-III evidence (operative note)
+Test-first is auditable, not trusted: a build agent records the **failing-test run (the red)** in the change worklog before the code that turns it green (see `TEST-014` and the agent-brief preflight). *(Added 2026-06-08, sprint-2 retro, closing sprint-1 carry-forward.)*
 
 ### PRIN-VII Pipeline Must Be Green
 Every push results in a fully green pipeline. No "pre-existing failures". A pull request MUST NOT merge on a red pipeline. Governs `CI-*`, `QG-*`.
@@ -55,3 +58,5 @@ Every unit of work keeps a worklog capturing the AI and user steps that produced
 | Date | Principle | Change | Source |
 |---|---|---|---|
 | 2026-06-07 | PRIN-VI | Parallel execution of independent, disjoint-file stories permitted under a single gating orchestrator | Sprint-1 retro, fork F1 |
+| 2026-06-08 | PRIN-VI | LOC soft budget applies per disjoint delivery lane when one story runs as parallel lanes (hard ceiling stays per story) | Sprint-2 retro, fork |
+| 2026-06-08 | PRIN-III | Test-first requires a recorded red-run in the worklog before the green commit (see TEST-014) | Sprint-2 retro, fork |

@@ -28,3 +28,22 @@ def test_upgrade_creates_schema_meta_and_downgrade_drops_it(sqlite_url: str) -> 
         assert "schema_meta" not in tables_after_downgrade
     finally:
         engine.dispose()
+
+
+def test_upgrade_creates_location_table_and_downgrade_drops_it(sqlite_url: str) -> None:
+    cfg = make_alembic_config(sqlite_url)
+    engine = create_engine(sqlite_url)
+
+    command.upgrade(cfg, "head")
+    try:
+        inspector = inspect(engine)
+        assert "location" in set(inspector.get_table_names())
+        columns = {col["name"] for col in inspector.get_columns("location")}
+        assert columns == {"id", "name", "notes", "created_at", "updated_at"}
+
+        command.downgrade(cfg, "0001")
+        tables_after_downgrade = set(inspect(engine).get_table_names())
+        assert "location" not in tables_after_downgrade
+        assert "schema_meta" in tables_after_downgrade
+    finally:
+        engine.dispose()
