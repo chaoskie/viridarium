@@ -10,6 +10,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from viridarium.domain.photo import Photo
 from viridarium.domain.plant import LightLevel, PotMaterial
 
 
@@ -129,3 +130,33 @@ class PlantResponse(BaseModel):
     archived: bool
     created_at: datetime
     updated_at: datetime
+
+
+class PhotoResponse(BaseModel):
+    """Public shape of a photo (security boundary, ARCH-007).
+
+    Deliberately omits ``stored_filename`` (the on-disk name never crosses the response
+    boundary). ``url`` is the computed bytes endpoint for this photo; the client fetches
+    the raw image from there.
+    """
+
+    id: int
+    plant_id: int
+    content_type: str
+    size_bytes: int
+    is_cover: bool
+    created_at: datetime
+    url: str
+
+    @classmethod
+    def from_domain(cls, photo: Photo) -> PhotoResponse:
+        """Build the wire response from a domain :class:`Photo`."""
+        return cls(
+            id=photo.id,
+            plant_id=photo.plant_id,
+            content_type=photo.content_type,
+            size_bytes=photo.size_bytes,
+            is_cover=photo.is_cover,
+            created_at=photo.created_at,
+            url=f"/api/v1/plants/{photo.plant_id}/photos/{photo.id}",
+        )

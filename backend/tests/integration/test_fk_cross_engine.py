@@ -31,9 +31,13 @@ from viridarium.adapters.outbound.db.engine import (
 from viridarium.adapters.outbound.db.location_repository import (
     SqlAlchemyLocationRepository,
 )
-from viridarium.adapters.outbound.db.models import PlantTagModel
+from viridarium.adapters.outbound.db.models import PhotoModel, PlantTagModel
+from viridarium.adapters.outbound.db.photo_repository import (
+    SqlAlchemyPhotoRepository,
+)
 from viridarium.adapters.outbound.db.plant_repository import SqlAlchemyPlantRepository
 from viridarium.domain.location import NewLocation
+from viridarium.domain.photo import NewPhoto
 from viridarium.domain.plant import NewPlant, PlantNotFoundError
 
 pytestmark = pytest.mark.integration
@@ -82,6 +86,18 @@ def _count_tag_rows(session_factory: sessionmaker[Session], plant_id: int) -> in
         )
 
 
+def _count_photo_rows(session_factory: sessionmaker[Session], plant_id: int) -> int:
+    with session_factory() as session:
+        return (
+            session.scalar(
+                select(func.count())
+                .select_from(PhotoModel)
+                .where(PhotoModel.plant_id == plant_id)
+            )
+            or 0
+        )
+
+
 def test_deleting_a_room_orphans_its_plants_to_homeless(fk_engine: Engine) -> None:
     """SET NULL on the real engine: delete a room -> its plant goes homeless and
     survives with history/tags intact (D-009 option C baseline, AC7)."""
@@ -115,3 +131,38 @@ def test_deleting_a_plant_cascades_its_tag_rows(fk_engine: Engine) -> None:
     assert _count_tag_rows(session_factory, plant.id) == 0  # CASCADE removed the rows
     with pytest.raises(PlantNotFoundError):
         plants.get(plant.id)
+
+
+def test_deleting_a_plant_cascades_its_photo_rows(fk_engine: Engine) -> None:
+    """CASCADE on the real engine: deleting a plant removes its photo rows (AC8).
+
+    Proves the DB-row CASCADE on both engines; the file-cleanup half is app-level and
+    covered once in the SQLite endpoint suite (test_plant_delete_cleans_photo_files)."""
+    session_factory = create_session_factory(fk_engine)
+    plants = SqlAlchemyPlantRepository(session_factory)
+    photos = SqlAlchemyPhotoRepository(session_factory)
+
+    plant = plants.add(_new_plant("FK photo cascade plant", None, ()))
+    photos.add(
+        NewPhoto(
+            plant_id=plant.id,
+            stored_filename="fk-a.jpg",
+            content_type="image/jpeg",
+            size_bytes=10,
+        ),
+        make_cover=True,
+    )
+    photos.add(
+        NewPhoto(
+            plant_id=plant.id,
+            stored_filename="fk-b.png",
+            content_type="image/png",
+            size_bytes=10,
+        ),
+        make_cover=False,
+    )
+    assert _count_photo_rows(session_factory, plant.id) == 2
+
+    plants.delete(plant.id)
+
+    assert _count_photo_rows(session_factory, plant.id) == 0  # CASCADE fired

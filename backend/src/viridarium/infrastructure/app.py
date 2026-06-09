@@ -13,8 +13,14 @@ from fastapi.responses import JSONResponse
 
 from viridarium.adapters.inbound.web.health import router as health_router
 from viridarium.adapters.inbound.web.locations import router as locations_router
+from viridarium.adapters.inbound.web.photos import router as photos_router
 from viridarium.adapters.inbound.web.plants import router as plants_router
 from viridarium.domain.location import LocationNotFoundError
+from viridarium.domain.photo import (
+    PhotoNotFoundError,
+    PhotoTooLargeError,
+    UnsupportedImageTypeError,
+)
 from viridarium.domain.plant import (
     LocationNotFoundForPlantError,
     PlantNotFoundError,
@@ -32,6 +38,7 @@ def _build_api_router() -> APIRouter:
     api.include_router(health_router)
     api.include_router(locations_router)
     api.include_router(plants_router)
+    api.include_router(photos_router)
     return api
 
 
@@ -57,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.health_probe = container.health_probe
     app.state.location_service = container.location_service
     app.state.plant_service = container.plant_service
+    app.state.photo_service = container.photo_service
 
     # Error-to-HTTP via a registered handler (ADR-C): domain raises typed errors;
     # the app factory maps each to a status. The body carries no PII (SEC-001),
@@ -80,6 +88,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         _request: Request, exc: LocationNotFoundForPlantError
     ) -> JSONResponse:
         return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+    # Photo upload/lookup errors (US-2.3). Each body is id/int-only - never the client
+    # filename or body content (SEC-001/SEC-007). The sniff/declared-cross-check failure
+    # is a 415, the size-cap breach a 413, a missing/cross-plant photo a 404.
+    @app.exception_handler(PhotoNotFoundError)
+    async def _photo_not_found(
+        _request: Request, exc: PhotoNotFoundError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+    @app.exception_handler(UnsupportedImageTypeError)
+    async def _unsupported_image_type(
+        _request: Request, exc: UnsupportedImageTypeError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=415, content={"detail": str(exc)})
+
+    @app.exception_handler(PhotoTooLargeError)
+    async def _photo_too_large(
+        _request: Request, exc: PhotoTooLargeError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=413, content={"detail": str(exc)})
 
     # Secure-by-default posture (SEC-003, SEC-011).
     app.middleware("http")(security_headers_middleware)

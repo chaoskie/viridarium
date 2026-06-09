@@ -96,3 +96,52 @@ def test_upgrade_creates_plant_tables_and_downgrade_drops_them(
         assert "schema_meta" in after
     finally:
         engine.dispose()
+
+
+def test_upgrade_creates_photo_table_and_downgrade_drops_it(
+    sqlite_url: str,
+) -> None:
+    cfg = make_alembic_config(sqlite_url)
+    engine = create_engine(sqlite_url)
+
+    command.upgrade(cfg, "head")
+    try:
+        inspector = inspect(engine)
+        assert "photo" in set(inspector.get_table_names())
+
+        cols = {col["name"] for col in inspector.get_columns("photo")}
+        assert cols == {
+            "id",
+            "plant_id",
+            "stored_filename",
+            "content_type",
+            "size_bytes",
+            "is_cover",
+            "created_at",
+        }
+        assert "updated_at" not in cols  # photos immutable
+
+        photo_fks = inspector.get_foreign_keys("photo")
+        plant_fk = next(fk for fk in photo_fks if fk["referred_table"] == "plant")
+        assert plant_fk["options"].get("ondelete") == "CASCADE"
+
+        indexes = inspector.get_indexes("photo")
+        index_cols = [idx["column_names"] for idx in indexes]
+        assert ["plant_id"] in index_cols  # ix_photo_plant_id
+
+        uniques = {
+            tuple(uc["column_names"])
+            for uc in inspector.get_unique_constraints("photo")
+        }
+        unique_indexes = {
+            tuple(idx["column_names"]) for idx in indexes if idx["unique"]
+        }
+        assert ("stored_filename",) in (uniques | unique_indexes)
+
+        command.downgrade(cfg, "0003")
+        after = set(inspect(engine).get_table_names())
+        assert "photo" not in after
+        assert "plant" in after
+        assert "plant_tag" in after
+    finally:
+        engine.dispose()

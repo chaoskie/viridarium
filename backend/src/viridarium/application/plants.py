@@ -13,6 +13,7 @@ body-reference failure). A homeless plant (``location_id is None``) is always al
 
 from __future__ import annotations
 
+from viridarium.domain.photo import PhotoRepository, PhotoStorage
 from viridarium.domain.plant import (
     LocationNotFoundForPlantError,
     NewPlant,
@@ -23,10 +24,24 @@ from viridarium.domain.plant import (
 
 
 class PlantService:
-    """Use cases for managing plants, backed by a repository port."""
+    """Use cases for managing plants, backed by a repository port.
 
-    def __init__(self, repository: PlantRepository) -> None:
+    Optionally wired with the photo repository + storage so :meth:`delete` can clean up
+    a deleted plant's photo files (P6): the DB CASCADE removes the photo rows, but the
+    raw bytes on disk must be unlinked app-level (engine-agnostic). The photo ports are
+    optional so the pure plant use cases can be unit-tested without them.
+    """
+
+    def __init__(
+        self,
+        repository: PlantRepository,
+        *,
+        photo_repository: PhotoRepository | None = None,
+        photo_storage: PhotoStorage | None = None,
+    ) -> None:
         self._repository = repository
+        self._photo_repository = photo_repository
+        self._photo_storage = photo_storage
 
     def _guard_location(self, location_id: int | None) -> None:
         """Reject a non-existent referenced location (homeless = None is allowed)."""
@@ -54,8 +69,20 @@ class PlantService:
         return self._repository.update(plant_id, new_plant)
 
     def delete(self, plant_id: int) -> None:
-        """Delete a plant; propagates ``PlantNotFoundError`` if absent."""
+        """Delete a plant and clean up its photo files (P6).
+
+        Enumerate the plant's photo filenames *before* the delete (the rows still
+        exist), delete the plant (the DB CASCADE removes the photo rows), then unlink
+        the files *after* (idempotent). Propagates ``PlantNotFoundError`` if absent;
+        the enumerate step is skipped when no photo ports are wired (pure unit tests).
+        """
+        filenames: list[str] = []
+        if self._photo_repository is not None and self._photo_storage is not None:
+            filenames = self._photo_repository.list_filenames_for_plant(plant_id)
         self._repository.delete(plant_id)
+        if self._photo_storage is not None:
+            for filename in filenames:
+                self._photo_storage.delete(filename)
 
     def archive(self, plant_id: int) -> Plant:
         """Archive a plant (idempotent); propagates ``PlantNotFoundError`` if absent.
