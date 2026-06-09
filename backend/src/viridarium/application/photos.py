@@ -27,6 +27,7 @@ from viridarium.domain.photo import (
     ALLOWED_CONTENT_TYPES,
     NewPhoto,
     Photo,
+    PhotoNotFoundError,
     PhotoRepository,
     PhotoStorage,
     PhotoTooLargeError,
@@ -96,9 +97,15 @@ class PhotoService:
 
     def storage_path(self, plant_id: int, photo_id: int) -> tuple[Path, str]:
         """Return the on-disk path + content-type for serving (after a cross-plant
-        existence check). The path is traversal-guarded by the storage adapter."""
+        existence check). The path is traversal-guarded by the storage adapter. A
+        missing backing file (row/file desync) maps to PhotoNotFoundError -> 404, not a
+        500, and leaks no path (SEC-007)."""
         photo = self._repository.get(plant_id, photo_id)
-        return self._storage.open_path(photo.stored_filename), photo.content_type
+        try:
+            path = self._storage.open_path(photo.stored_filename)
+        except FileNotFoundError as exc:
+            raise PhotoNotFoundError(plant_id, photo_id) from exc
+        return path, photo.content_type
 
     def delete(self, plant_id: int, photo_id: int) -> None:
         """Delete a photo: remove the row first, then unlink the file (DB-first, P5)."""
