@@ -19,11 +19,16 @@ from viridarium.adapters.outbound.db.engine import (
 from viridarium.adapters.outbound.db.location_repository import (
     SqlAlchemyLocationRepository,
 )
+from viridarium.adapters.outbound.db.photo_repository import (
+    SqlAlchemyPhotoRepository,
+)
+from viridarium.adapters.outbound.db.photo_storage import FilesystemPhotoStorage
 from viridarium.adapters.outbound.db.plant_repository import (
     SqlAlchemyPlantRepository,
 )
 from viridarium.application.health import GetHealthStatus
 from viridarium.application.locations import LocationService
+from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
 from viridarium.domain.health import HealthProbe
 from viridarium.infrastructure.settings import Settings
@@ -39,6 +44,7 @@ class Container:
     health_probe: HealthProbe
     location_service: LocationService
     plant_service: PlantService
+    photo_service: PhotoService
 
 
 def build_container(settings: Settings) -> Container:
@@ -47,7 +53,19 @@ def build_container(settings: Settings) -> Container:
     session_factory = create_session_factory(engine)
     health_probe = GetHealthStatus(version=settings.version)
     location_service = LocationService(SqlAlchemyLocationRepository(session_factory))
-    plant_service = PlantService(SqlAlchemyPlantRepository(session_factory))
+
+    photo_repository = SqlAlchemyPhotoRepository(session_factory)
+    photo_storage = FilesystemPhotoStorage(settings.photos_dir)
+    photo_service = PhotoService(
+        photo_repository, photo_storage, max_bytes=settings.photos_max_bytes
+    )
+    # Inject the photo repo + storage into the plant service for P6 file cleanup:
+    # deleting a plant cascades its photo rows (DB) AND unlinks the files (app-level).
+    plant_service = PlantService(
+        SqlAlchemyPlantRepository(session_factory),
+        photo_repository=photo_repository,
+        photo_storage=photo_storage,
+    )
     return Container(
         settings=settings,
         engine=engine,
@@ -55,4 +73,5 @@ def build_container(settings: Settings) -> Container:
         health_probe=health_probe,
         location_service=location_service,
         plant_service=plant_service,
+        photo_service=photo_service,
     )

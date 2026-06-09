@@ -4,8 +4,10 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { fetchLocations, type Location } from "@/lib/api/locations";
 import type { Plant, PlantFilter } from "@/lib/api/plants";
+import { fetchPhotos, photoUrl } from "@/lib/api/photos";
 
 import { DeletePlantDialog } from "./DeletePlantDialog";
+import { PhotoGalleryModal } from "./PhotoGalleryModal";
 import { PlantFormModal } from "./PlantFormModal";
 import { usePlants } from "./usePlants";
 
@@ -13,7 +15,56 @@ type ModalState =
   | { readonly kind: "closed" }
   | { readonly kind: "create" }
   | { readonly kind: "edit"; readonly plant: Plant }
-  | { readonly kind: "delete"; readonly plant: Plant };
+  | { readonly kind: "delete"; readonly plant: Plant }
+  | { readonly kind: "photos"; readonly plant: Plant };
+
+/**
+ * A small, self-contained cover thumbnail for a plant card. Fetches the plant's
+ * photos lazily on mount (so it never blocks the list render) and shows the
+ * `is_cover` image, or a neutral placeholder when there is none / the fetch
+ * fails. Deliberately simple: no shared state, no ret-on-error.
+ */
+function CoverThumb({ plant }: { readonly plant: Plant }): ReactNode {
+  const [coverId, setCoverId] = useState<number | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void fetchPhotos(plant.id)
+      .then((photos) => {
+        if (active) {
+          const cover = photos.find((photo) => photo.is_cover);
+          setCoverId(cover?.id ?? null);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setCoverId(null);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [plant.id]);
+
+  if (coverId === null) {
+    return (
+      <div
+        className="grid h-16 w-16 shrink-0 place-items-center rounded-control border-control border-border bg-surface-sunken font-label text-xs uppercase tracking-widest text-ink-muted"
+        aria-hidden="true"
+      >
+        No photo
+      </div>
+    );
+  }
+  return (
+    <img
+      src={photoUrl(plant.id, coverId)}
+      alt={`${plant.name} cover photo`}
+      loading="lazy"
+      className="h-16 w-16 shrink-0 rounded-control border-control border-border object-cover"
+    />
+  );
+}
 
 const CONTROL_CLASSES =
   "min-h-tap-min w-full rounded-control border-control border-border bg-surface px-3 py-2 font-body text-base text-ink placeholder:text-ink-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring";
@@ -290,39 +341,51 @@ export function PlantsPage(): ReactNode {
                 key={plant.id}
                 className="flex flex-col gap-3 rounded-card border-card border-border bg-surface-raised p-4 shadow-card sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-display text-xl font-semibold text-ink">
-                      {plant.name}
-                    </h2>
-                    {plant.archived ? (
-                      <span className="rounded-pill border-control border-border bg-surface-sunken px-2 py-0.5 font-label text-xs uppercase tracking-widest text-ink-muted">
-                        Archived
-                      </span>
+                <div className="flex items-center gap-3">
+                  <CoverThumb plant={plant} />
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-display text-xl font-semibold text-ink">
+                        {plant.name}
+                      </h2>
+                      {plant.archived ? (
+                        <span className="rounded-pill border-control border-border bg-surface-sunken px-2 py-0.5 font-label text-xs uppercase tracking-widest text-ink-muted">
+                          Archived
+                        </span>
+                      ) : null}
+                    </div>
+                    {plant.species !== null && plant.species.length > 0 ? (
+                      <p className="font-mono text-base italic text-ink-muted">
+                        {plant.species}
+                      </p>
+                    ) : null}
+                    <p className="font-body text-sm text-ink-muted">
+                      {room !== null ? room : "Homeless"}
+                    </p>
+                    {plant.tags.length > 0 ? (
+                      <ul className="flex flex-wrap gap-1.5">
+                        {plant.tags.map((t) => (
+                          <li
+                            key={t}
+                            className="rounded-pill border-control border-border bg-surface px-2 py-0.5 font-label text-xs uppercase tracking-widest text-ink-muted"
+                          >
+                            {t}
+                          </li>
+                        ))}
+                      </ul>
                     ) : null}
                   </div>
-                  {plant.species !== null && plant.species.length > 0 ? (
-                    <p className="font-mono text-base italic text-ink-muted">
-                      {plant.species}
-                    </p>
-                  ) : null}
-                  <p className="font-body text-sm text-ink-muted">
-                    {room !== null ? room : "Homeless"}
-                  </p>
-                  {plant.tags.length > 0 ? (
-                    <ul className="flex flex-wrap gap-1.5">
-                      {plant.tags.map((t) => (
-                        <li
-                          key={t}
-                          className="rounded-pill border-control border-border bg-surface px-2 py-0.5 font-label text-xs uppercase tracking-widest text-ink-muted"
-                        >
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <Button
+                    variant="ghost"
+                    aria-label={`View photos of ${plant.name}`}
+                    onClick={() => {
+                      setModal({ kind: "photos", plant });
+                    }}
+                  >
+                    Photos
+                  </Button>
                   <Button
                     variant="ghost"
                     aria-label={`${plant.archived ? "Unarchive" : "Archive"} ${plant.name}`}
@@ -383,6 +446,10 @@ export function PlantsPage(): ReactNode {
           onConfirm={remove}
           onClose={closeModal}
         />
+      ) : null}
+
+      {modal.kind === "photos" ? (
+        <PhotoGalleryModal plant={modal.plant} onClose={closeModal} />
       ) : null}
     </section>
   );

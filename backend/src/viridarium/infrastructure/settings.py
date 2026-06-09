@@ -40,6 +40,12 @@ class Settings(BaseSettings):
     # section 7). Unset by default so dev/test runs stay API-only.
     static_dir: str | None = Field(default=None)
 
+    # Photo storage (US-2.3). ``photos_dir`` is a volume-mounted directory for the raw
+    # bytes (NFR section 7); ``photos_max_bytes`` is the server-side upload size cap
+    # (default 10 MB), enforced via a capped read (413), regardless of any client limit.
+    photos_dir: str = Field(default="/data/photos")
+    photos_max_bytes: int = Field(default=10 * 1024 * 1024)
+
 
 @lru_cache
 def get_settings() -> Settings:

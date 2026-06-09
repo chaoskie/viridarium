@@ -10,6 +10,7 @@ from __future__ import annotations
 from fastapi import Request
 
 from viridarium.application.locations import LocationService
+from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
 from viridarium.domain.health import HealthProbe
 
@@ -29,4 +30,10 @@ def get_location_service(request: Request) -> LocationService:
 def get_plant_service(request: Request) -> PlantService:
     """Return the application's plant service from the composition root."""
     service: PlantService = request.app.state.plant_service
+    return service
+
+
+def get_photo_service(request: Request) -> PhotoService:
+    """Return the application's photo service from the composition root."""
+    service: PhotoService = request.app.state.photo_service
     return service

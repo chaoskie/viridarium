@@ -102,3 +102,37 @@ class PlantTagModel(Base):
         primary_key=True,
     )
     tag: Mapped[str] = mapped_column(String(50), primary_key=True)
+
+
+class PhotoModel(Base):
+    """A plant photo's metadata row (US-2.3).
+
+    Owned child of ``plant`` with ``ON DELETE CASCADE`` so a plant delete removes the
+    rows (the files are unlinked app-level, P6). ``stored_filename`` is the
+    server-generated on-disk name (UUID + sniffed ext) and is unique. ``plant_id`` is
+    indexed for the per-plant list. Photos are immutable, so there is no ``updated_at``
+    (only the server-set ``created_at``, ADR-A). ``is_cover`` carries a DB-level
+    ``server_default`` false; the single-cover invariant is enforced in the repository.
+    """
+
+    __tablename__ = "photo"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    plant_id: Mapped[int] = mapped_column(
+        ForeignKey("plant.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    stored_filename: Mapped[str] = mapped_column(
+        String(255), nullable=False, unique=True
+    )
+    content_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_cover: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=func.false()
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
