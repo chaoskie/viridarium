@@ -28,15 +28,27 @@ class FilesystemPhotoStorage:
         return name
 
     def open_path(self, stored_filename: str) -> Path:
-        """Resolve the stored file's path, asserting it stays within the root.
+        """Resolve the stored file's path for serving, asserting it stays within the
+        root AND that the file exists.
 
-        The name is server-generated (UUID), but the resolve-within-root check guards
-        against any future caller passing a tainted name (traversal guard)."""
-        candidate = (self._root / stored_filename).resolve()
-        if self._root not in candidate.parents and candidate != self._root:
-            raise ValueError("resolved path escapes the photos directory")
+        Raises ``FileNotFoundError`` (carrying only the stored name, never the absolute
+        path) when the row's backing file is gone, so the serve path answers 404 not a
+        500 on a row/file desync (crash mid-delete, backup/restore, external loss)."""
+        candidate = self._resolve(stored_filename)
+        if not candidate.is_file():
+            raise FileNotFoundError(stored_filename)
         return candidate
 
     def delete(self, stored_filename: str) -> None:
         """Unlink the stored file; a missing file is not an error (idempotent)."""
-        self.open_path(stored_filename).unlink(missing_ok=True)
+        self._resolve(stored_filename).unlink(missing_ok=True)
+
+    def _resolve(self, stored_filename: str) -> Path:
+        """Resolve within-root (traversal guard) WITHOUT asserting existence.
+
+        The name is server-generated (UUID), but the resolve-within-root check guards
+        against any future caller passing a tainted name."""
+        candidate = (self._root / stored_filename).resolve()
+        if self._root not in candidate.parents and candidate != self._root:
+            raise ValueError("resolved path escapes the photos directory")
+        return candidate

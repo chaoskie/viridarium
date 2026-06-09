@@ -105,6 +105,23 @@ def test_get_bytes_round_trips(client: TestClient) -> None:
     assert response.headers["cache-control"] == ("private, max-age=31536000, immutable")
 
 
+def test_get_bytes_missing_file_returns_404(
+    client: TestClient, photos_dir: Path
+) -> None:
+    """Row/file desync (crash mid-delete, backup/restore, external loss): the row
+    exists but the file is gone. Serving must answer a clean 404 (no PII/path leak),
+    not a 500. (Fable 5 review finding.)"""
+    plant_id = _make_plant(client)
+    photo_id = _upload(client, plant_id).json()["id"]
+    for stored in photos_dir.iterdir():  # remove the backing file, keep the row
+        stored.unlink()
+
+    response = client.get(f"{_photos_url(plant_id)}/{photo_id}")
+
+    assert response.status_code == 404
+    assert set(response.json().keys()) == {"detail"}
+
+
 def test_list_newest_first(client: TestClient) -> None:
     plant_id = _make_plant(client)
     ids = [_upload(client, plant_id).json()["id"] for _ in range(3)]
