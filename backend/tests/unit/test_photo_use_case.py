@@ -226,6 +226,26 @@ def test_upload_missing_plant_raises_plant_not_found() -> None:
     assert storage.calls == []  # plant-exists checked first
 
 
+class _ExplodingAddRepository(_FakePhotoRepository):
+    """Fake whose metadata insert always fails (simulated engine error)."""
+
+    def add(self, new_photo: NewPhoto, *, make_cover: bool) -> Photo:
+        raise RuntimeError("simulated insert failure")
+
+
+def test_upload_failed_insert_removes_saved_file() -> None:
+    """A failed metadata insert must not orphan the saved bytes (VIRIDARIUM-46)."""
+    repo = _ExplodingAddRepository()
+    storage = _FakePhotoStorage()
+    service = PhotoService(repo, storage, max_bytes=1_000_000)
+
+    with pytest.raises(RuntimeError, match="simulated insert failure"):
+        service.upload(1, _JPEG, declared_content_type="image/jpeg")
+
+    assert storage.saved == {}  # disk matches DB: no ghost file
+    assert [call[0] for call in storage.calls] == ["save", "delete"]
+
+
 # ------------------------------------------------------------------------- delete
 def test_delete_promotes_newest_survivor_when_cover_removed() -> None:
     service, repo, _storage = _service()

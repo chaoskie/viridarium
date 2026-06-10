@@ -13,7 +13,9 @@ this security-sensitive story), ordered so no bytes hit disk until every check p
    allowlisted image (the sniff is authoritative).
 4. ``declared/sniff cross-check`` -> 415 if the client-declared content-type is not in
    the allowlist or disagrees with the sniffed type.
-5. ``storage.save`` then ``repo.add`` (make_cover when it is the plant's first photo).
+5. ``storage.save`` then ``repo.add`` (make_cover when it is the plant's first photo);
+   a failed insert deletes the just-saved file before re-raising, so disk and DB never
+   diverge (VIRIDARIUM-46).
 
 On delete the row is removed first, then the file (DB-first, P5), so a failed file
 unlink never leaves a dangling row.
@@ -71,17 +73,22 @@ class PhotoService:
         if declared not in ALLOWED_CONTENT_TYPES or declared != content_type:
             raise UnsupportedImageTypeError()
 
-        stored_filename = self._storage.save(data, suffix=ext)
         make_cover = not self._repository.list_for_plant(plant_id)
-        return self._repository.add(
-            NewPhoto(
-                plant_id=plant_id,
-                stored_filename=stored_filename,
-                content_type=content_type,
-                size_bytes=len(data),
-            ),
-            make_cover=make_cover,
-        )
+        stored_filename = self._storage.save(data, suffix=ext)
+        try:
+            return self._repository.add(
+                NewPhoto(
+                    plant_id=plant_id,
+                    stored_filename=stored_filename,
+                    content_type=content_type,
+                    size_bytes=len(data),
+                ),
+                make_cover=make_cover,
+            )
+        except Exception:
+            # Disk must match DB (P5): a failed insert must not orphan the bytes.
+            self._storage.delete(stored_filename)
+            raise
 
     def list(self, plant_id: int) -> list[Photo]:
         """Return the plant's photos, newest-first."""
