@@ -10,6 +10,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from viridarium.domain.care_schedule import CareSchedule, CareType, Dormancy
 from viridarium.domain.photo import Photo
 from viridarium.domain.plant import LightLevel, PotMaterial
 
@@ -159,4 +160,56 @@ class PhotoResponse(BaseModel):
             is_cover=photo.is_cover,
             created_at=photo.created_at,
             url=f"/api/v1/plants/{photo.plant_id}/photos/{photo.id}",
+        )
+
+
+class CareScheduleUpsert(BaseModel):
+    """Request body for PUT /api/v1/plants/{id}/schedules/{care_type} (CS1).
+
+    Keyed-PUT create-or-replace: ``care_type`` comes from the PATH only, never the body
+    (``extra="forbid"`` rejects a stray ``care_type`` -> 422). Only ranges + enum
+    membership are validated (no cross-field rule, CS3 / PO Q2): ``interval_days`` is
+    required (ge=1 le=3650); ``winter_interval_days`` is optional (same range *when
+    present*, default null); ``dormancy`` is optional - when omitted the router resolves
+    the care-type default (feed->paused, water->winter_interval, CS2). ``enabled``
+    defaults true.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    interval_days: int = Field(ge=1, le=3650)
+    winter_interval_days: int | None = Field(default=None, ge=1, le=3650)
+    dormancy: Dormancy | None = Field(default=None)
+    enabled: bool = Field(default=True)
+
+
+class CareScheduleResponse(BaseModel):
+    """Public shape of a care schedule (security boundary, ARCH-007).
+
+    Keyed by ``care_type`` and deliberately **omits the surrogate ``id``** (ARCH-007):
+    the resource is addressed by ``(plant_id, care_type)``, so the PK never crosses the
+    wire.
+    """
+
+    plant_id: int
+    care_type: CareType
+    interval_days: int
+    winter_interval_days: int | None
+    dormancy: Dormancy
+    enabled: bool
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def from_domain(cls, schedule: CareSchedule) -> CareScheduleResponse:
+        """Build the wire response from a domain :class:`CareSchedule` (no ``id``)."""
+        return cls(
+            plant_id=schedule.plant_id,
+            care_type=schedule.care_type,
+            interval_days=schedule.interval_days,
+            winter_interval_days=schedule.winter_interval_days,
+            dormancy=schedule.dormancy,
+            enabled=schedule.enabled,
+            created_at=schedule.created_at,
+            updated_at=schedule.updated_at,
         )
