@@ -1,0 +1,68 @@
+import { useEffect, useId, useRef } from "react";
+import type { ReactNode } from "react";
+
+interface ModalProps {
+  readonly title: string;
+  readonly onClose: () => void;
+  readonly children: ReactNode;
+}
+
+/**
+ * Accessible modal dialog (FE-001/FE-011): `role="dialog"`, `aria-modal`,
+ * labelled by its title, Escape-to-close, and a backdrop click closes it.
+ * Initial focus lands inside the dialog on open.
+ */
+export function Modal({ title, onClose, children }: ModalProps): ReactNode {
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent): void {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    dialogRef.current?.focus();
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-overlay p-4 sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className="flex w-full max-w-md flex-col gap-4 rounded-card border-card border-border bg-surface-raised p-5 shadow-raised outline-none"
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <h2
+            id={titleId}
+            className="font-display text-2xl font-semibold text-ink"
+          >
+            {title}
+          </h2>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="grid min-h-tap-min min-w-tap-min place-items-center rounded-control border-control border-transparent text-xl text-ink-muted hover:bg-surface-sunken hover:text-ink"
+          >
+            ✕
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}

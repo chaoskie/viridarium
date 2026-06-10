@@ -20,6 +20,8 @@ Log an entry **when**:
 
 Do **NOT** log: individual file edits, reads, or routine test runs - git history and session transcripts already cover those.
 
+**Public-repo hygiene (this file is tracked):** `specs/` is committed to the public repo. Do NOT write tracker (Plane) issue UUIDs, homelab hostnames, tokens, or personal data here - refer to work by its story id (e.g. "US-2.2") and keep tracker ids in the gitignored vault (`.claude/docs/`). *(Added 2026-06-08, sprint-2 retro: Plane ids nearly leaked into a tracked worklog.)*
+
 ---
 
 ## Entries

@@ -25,7 +25,7 @@ Plant *──0..1 SpeciesInfo (optional, cached from a pluggable provider)
 ### Plant
 - `name` (required, the household name: "Monstera living room left")
 - `species` (free text) + optional `species_info` link
-- `location` (required, FK)
+- `location` (optional FK; a plant may be **homeless** - no location - as a deliberate first-class state, e.g. a dead plant kept for its history/photos. See D-009)
 - `acquired_on` (optional date)
 - `pot_size_cm`, `pot_material` (enum: terracotta, plastic, ceramic, self-watering, other)
 - `light_level` (enum: dark, indirect, bright-indirect, full-sun)
@@ -50,7 +50,12 @@ The append-only history: `plant_id`, `type` (`water`, `feed`, `repot`, `observe`
 A due task supports four actions: **done** (logs the event; next due recomputes from it, so doing it early or late self-corrects), **done with backdate**, **snooze** (shifts this occurrence by N days without logging care; stored as `snoozed_until` on the schedule), and **skip** (dismisses this occurrence; next due recomputes as if done, but no care event is logged and the skip is recorded). The schedule model stays transparent and user-editable at all times: the user always wins the argument with the algorithm. This is deliberate: the category leader's top complaint is uneditable frequencies, and the runner-up's loved feature is exactly this correction loop.
 
 ### Location
-`name` ("Living room", "Office windowsill"), optional `notes`. Deleting requires empty or reassignment.
+`name` ("Living room", "Office windowsill"), optional `notes`. Deleting an empty room
+removes it directly. Deleting a room that still holds plants prompts the user to choose:
+delete those plants too, move them (to an existing room or a new one created inline), or
+leave them homeless (location cleared). The app never silently strands or deletes plant
+history. See D-009; the plant-aware flow lands with the Plant story (US-2.1), since
+locations are built first.
 
 ### SpeciesInfo (v1.5, optional)
 Cached lookup from a pluggable provider (Perenual first candidate; provider behind a port, fully optional, app works 100% without a key). Never auto-overwrites user-set values; suggestions only.

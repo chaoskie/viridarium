@@ -2,38 +2,73 @@
  * Theme controller (FE-002 multi-theme support).
  *
  * Single source of truth for: the set of valid themes, the default, the
- * localStorage key, and the read/apply/persist logic. The inline pre-paint
- * script in index.html mirrors KEY / THEMES / DEFAULT to avoid a theme flash;
- * keep them in sync.
+ * localStorage key, and the read/resolve/apply/persist logic. The inline
+ * pre-paint script in index.html mirrors KEY / THEMES / DEFAULT and the
+ * prefers-color-scheme precedence to avoid a theme flash; keep them in sync.
+ *
+ * Default + first-load precedence (D-008):
+ *   1. a valid stored choice always wins;
+ *   2. else, if the OS prefers a dark scheme, use "dark";
+ *   3. else, the Roman default.
  */
 
-export const THEMES = ["terracotta", "herbarium"] as const;
+export const THEMES = ["roman", "dark", "herbarium", "terracotta"] as const;
 
 export type Theme = (typeof THEMES)[number];
 
-export const DEFAULT_THEME: Theme = "terracotta";
+export const DEFAULT_THEME: Theme = "roman";
 
 export const THEME_STORAGE_KEY = "viridarium.theme";
 
 /** Human labels for the toggle control. */
 export const THEME_LABELS: Readonly<Record<Theme, string>> = {
-  terracotta: "Terracotta",
+  roman: "Roman",
+  dark: "Dark",
   herbarium: "Herbarium",
+  terracotta: "Terracotta",
 };
 
 export function isTheme(value: string | null): value is Theme {
   return value !== null && (THEMES as readonly string[]).includes(value);
 }
 
-/** Read the persisted theme, falling back to the default. Never throws. */
-export function readStoredTheme(): Theme {
+/**
+ * Read the persisted theme, or `null` when nothing valid is stored. Never
+ * throws. Distinct from the resolved initial theme: callers that need the
+ * prefers-color-scheme fallback use `getInitialTheme()`.
+ */
+export function readStoredTheme(): Theme | null {
   let stored: string | null = null;
   try {
     stored = window.localStorage.getItem(THEME_STORAGE_KEY);
   } catch {
     stored = null;
   }
-  return isTheme(stored) ? stored : DEFAULT_THEME;
+  return isTheme(stored) ? stored : null;
+}
+
+/** Whether the OS reports a dark color-scheme preference. Never throws. */
+export function systemPrefersDark(): boolean {
+  try {
+    return (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The theme to use on first paint / mount: a stored choice wins; else the OS
+ * dark preference selects "dark"; else the Roman default. Mirrors index.html.
+ */
+export function getInitialTheme(): Theme {
+  const stored = readStoredTheme();
+  if (stored !== null) {
+    return stored;
+  }
+  return systemPrefersDark() ? "dark" : DEFAULT_THEME;
 }
 
 /** Apply a theme to the document root (sets data-theme on <html>). */

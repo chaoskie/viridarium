@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roman Viridarium — Theme 06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --travertine:#efe7d6; --travertine-deep:#e6dcc6; --plaster:#f6f0e3;
+  --basalt:#2a2620; --ink-soft:#6b6354;
+  --pompeii:#9e3b2e; --pompeii-soft:#b9543f;
+  --olive:#5b6a42; --olive-deep:#414d2f; --ochre:#b58a32; --gold:#a98a3c;
+  --rule:#cabfa4; --rule-strong:#a89a78;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'EB Garamond',serif; color:var(--basalt); min-height:100vh; padding-bottom:60px;
+  background:var(--travertine);
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(181,138,50,.06), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(158,59,46,.05), transparent 45%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 39h40M39 0v40' stroke='%23000' stroke-opacity='0.03' stroke-width='1'/%3E%3C/svg%3E");
+}
+.frame{max-width:1060px;margin:0 auto;padding:0 40px}
+
+/* Greek-key meander divider */
+.meander{height:14px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M1 13V4h9V8H5v1h8V1h-9' fill='none' stroke='%23a89a78' stroke-width='1.2'/%3E%3C/svg%3E");background-repeat:repeat-x;opacity:.7;margin:0}
+
+header{padding:30px 0 18px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:16px}
+.crest{
+  width:48px;height:48px;border:1.5px solid var(--rule-strong);border-radius:3px;display:grid;place-items:center;
+  background:linear-gradient(160deg,var(--plaster),var(--travertine-deep)); color:var(--olive-deep); font-size:22px;
+  box-shadow:inset 0 0 0 3px rgba(255,255,255,.4);
+}
+.brand h1{
+  font-family:'Cinzel',serif; font-weight:600; font-size:30px; letter-spacing:.14em; color:var(--basalt);
+}
+.brand h1 .a{color:var(--pompeii)}
+nav{display:flex;gap:30px;font-family:'Cinzel',serif;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase}
+nav a{color:var(--ink-soft);text-decoration:none;padding-bottom:3px}
+nav a.on{color:var(--basalt);border-bottom:1.5px solid var(--pompeii)}
+
+.dateline{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 4px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+.dateline b{color:var(--pompeii);font-weight:600}
+
+.invocation{padding:26px 0 10px;display:flex;justify-content:space-between;align-items:flex-end;gap:30px}
+.invocation h2{
+  font-family:'Cinzel',serif; font-weight:500; font-size:40px; line-height:1.12; letter-spacing:.01em; max-width:15ch;
+}
+.invocation h2 em{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;color:var(--pompeii);letter-spacing:0}
+.invocation .epigraph{font-style:italic;font-size:18px;color:var(--ink-soft);margin-top:12px;font-family:'Cormorant Garamond',serif}
+.tally{display:flex;gap:0;border:1px solid var(--rule-strong);background:var(--plaster)}
+.tally div{padding:14px 22px;text-align:center;border-right:1px solid var(--rule)}
+.tally div:last-child{border-right:none}
+.tally .n{font-family:'Cinzel',serif;font-weight:700;font-size:26px;line-height:1}
+.tally .n.late{color:var(--pompeii)} .tally .n.due{color:var(--olive-deep)}
+.tally .l{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:5px}
+
+.tablet-title{
+  font-family:'Cinzel',serif;font-size:14px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+  margin:30px 0 14px;display:flex;align-items:center;gap:14px;color:var(--basalt);
+}
+.tablet-title::before{content:"";width:22px;height:1.5px;background:var(--pompeii)}
+.tablet-title.due::before{background:var(--olive)}
+.tablet-title .roman{color:var(--gold);font-weight:500}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(308px,1fr));gap:18px}
+.card{
+  background:var(--plaster); border:1px solid var(--rule-strong); padding:0; position:relative;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 2px 6px rgba(42,38,32,.06);
+}
+.card .capband{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 16px;border-bottom:1px solid var(--rule);
+  background:linear-gradient(180deg, rgba(255,255,255,.35), transparent);
+}
+.specimen{font-family:'Cinzel',serif;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.rite{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border:1px solid}
+.rite.late{color:var(--pompeii);border-color:var(--pompeii-soft);background:rgba(158,59,46,.06)}
+.rite.due{color:var(--olive-deep);border-color:var(--olive);background:rgba(91,106,66,.07)}
+.rite.feed{color:var(--ochre);border-color:var(--gold);background:rgba(181,138,50,.08)}
+.card .body{padding:14px 16px 16px}
+.card h3{font-family:'Cinzel',serif;font-weight:600;font-size:21px;letter-spacing:.02em;line-height:1.1}
+.card .latin{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--olive-deep);margin:1px 0 12px}
+.card .ledger{display:flex;gap:18px;font-size:15px;color:var(--ink-soft);margin-bottom:14px}
+.card .ledger b{color:var(--basalt);font-weight:600}
+.card .foot{display:flex;justify-content:space-between;align-items:center;border-top:1px dotted var(--rule);padding-top:13px}
+.when{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--ink-soft)}
+.when.over{color:var(--pompeii)}
+.seal{
+  font-family:'Cinzel',serif;font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  background:none;border:1px solid var(--basalt);color:var(--basalt);padding:8px 18px;cursor:pointer;transition:.2s;
+}
+.seal:hover{background:var(--basalt);color:var(--plaster)}
+
+.peristyle{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--rule-strong);background:var(--plaster);margin-top:4px}
+.peristyle .room{padding:16px 18px;border-right:1px solid var(--rule)}
+.peristyle .room:last-child{border-right:none}
+.peristyle .rn{font-family:'Cinzel',serif;font-weight:600;font-size:14px;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.peristyle .rn::before{content:"";width:7px;height:7px;background:var(--olive);transform:rotate(45deg)}
+.peristyle .room.warn .rn::before{background:var(--pompeii)}
+.peristyle .rs{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:var(--ink-soft);margin-top:5px}
+
+footer{margin-top:46px}
+.colophon{display:flex;justify-content:space-between;padding-top:14px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.colophon .api{color:var(--olive-deep)}
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <div class="brand"><div class="crest">❦</div><h1>VIRID<span class="a">ARIUM</span></h1></div>
+    <nav><a class="on">Hodie</a><a>Plantae</a><a>Hortus</a><a>Acta</a><a>Ratio</a></nav>
+  </header>
+  <div class="meander"></div>
+
+  <div class="dateline"><span>Dies Solis · VII Iunii</span><span>XXIV plantae · <b>II neglectae</b> · III hodie</span></div>
+
+  <div class="invocation">
+    <div>
+      <h2>The garden asks <em>five rites</em> of you today.</h2>
+      <p class="epigraph">Two waterings stand overdue; the orchid awaits its feeding.</p>
+    </div>
+    <div class="tally">
+      <div><div class="n">24</div><div class="l">Plantae</div></div>
+      <div><div class="n due">3</div><div class="l">Hodie</div></div>
+      <div><div class="n late">2</div><div class="l">Neglectae</div></div>
+    </div>
+  </div>
+
+  <div class="tablet-title"><span class="roman">I.</span> Overdue</div>
+  <div class="cards">
+    <div class="card">
+      <div class="capband"><span class="specimen">No. VII · Triclinium</span><span class="rite late">Aqua · II d</span></div>
+      <div class="body">
+        <h3>Monstera</h3><div class="latin">Monstera deliciosa</div>
+        <div class="ledger"><span>last <b>9 d ago</b></span><span>every <b>7 d</b></span></div>
+        <div class="foot"><span class="when over">overdue by two days</span><button class="seal">Aquata ✓</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="capband"><span class="specimen">No. XII · Cubiculum</span><span class="rite late">Aqua · I d</span></div>
+      <div class="body">
+        <h3>Calathea</h3><div class="latin">Calathea orbifolia</div>
+        <div class="ledger"><span>last <b>5 d ago</b></span><span>every <b>4 d</b></span></div>
+        <div class="foot"><span class="when over">overdue by one day</span><button class="seal">Aquata ✓</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablet-title due"><span class="roman">II.</span> Due today</div>
+  <div class="cards">
+    <div class="card">
+      <div class="capband"><span class="specimen">No. III · Triclinium</span><span class="rite due">Aqua</span></div>
+      <div class="body">
+        <h3>Fiddle-leaf fig</h3><div class="latin">Ficus lyrata</div>
+        <div class="ledger"><span>last <b>7 d ago</b></span><span>every <b>7 d</b></span></div>
+        <div class="foot"><span class="when">due today</span><button class="seal">Aquata ✓</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="capband"><span class="specimen">No. XVIII · Tablinum</span><span class="rite due">Aqua</span></div>
+      <div class="body">
+        <h3>Golden pothos</h3><div class="latin">Epipremnum aureum</div>
+        <div class="ledger"><span>last <b>10 d ago</b></span><span>every <b>10 d</b></span></div>
+        <div class="foot"><span class="when">due today</span><button class="seal">Aquata ✓</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="capband"><span class="specimen">No. XXI · Culina</span><span class="rite feed">Cibus</span></div>
+      <div class="body">
+        <h3>Moth orchid</h3><div class="latin">Phalaenopsis</div>
+        <div class="ledger"><span>last fed <b>30 d ago</b></span><span>every <b>30 d</b></span></div>
+        <div class="foot"><span class="when">feeding due</span><button class="seal">Pasta ✓</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tablet-title"><span class="roman">III.</span> The peristyle</div>
+  <div class="peristyle">
+    <div class="room warn"><div class="rn">Triclinium</div><div class="rs">8 plantae · 2 due</div></div>
+    <div class="room"><div class="rn">Tablinum</div><div class="rs">6 plantae · 1 due</div></div>
+    <div class="room warn"><div class="rn">Cubiculum</div><div class="rs">5 plantae · 1 overdue</div></div>
+    <div class="room"><div class="rn">Culina</div><div class="rs">5 plantae · 1 due</div></div>
+  </div>
+
+  <footer>
+    <div class="meander"></div>
+    <div class="colophon"><span>Viridarium · hortus tuus</span><span class="api">/api/v1 · kalendarium ICS · nuntii</span></div>
+  </footer>
+</div>
+</body>
+</html>

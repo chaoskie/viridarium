@@ -1,30 +1,191 @@
 /*
  * Theme-token contract (FE-002 / FE-010).
  *
- * This file is the ONLY place colors, fonts, radii, shadows, textures, and the
- * tap-target baseline are defined as literal values. Tailwind
+ * This file is the ONLY place colors, fonts, radii, shadows, textures, motifs,
+ * and the tap-target baseline are defined as literal values. Tailwind
  * (tailwind.config.ts) maps each token onto a utility class; components consume
  * the classes and never reference raw hex / px / font names.
  *
- * Multi-theme model:
- *   - :root and [data-theme="terracotta"] both carry the DEFAULT theme
- *     (Terracotta - warm clay, sticker shapes, hard-offset shadows).
- *   - [data-theme="herbarium"] OVERRIDES the same token NAMES with the
- *     Herbarium values (botanical editorial, double-rule, engraved calm).
+ * Multi-theme model (D-008):
+ *   - :root and [data-theme="roman"] both carry the DEFAULT theme (Roman -
+ *     travertine + Pompeiian red / olive / ochre, Cinzel caps, hairline rules).
+ *   - [data-theme="dark"]       - greenhouse at night (warm-dark, first-class).
+ *   - [data-theme="terracotta"] - retained, warm clay sticker look.
+ *   - [data-theme="herbarium"]  - retained, botanical editorial.
  *
  * The theme controller sets data-theme on <html>; absent the attribute the
- * :root defaults render, so Terracotta is the no-JS / pre-paint default.
+ * :root defaults (Roman) render, so Roman is the no-JS / pre-paint default.
  *
- * Adding a NEW token NAME is a design decision (FE-010 ADR), not dev
- * discretion. Adding a new [data-theme="..."] block that only re-binds the
- * existing names is normal dev work (see frontend/README.md recipe).
+ * Contrast (D-008 #4 / FE-011): every theme's ink and muted-ink clear WCAG AA
+ * (>= 4.5:1) on their own surfaces; the *-strong accents clear AA as text. The
+ * mockup's lighter muted ink (#6b6354) and italic epigraph failed AA and were
+ * darkened here. See src/lib/theme/contrast.test.ts and the change worklog.
+ *
+ * Adding a NEW token NAME is a design decision (FE-010 ADR or written
+ * comply-or-explain in the change proposal), not casual dev discretion. Adding
+ * a new [data-theme="..."] block that only re-binds existing names is normal
+ * dev work (see frontend/README.md recipe).
  */
 
 /* ------------------------------------------------------------------------- *
- * DEFAULT THEME - Terracotta (warm clay)
- * Mockup: docs/design/themes/theme-04-terracotta.html
+ * DEFAULT THEME - Roman (travertine + Pompeiian red, inscriptional)
+ * Mockup: docs/design/themes/theme-06-roman.html (English-labeled per D-008)
  * ------------------------------------------------------------------------- */
 :root,
+[data-theme="roman"] {
+  /* Surfaces */
+  --color-surface: #efe7d6; /* travertine page */
+  --color-surface-raised: #f6f0e3; /* plaster tiles */
+  --color-surface-sunken: #e6dcc6; /* travertine-deep wells */
+
+  /* Text / ink */
+  --color-ink: #2a2620; /* basalt */
+  --color-ink-muted: #5c5444; /* darkened from mockup #6b6354 for AA (>=4.6:1) */
+  --color-ink-inverse: #f6f0e3; /* plaster on dark fills */
+
+  /* Brand / interactive - Pompeiian red */
+  --color-accent: #9e3b2e; /* pompeii */
+  --color-accent-strong: #7f2c21; /* pompeii-deep (hover) */
+  --color-accent-soft: #efe2d2; /* warm tint (active nav) */
+
+  /* Secondary + tertiary accents */
+  --color-accent-2: #5b6a42; /* olive */
+  --color-accent-2-strong: #414d2f; /* olive-deep */
+  --color-accent-3: #b58a32; /* ochre (fill only) */
+  --color-accent-3-strong: #7a5a18; /* ochre-deep for AA text (>=4.5:1) */
+
+  /* Semantic status */
+  --color-danger: #9e3b2e; /* pompeii doubles as late/danger */
+  --color-warning: #7a5a18; /* ochre-deep (AA text) */
+  --color-success: #414d2f; /* olive-deep */
+
+  /* Structure - hairline rules */
+  --color-border: #a89a78; /* rule-strong hairline */
+  --color-ring: #9e3b2e;
+  --color-overlay: rgba(42, 38, 32, 0.4); /* mobile-menu scrim */
+
+  /* Typography - inscriptional caps + Garamond */
+  --font-display: "Cinzel", Georgia, serif; /* inscriptional caps */
+  --font-body: "EB Garamond", Georgia, serif;
+  --font-label: "Cinzel", Georgia, serif; /* tracked caps labels */
+  --font-mono: "Cormorant Garamond", Georgia, serif; /* italic accent / ledgers */
+
+  /* Radii - crisp, plate-like */
+  --radius-card: 0.1875rem; /* 3px */
+  --radius-control: 0.1875rem; /* 3px */
+  --radius-pill: 0.125rem; /* squared badges */
+
+  /* Structure widths - hairlines, not chunky */
+  --border-width-card: 1px;
+  --border-width-control: 1px;
+
+  /* Elevation - soft, low engraved-stone shadow */
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 2px 6px rgba(42, 38, 32, 0.08);
+  --shadow-raised: 0 2px 10px rgba(42, 38, 32, 0.12);
+
+  /* Background texture - faint plaster wash + fine grid */
+  --bg-texture: radial-gradient(
+      circle at 20% 0%,
+      rgba(181, 138, 50, 0.06),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(158, 59, 46, 0.05),
+      transparent 45%
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 39h40M39 0v40' stroke='%232a2620' stroke-opacity='0.03' stroke-width='1'/%3E%3C/svg%3E");
+  --bg-texture-size: auto;
+
+  /* Greek-key meander divider motif (rule-strong stroke) */
+  --motif-meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M1 13V4h9V8H5v1h8V1h-9' fill='none' stroke='%23a89a78' stroke-width='1.2'/%3E%3C/svg%3E");
+
+  /* Sizing baselines */
+  --size-tap-min: 44px;
+}
+
+/* ------------------------------------------------------------------------- *
+ * DARK THEME - "lights out in the greenhouse" (warm-dark, first-class)
+ * Same token NAMES, re-bound for a greenhouse-at-night palette.
+ * ------------------------------------------------------------------------- */
+[data-theme="dark"] {
+  /* Surfaces - deep green-black -> charcoal */
+  --color-surface: #161a14; /* greenhouse night */
+  --color-surface-raised: #1f241c; /* charcoal-green panel */
+  --color-surface-sunken: #11140f; /* deeper well */
+
+  /* Text / ink - warm off-white */
+  --color-ink: #ece7da; /* warm bone (>=12:1 on surface) */
+  --color-ink-muted: #b3ac99; /* warm muted (>=6:1 on surface) */
+  --color-ink-inverse: #161a14; /* night on light accent fills */
+
+  /* Brand / interactive - Pompeiian red tuned brighter for dark */
+  --color-accent: #d76a57; /* warm terracotta-red */
+  --color-accent-strong: #e88571; /* brighter on hover */
+  --color-accent-soft: #2a211d; /* warm tint panel (active nav) */
+
+  /* Secondary + tertiary accents tuned for dark */
+  --color-accent-2: #9cb277; /* lit olive */
+  --color-accent-2-strong: #b3c890; /* brighter olive */
+  --color-accent-3: #d6a94e; /* warm ochre/gold */
+  --color-accent-3-strong: #e0bc6e; /* brighter ochre text */
+
+  /* Semantic status */
+  --color-danger: #e08573; /* lit pompeii */
+  --color-warning: #d6a94e; /* ochre */
+  --color-success: #9cb277; /* lit olive */
+
+  /* Structure - low-glow hairline */
+  --color-border: #3a4234; /* dim olive-grey rule */
+  --color-ring: #d76a57;
+  --color-overlay: rgba(0, 0, 0, 0.55);
+
+  /* Typography - same inscriptional family */
+  --font-display: "Cinzel", Georgia, serif;
+  --font-body: "EB Garamond", Georgia, serif;
+  --font-label: "Cinzel", Georgia, serif;
+  --font-mono: "Cormorant Garamond", Georgia, serif;
+
+  /* Radii - match Roman */
+  --radius-card: 0.1875rem;
+  --radius-control: 0.1875rem;
+  --radius-pill: 0.125rem;
+
+  /* Structure widths */
+  --border-width-card: 1px;
+  --border-width-control: 1px;
+
+  /* Elevation - restrained glow, no harsh light spill */
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-raised: 0 4px 16px rgba(0, 0, 0, 0.55);
+
+  /* Background texture - faint warm glow from above, fine grid */
+  --bg-texture: radial-gradient(
+      circle at 50% -10%,
+      rgba(214, 169, 78, 0.06),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(215, 106, 87, 0.04),
+      transparent 45%
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 39h40M39 0v40' stroke='%23ffffff' stroke-opacity='0.02' stroke-width='1'/%3E%3C/svg%3E");
+  --bg-texture-size: auto;
+
+  /* Greek-key meander - dim rule stroke */
+  --motif-meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M1 13V4h9V8H5v1h8V1h-9' fill='none' stroke='%235a6450' stroke-width='1.2'/%3E%3C/svg%3E");
+
+  /* Sizing baselines */
+  --size-tap-min: 44px;
+}
+
+/* ------------------------------------------------------------------------- *
+ * THEME - Terracotta (warm clay) - retained, selectable
+ * Mockup: docs/design/themes/theme-04-terracotta.html
+ * ------------------------------------------------------------------------- */
 [data-theme="terracotta"] {
   /* Surfaces */
   --color-surface: #faf3e7; /* cream page */
@@ -45,15 +206,17 @@
   --color-accent-2: #7da27a; /* sage */
   --color-accent-2-strong: #547752; /* sage-deep */
   --color-accent-3: #e3a72f; /* mustard */
+  --color-accent-3-strong: #8a6210; /* mustard-deep for AA text */
 
   /* Semantic status */
   --color-danger: #9c3f26; /* clay-deep doubles as late/danger */
-  --color-warning: #e3a72f; /* mustard */
+  --color-warning: #8a6210; /* mustard-deep (AA text) */
   --color-success: #547752; /* sage-deep */
 
   /* Structure */
   --color-border: #3d2a20; /* chunky chocolate outline */
   --color-ring: #c4593a;
+  --color-overlay: rgba(61, 42, 32, 0.45);
 
   /* Typography */
   --font-display: "Baloo 2", system-ui, cursive;
@@ -81,14 +244,16 @@
   );
   --bg-texture-size: 26px 26px;
 
+  /* No meander motif in Terracotta */
+  --motif-meander: none;
+
   /* Sizing baselines */
   --size-tap-min: 44px;
 }
 
 /* ------------------------------------------------------------------------- *
- * SECONDARY THEME - Herbarium (botanical editorial)
+ * THEME - Herbarium (botanical editorial) - retained, selectable
  * Mockup: docs/design/themes/theme-01-herbarium.html
- * Same token NAMES, re-bound values.
  * ------------------------------------------------------------------------- */
 [data-theme="herbarium"] {
   /* Surfaces */
@@ -98,7 +263,7 @@
 
   /* Text / ink */
   --color-ink: #2b2b23;
-  --color-ink-muted: #5c5a4a;
+  --color-ink-muted: #565446; /* darkened from mockup #5c5a4a for AA */
   --color-ink-inverse: #f4efe3; /* paper on dark fills */
 
   /* Brand / interactive */
@@ -110,15 +275,17 @@
   --color-accent-2: #4a5d3a; /* moss */
   --color-accent-2-strong: #36482a; /* moss-deep */
   --color-accent-3: #9a7b2d; /* gold */
+  --color-accent-3-strong: #6f581c; /* gold-deep for AA text */
 
   /* Semantic status */
   --color-danger: #a8502c; /* rust */
-  --color-warning: #9a7b2d; /* gold */
+  --color-warning: #6f581c; /* gold-deep (AA text) */
   --color-success: #4a5d3a; /* moss */
 
   /* Structure */
   --color-border: #c9bfa6; /* hairline rule */
   --color-ring: #a8502c;
+  --color-overlay: rgba(43, 43, 35, 0.4);
 
   /* Typography */
   --font-display: "Fraunces", Georgia, serif;
@@ -151,6 +318,9 @@
       rgba(92, 90, 74, 0.045) 27px 28px
     );
   --bg-texture-size: auto;
+
+  /* No meander motif in Herbarium */
+  --motif-meander: none;
 
   /* Sizing baselines */
   --size-tap-min: 44px;

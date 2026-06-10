@@ -38,11 +38,32 @@ def sqlite_url(tmp_path: Path) -> str:
 
 
 @pytest.fixture
-def migrated_settings(sqlite_url: str, monkeypatch: pytest.MonkeyPatch) -> Settings:
-    """Settings whose database has migrations applied to head."""
+def photos_dir(tmp_path: Path) -> Path:
+    """Per-test photo storage dir under ``tmp_path`` so the suite never touches /data.
+
+    Exposed as a fixture so tests can assert on-disk effects (file-gone, UUID naming,
+    plant-delete cleanup). Created lazily by the storage adapter; returned as a Path.
+    """
+    return tmp_path / "photos"
+
+
+@pytest.fixture
+def migrated_settings(
+    sqlite_url: str, photos_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> Settings:
+    """Settings whose database has migrations applied to head.
+
+    Points ``photos_dir`` at a ``tmp_path`` subdir and uses a deliberately small
+    ``photos_max_bytes`` so the oversize reject is cheap to test (no 10 MB payload).
+    """
     # env.py resolves the URL from settings via DATABASE_URL.
     monkeypatch.setenv("DATABASE_URL", sqlite_url)
-    settings = Settings(database_url=sqlite_url, version="test-1.2.3")
+    settings = Settings(
+        database_url=sqlite_url,
+        version="test-1.2.3",
+        photos_dir=str(photos_dir),
+        photos_max_bytes=1024,
+    )
     command.upgrade(make_alembic_config(sqlite_url), "head")
     return settings
 

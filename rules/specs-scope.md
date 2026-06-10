@@ -23,7 +23,7 @@ Before implementation, a change carries a **test-foundation** document (in its c
 *Targets:* test-engineer, spec-propose, DoR template.
 
 ### SPEC-004 — Story format & sizing
-A story is written as **"As `<role>`, I want `<what>`, so that `<why>`"** and sized to **1-3 days OR ~400-500 LOC of new logic**. Larger work MUST be split into multiple stories. (Repetitive changes within one logical segment are excluded from the LOC count.)
+A story is written as **"As `<role>`, I want `<what>`, so that `<why>`"** and sized to **1-3 days OR ~400-500 LOC of new logic**. Larger work MUST be split into multiple stories. (Repetitive changes within one logical segment are excluded from the LOC count.) **A story that is one user-meaningful slice but spans disjoint delivery lanes (e.g. backend + frontend) is NOT split into layer-only non-stories; the ~400-500 soft budget is then measured per lane (per [[00-constitution#PRIN-VI Story-Gated Iteration|PRIN-VI]]), while the 1000 LOC hard ceiling stays per story.** *(Clarified 2026-06-08, sprint-2 retro.)*
 *Targets:* design work, spec-propose.
 
 ### SPEC-005 — Multi-story look-ahead (MAY)

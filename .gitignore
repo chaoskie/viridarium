@@ -43,3 +43,6 @@ frontend/dist/
 # Playwright
 test-results/
 playwright-report/
+
+# Obsidian workspace files (the public docs/ folder may be opened in the app)
+**/.obsidian/

@@ -21,6 +21,9 @@ The locked stack. Adding or replacing any component requires a written amendment
 | Auth | **None in v1** by design; trusted-network deployment (`SEC-003`) |
 | Deferred | queues / events / user auth (amendment when needed) |
 
+**Approved support dependencies** (added by amendment, pinned, pip-audit-scanned):
+`python-multipart` (file upload / `multipart/form-data` parsing for FastAPI) - amendment ADR-010, 2026-06-09.
+
 *Targets:* all agents.
 
 ### ARCH-002 — Hexagonal layering, dependencies inward

@@ -3,6 +3,8 @@ import { Route, Routes } from "react-router-dom";
 
 import { AppShell } from "@/components/AppShell";
 import { PlaceholderPage } from "@/components/PlaceholderPage";
+import { PlantsPage } from "@/features/plants/PlantsPage";
+import { RoomsPage } from "@/features/rooms/RoomsPage";
 import { TodayPage } from "@/features/today/TodayPage";
 
 export function App(): ReactNode {
@@ -10,8 +12,8 @@ export function App(): ReactNode {
     <AppShell>
       <Routes>
         <Route path="/" element={<TodayPage />} />
-        <Route path="/plants" element={<PlaceholderPage title="Plants" />} />
-        <Route path="/rooms" element={<PlaceholderPage title="Rooms" />} />
+        <Route path="/plants" element={<PlantsPage />} />
+        <Route path="/rooms" element={<RoomsPage />} />
         <Route path="/journal" element={<PlaceholderPage title="Journal" />} />
         <Route
           path="/settings"

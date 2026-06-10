@@ -42,3 +42,89 @@ export async function getJson<T>(path: string): Promise<T> {
 
   return (await response.json()) as T;
 }
+
+/**
+ * Send a JSON body via a mutating method and parse the JSON response.
+ *
+ * Shared by `postJson`/`putJson`. The caller supplies the expected response
+ * type; no runtime validation is performed here (parity with `getJson`).
+ */
+async function sendJson<T>(
+  method: "POST" | "PUT",
+  path: string,
+  body: unknown,
+): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      `${method} ${path} failed with ${String(response.status)}`,
+    );
+  }
+
+  return (await response.json()) as T;
+}
+
+/** Perform a POST with a JSON body and parse the JSON response (e.g. 201). */
+export function postJson<T>(path: string, body: unknown): Promise<T> {
+  return sendJson<T>("POST", path, body);
+}
+
+/** Perform a PUT with a JSON body and parse the JSON response (e.g. 200). */
+export function putJson<T>(path: string, body: unknown): Promise<T> {
+  return sendJson<T>("PUT", path, body);
+}
+
+/**
+ * POST a `FormData` body (multipart) and parse the JSON response (e.g. 201).
+ *
+ * CRITICAL: we deliberately do NOT set a `Content-Type` header - the browser
+ * generates it together with the multipart boundary. Setting it manually would
+ * omit the boundary and break server-side parsing. Only `Accept` is negotiated.
+ * Throws `ApiError` on a non-2xx response (parity with the JSON helpers).
+ */
+export async function postFormData<T>(
+  path: string,
+  form: FormData,
+): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+    body: form,
+  });
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      `POST ${path} failed with ${String(response.status)}`,
+    );
+  }
+
+  return (await response.json()) as T;
+}
+
+/**
+ * Perform a DELETE. A successful response carries no body (204 -> void).
+ * Throws `ApiError` on a non-2xx response.
+ */
+export async function deleteResource(path: string): Promise<void> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "DELETE",
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      `DELETE ${path} failed with ${String(response.status)}`,
+    );
+  }
+}

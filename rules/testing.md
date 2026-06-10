@@ -61,3 +61,7 @@ Every Python test file MUST declare its layer marker via a module-level `pytestm
 ### TEST-013 — Binding coverage/quality gates (cite)
 The suite MUST satisfy `QG-002` (overall coverage floor 85%; diff-cover 80% on new code; branch coverage targets per layer). Enforced deterministically in the Makefile and mirrored in CI (`cicd.md`).
 *Targets:* reviewer-gate, ci, DoD template.
+
+### TEST-014 — Test-first evidence (the red)
+Test-first ([[00-constitution#PRIN-III Test-First|PRIN-III]]) is **auditable from artifacts, not trusted from a claim**. For each story (or lane), the build agent records the **failing-test run that precedes the implementation** in the change worklog: the test names plus the failing assertion/error output (the "red"), before the commit that turns them green. Coverage + a passing suite prove the tests exist and pass; this proves they were written first. A story whose worklog shows no red-before-green is a PRIN-III deviation requiring comply-or-explain. *(Added 2026-06-08, sprint-2 retro, closing the sprint-1 carry-forward.)*
+*Targets:* developers, test-engineer, reviewer-gate, DoD template.
