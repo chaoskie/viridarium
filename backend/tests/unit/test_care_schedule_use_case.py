@@ -6,9 +6,10 @@ persistence layer must not be mocked). The fake is keyed by ``(plant_id, care_ty
 so even at the fake level a second upsert overwrites rather than adds a second row, and
 its ``plant_exists`` is backed by a configurable set of "existing plant ids".
 
-The only economically-unit-reachable logic is the **plant-exists guard** (upsert/list ->
-``PlantNotFoundForScheduleError``) and the **not-found propagation** (get/delete ->
-``CareScheduleNotFoundError``). The frozen domain dataclasses + the ``CareType``/
+The only economically-unit-reachable logic is the **plant-exists guard** (all four
+operations -> ``PlantNotFoundForScheduleError``) and the **not-found propagation**
+(get/delete on an existing plant -> ``CareScheduleNotFoundError``).
+The frozen domain dataclasses + the ``CareType``/
 ``Dormancy`` StrEnums get no unit test of their own (TEST-004 #2: would pass against any
 implementation); the dormancy-default-by-care-type logic lives in the router and is
 proven through the integration matrix.
@@ -162,6 +163,15 @@ def test_get_propagates_care_schedule_not_found() -> None:
     assert exc.value.care_type == CareType.FEED
 
 
+def test_get_missing_plant_raises_plant_not_found() -> None:
+    service = CareScheduleService(_FakeCareScheduleRepository({1}))
+
+    with pytest.raises(PlantNotFoundForScheduleError) as exc:
+        service.get(999, CareType.WATER)
+
+    assert exc.value.plant_id == 999
+
+
 def test_get_happy_returns_row() -> None:
     service = CareScheduleService(_FakeCareScheduleRepository({1}))
     service.upsert(1, _new())
@@ -176,6 +186,15 @@ def test_delete_propagates_care_schedule_not_found() -> None:
 
     with pytest.raises(CareScheduleNotFoundError):
         service.delete(1, CareType.WATER)
+
+
+def test_delete_missing_plant_raises_plant_not_found() -> None:
+    service = CareScheduleService(_FakeCareScheduleRepository({1}))
+
+    with pytest.raises(PlantNotFoundForScheduleError) as exc:
+        service.delete(999, CareType.WATER)
+
+    assert exc.value.plant_id == 999
 
 
 def test_delete_happy_removes_row() -> None:

@@ -332,11 +332,14 @@ def test_get_list_unknown_plant_returns_404(client: TestClient) -> None:
 def test_get_single_unknown_plant_returns_404(client: TestClient) -> None:
     response = client.get(f"{_PLANTS}/999999/schedules/water")
     assert response.status_code == 404
+    # the reason must be the missing plant, not a missing schedule (VIRIDARIUM-48)
+    assert response.json()["detail"] == "Plant 999999 not found"
 
 
 def test_delete_unknown_plant_returns_404(client: TestClient) -> None:
     response = client.delete(f"{_PLANTS}/999999/schedules/water")
     assert response.status_code == 404
+    assert response.json()["detail"] == "Plant 999999 not found"
 
 
 def test_get_unknown_schedule_returns_404_no_pii(client: TestClient) -> None:
