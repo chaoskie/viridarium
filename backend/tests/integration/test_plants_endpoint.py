@@ -126,6 +126,8 @@ _BAD_BODIES = [
     pytest.param({"name": "ok", "pot_size_cm": 0}, id="pot-size-below-min"),
     pytest.param({"name": "ok", "pot_size_cm": 501}, id="pot-size-above-max"),
     pytest.param({"name": "ok", "pot_size_cm": "big"}, id="pot-size-non-int"),
+    # a float must be a 422, never silently truncated to int (VIRIDARIUM-47)
+    pytest.param({"name": "ok", "pot_size_cm": 3.7}, id="pot-size-float-not-coerced"),
     pytest.param({"name": "ok", "pot_material": "gold"}, id="pot-material-invalid"),
     pytest.param(
         {"name": "ok", "light_level": "ultraviolet"}, id="light-level-invalid"
