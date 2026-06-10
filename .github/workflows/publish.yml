@@ -27,7 +27,7 @@ jobs:
       id-token: write # OIDC for provenance attestation
       attestations: write # attest-build-provenance
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up QEMU (arm64 emulation)
         uses: docker/setup-qemu-action@v4
