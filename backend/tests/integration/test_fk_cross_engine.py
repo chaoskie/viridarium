@@ -24,6 +24,9 @@ from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from tests.integration.conftest import make_alembic_config
+from viridarium.adapters.outbound.db.care_schedule_repository import (
+    SqlAlchemyCareScheduleRepository,
+)
 from viridarium.adapters.outbound.db.engine import (
     create_db_engine,
     create_session_factory,
@@ -31,11 +34,16 @@ from viridarium.adapters.outbound.db.engine import (
 from viridarium.adapters.outbound.db.location_repository import (
     SqlAlchemyLocationRepository,
 )
-from viridarium.adapters.outbound.db.models import PhotoModel, PlantTagModel
+from viridarium.adapters.outbound.db.models import (
+    CareScheduleModel,
+    PhotoModel,
+    PlantTagModel,
+)
 from viridarium.adapters.outbound.db.photo_repository import (
     SqlAlchemyPhotoRepository,
 )
 from viridarium.adapters.outbound.db.plant_repository import SqlAlchemyPlantRepository
+from viridarium.domain.care_schedule import CareType, Dormancy, NewCareSchedule
 from viridarium.domain.location import NewLocation
 from viridarium.domain.photo import NewPhoto
 from viridarium.domain.plant import NewPlant, PlantNotFoundError
@@ -93,6 +101,20 @@ def _count_photo_rows(session_factory: sessionmaker[Session], plant_id: int) -> 
                 select(func.count())
                 .select_from(PhotoModel)
                 .where(PhotoModel.plant_id == plant_id)
+            )
+            or 0
+        )
+
+
+def _count_care_schedule_rows(
+    session_factory: sessionmaker[Session], plant_id: int
+) -> int:
+    with session_factory() as session:
+        return (
+            session.scalar(
+                select(func.count())
+                .select_from(CareScheduleModel)
+                .where(CareScheduleModel.plant_id == plant_id)
             )
             or 0
         )
@@ -166,3 +188,40 @@ def test_deleting_a_plant_cascades_its_photo_rows(fk_engine: Engine) -> None:
     plants.delete(plant.id)
 
     assert _count_photo_rows(session_factory, plant.id) == 0  # CASCADE fired
+
+
+def test_deleting_a_plant_cascades_its_care_schedule_rows(fk_engine: Engine) -> None:
+    """CASCADE on the real engine: a plant delete removes its care_schedule rows (AC7).
+
+    Proves the DB-row CASCADE on both engines (SQLite local, Postgres CI leg). No
+    app-level cleanup this story (no files), so this is the sole cascade proof."""
+    session_factory = create_session_factory(fk_engine)
+    plants = SqlAlchemyPlantRepository(session_factory)
+    schedules = SqlAlchemyCareScheduleRepository(session_factory)
+
+    plant = plants.add(_new_plant("FK schedule cascade plant", None, ()))
+    schedules.upsert(
+        plant.id,
+        NewCareSchedule(
+            care_type=CareType.WATER,
+            interval_days=7,
+            winter_interval_days=None,
+            dormancy=Dormancy.WINTER_INTERVAL,
+            enabled=True,
+        ),
+    )
+    schedules.upsert(
+        plant.id,
+        NewCareSchedule(
+            care_type=CareType.FEED,
+            interval_days=30,
+            winter_interval_days=None,
+            dormancy=Dormancy.PAUSED,
+            enabled=True,
+        ),
+    )
+    assert _count_care_schedule_rows(session_factory, plant.id) == 2
+
+    plants.delete(plant.id)
+
+    assert _count_care_schedule_rows(session_factory, plant.id) == 0  # CASCADE fired

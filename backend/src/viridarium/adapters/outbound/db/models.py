@@ -18,6 +18,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
@@ -135,4 +136,49 @@ class PhotoModel(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+    )
+
+
+class CareScheduleModel(Base):
+    """A plant's care schedule row (US-3.1).
+
+    Owned child of ``plant`` with ``ON DELETE CASCADE`` so a plant delete removes its
+    schedule rows. A surrogate ``id`` PK plus a ``(plant_id, care_type)`` unique
+    constraint enforces one schedule per care type (the keyed-PUT upsert is the only
+    write path, CS1). Enums are stored as ``String`` (D3, portable - no native DB enum
+    types, ARCH-011). ``enabled`` carries a DB-level ``server_default`` true.
+    ``winter_interval_days`` is nullable (CS3). ``plant_id`` is indexed for the
+    per-plant list. Timestamps are server-set (ADR-A), mirroring ``PlantModel``.
+    """
+
+    __tablename__ = "care_schedule"
+    __table_args__ = (
+        UniqueConstraint(
+            "plant_id", "care_type", name="uq_care_schedule_plant_id_care_type"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    plant_id: Mapped[int] = mapped_column(
+        ForeignKey("plant.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    care_type: Mapped[str] = mapped_column(String(10), nullable=False)
+    interval_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    winter_interval_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    dormancy: Mapped[str] = mapped_column(String(20), nullable=False)
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=func.true()
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )

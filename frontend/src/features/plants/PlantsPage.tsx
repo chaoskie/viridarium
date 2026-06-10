@@ -6,6 +6,7 @@ import { fetchLocations, type Location } from "@/lib/api/locations";
 import type { Plant, PlantFilter } from "@/lib/api/plants";
 import { fetchPhotos, photoUrl } from "@/lib/api/photos";
 
+import { CareScheduleModal } from "./CareScheduleModal";
 import { DeletePlantDialog } from "./DeletePlantDialog";
 import { PhotoGalleryModal } from "./PhotoGalleryModal";
 import { PlantFormModal } from "./PlantFormModal";
@@ -16,7 +17,8 @@ type ModalState =
   | { readonly kind: "create" }
   | { readonly kind: "edit"; readonly plant: Plant }
   | { readonly kind: "delete"; readonly plant: Plant }
-  | { readonly kind: "photos"; readonly plant: Plant };
+  | { readonly kind: "photos"; readonly plant: Plant }
+  | { readonly kind: "schedules"; readonly plant: Plant };
 
 /**
  * A small, self-contained cover thumbnail for a plant card. Fetches the plant's
@@ -388,6 +390,15 @@ export function PlantsPage(): ReactNode {
                   </Button>
                   <Button
                     variant="ghost"
+                    aria-label={`Configure care schedules for ${plant.name}`}
+                    onClick={() => {
+                      setModal({ kind: "schedules", plant });
+                    }}
+                  >
+                    Schedules
+                  </Button>
+                  <Button
+                    variant="ghost"
                     aria-label={`${plant.archived ? "Unarchive" : "Archive"} ${plant.name}`}
                     onClick={() => {
                       // Reversible (A4) - no confirm dialog.
@@ -450,6 +461,10 @@ export function PlantsPage(): ReactNode {
 
       {modal.kind === "photos" ? (
         <PhotoGalleryModal plant={modal.plant} onClose={closeModal} />
+      ) : null}
+
+      {modal.kind === "schedules" ? (
+        <CareScheduleModal plant={modal.plant} onClose={closeModal} />
       ) : null}
     </section>
   );
