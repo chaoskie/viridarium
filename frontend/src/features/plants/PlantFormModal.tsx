@@ -92,14 +92,14 @@ function parseTags(raw: string): string[] {
   return [...seen];
 }
 
-/** Convert a number-ish field string to a number or null (empty -> null). */
+/** Convert an integer field string to a number or null (empty/non-integer -> null). */
 function parseOptionalInt(raw: string): number | null {
   const trimmed = raw.trim();
   if (trimmed.length === 0) {
     return null;
   }
   const parsed = Number(trimmed);
-  return Number.isFinite(parsed) ? parsed : null;
+  return Number.isInteger(parsed) ? parsed : null;
 }
 
 /** Convert an optional text field to a trimmed value or null. */
@@ -146,6 +146,7 @@ export function PlantFormModal({
   const [archived, setArchived] = useState(plant?.archived ?? false);
 
   const [nameError, setNameError] = useState<string | null>(null);
+  const [potSizeError, setPotSizeError] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -177,7 +178,16 @@ export function PlantFormModal({
       setNameError("Please enter a plant name.");
       return;
     }
+    const trimmedPotSize = potSizeCm.trim();
+    if (
+      trimmedPotSize.length > 0 &&
+      !Number.isInteger(Number(trimmedPotSize))
+    ) {
+      setPotSizeError("Pot size must be a whole number of centimeters.");
+      return;
+    }
     setNameError(null);
+    setPotSizeError(null);
     setLocationError(null);
     setFormError(null);
     setSubmitting(true);
@@ -219,6 +229,9 @@ export function PlantFormModal({
     <Modal title={isEdit ? "Edit plant" : "Add plant"} onClose={onClose}>
       <form
         className="flex flex-col gap-4"
+        // all validation is custom (consistent field errors, incl. the name
+        // mirror); native bubbles would preempt it for step/min/max
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
           void handleSubmit();
@@ -279,13 +292,20 @@ export function PlantFormModal({
             inputMode="numeric"
             min={POT_SIZE_MIN}
             max={POT_SIZE_MAX}
+            step={1}
             className={SELECT_CLASSES}
             value={potSizeCm}
             placeholder="Optional"
+            aria-invalid={potSizeError !== null || undefined}
             onChange={(event) => {
               setPotSizeCm(event.target.value);
             }}
           />
+          {potSizeError ? (
+            <p className="font-body text-sm text-danger" role="alert">
+              {potSizeError}
+            </p>
+          ) : null}
         </div>
 
         <FieldSelect
