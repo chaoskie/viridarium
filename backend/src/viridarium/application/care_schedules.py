@@ -5,11 +5,12 @@ A thin application service over the
 types (ARCH-007) and never translates domain errors into HTTP concerns (ADR-C).
 
 The one piece of genuine application logic is the **plant-exists guard** (mirrors the
-plant FK-existence guard): ``upsert``/``list`` check ``plant_exists`` *first* and raise
+plant FK-existence guard): every operation checks ``plant_exists`` *first* and raises
 :class:`~viridarium.domain.care_schedule.PlantNotFoundForScheduleError` (404) before
-touching the repo. ``get``/``delete`` do not pre-check the plant - they let the repo
-raise :class:`~viridarium.domain.care_schedule.CareScheduleNotFoundError` (404), since a
-missing schedule and a missing plant both surface as 404 at the boundary.
+touching the repo, so a missing plant and a missing schedule report distinct reasons.
+``get``/``delete`` on an existing plant then let the repo raise
+:class:`~viridarium.domain.care_schedule.CareScheduleNotFoundError` (404) when the
+schedule itself is absent (VIRIDARIUM-48).
 """
 
 from __future__ import annotations
@@ -45,9 +46,11 @@ class CareScheduleService:
         return self._repository.list_for_plant(plant_id)
 
     def get(self, plant_id: int, care_type: CareType) -> CareSchedule:
-        """Return one schedule; propagates ``CareScheduleNotFoundError`` if absent."""
+        """Return one schedule; raise if the plant, then the schedule, is missing."""
+        self._guard_plant(plant_id)
         return self._repository.get(plant_id, care_type)
 
     def delete(self, plant_id: int, care_type: CareType) -> None:
-        """Delete one schedule; propagates ``CareScheduleNotFoundError`` if absent."""
+        """Delete one schedule; raise if the plant, then the schedule, is missing."""
+        self._guard_plant(plant_id)
         self._repository.delete(plant_id, care_type)
