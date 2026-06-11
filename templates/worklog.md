@@ -11,7 +11,7 @@ Per-change trail (`TRACE-001`). Entries **newest-first**, one line each:
 
 Log an entry **when**:
 - you **choose** between alternatives - log the fork + one-line why, link the ADR/decision note
-- a **gate-check** runs - link the posted PASS/FAIL block (`QG-004`)
+- a **gate-check** runs - link the posted PASS/WATCH/FAIL block (`QG-004`); every WATCH caveat gets its own line here - these lines are the next retrospective's mandatory input
 - you **stop on the circuit breaker** - state + retry count (`QG-007`)
 - a **review verdict** lands - counts per severity (`REV-003`)
 - you **commit** - hash + message

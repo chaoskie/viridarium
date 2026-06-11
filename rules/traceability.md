@@ -21,7 +21,7 @@ Logging scope is governed by the **worklog template's AI logging guidance**. The
 *Targets:* all agents, worklog template.
 
 ### TRACE-005 — Decisions link to their records
-Every logged decision references its record (ADR per ARCH-010, design note, or spec section). A gate-check entry links the posted PASS/FAIL results. No naked "we decided X".
+Every logged decision references its record (ADR per ARCH-010, design note, or spec section). A gate-check entry links the posted PASS/WATCH/FAIL results. No naked "we decided X".
 *Targets:* all agents, design work.
 
 ### TRACE-006 — Actor attribution

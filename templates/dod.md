@@ -1,6 +1,6 @@
 # Definition of Done
 
-Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/FAIL (`QG-004`); any FAIL blocks archive/merge.
+Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/WATCH/FAIL (`QG-004`); any FAIL blocks archive/merge; any WATCH records its caveat in the worklog for the next retro.
 
 ## 1. Functional
 - [ ] Every acceptance criterion met and verified (story-complete check)
@@ -10,6 +10,7 @@ Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/FAIL (`QG
 ## 2. Code Quality
 - [ ] Mechanical gate green: ruff lint+format, ruff S, mypy strict (domain+app), import-linter boundaries (`QG-001`)
 - [ ] Review verdict clean: no open CRITICAL/HIGH (`REV-008`); MEDIUM/LOW handed to `/td` (`REV-003`)
+- [ ] Independent review evidenced: the reviewing actor in the worklog differs from the implementing actor (`REV-004`, `TRACE-006`)
 - [ ] File ceilings respected or justified inline (`QG-009`)
 
 ## 3. Test & Validate
@@ -17,6 +18,8 @@ Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/FAIL (`QG
 - [ ] Required pytest layer markers present in every test file (`TEST-012`)
 - [ ] Test-foundation re-audit **approved** by the test-engineer subagent (`SPEC-003`)
 - [ ] Test-first evidence: the failing run (the "red") is recorded in the worklog before the green commit (`TEST-014`)
+- [ ] Empirical review done: red-verify of the new tests + ≥1 mutation spot-check on new wiring, run in a throwaway copy, outcomes in the worklog (`REV-010`)
+- [ ] If the change adds or repairs a quality gate: bites-proof recorded - the gate demonstrably failed against the broken property in a throwaway copy (`QG-015`)
 - [ ] Playwright acceptance green (`TEST-009`, `CI-010`); ran on both SQLite and PostgreSQL paths (`ARCH-011`)
 - [ ] UI story: verified via the **production path** - built SPA served *through the backend* (not just vite dev / in-process TestClient), **zero page/console errors** (`TEST-010`). Catches CSP-class bugs (security headers vs external assets/inline scripts) invisible to dev-mode + API-only tests. *(Added 2026-06-08, sprint-2 retro.)*
 - [ ] Audit Spaces green: a11y / perf (`FE-015`) + event-logging (`SEC-008`)

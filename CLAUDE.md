@@ -8,7 +8,7 @@ This project runs a rules-driven, spec-first workflow. The **constitution** (`ru
 
 ## Operating constraints (every agent, every task)
 
-- **Gate before advancing** - post an explicit PASS/FAIL checklist before moving to a next phase/story; any FAIL halts (`QG-004`, PRIN-VIII).
+- **Gate before advancing** - post an explicit PASS/WATCH/FAIL checklist before moving to a next phase/story; any FAIL halts, every WATCH caveat is worklogged and surfaces in the next retro (`QG-004`, PRIN-VIII).
 - **Circuit breaker** - stop and escalate after 3 retries on the same fix or 5 distinct test failures (`QG-007`). Report state; don't thrash.
 - **Commit gating** - don't commit until the user confirms the change works, unless the running workflow explicitly opted into autonomous commits gated on a green DoD (`QG-010`).
 - **Minimal changes** - only what the task requires; no drive-by refactors, renames, or formatting cascades (PRIN-IX). Formatters run on touched files only.
