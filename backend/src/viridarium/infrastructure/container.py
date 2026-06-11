@@ -12,6 +12,9 @@ from dataclasses import dataclass
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from viridarium.adapters.outbound.db.care_event_repository import (
+    SqlAlchemyCareEventRepository,
+)
 from viridarium.adapters.outbound.db.care_schedule_repository import (
     SqlAlchemyCareScheduleRepository,
 )
@@ -29,6 +32,7 @@ from viridarium.adapters.outbound.db.photo_storage import FilesystemPhotoStorage
 from viridarium.adapters.outbound.db.plant_repository import (
     SqlAlchemyPlantRepository,
 )
+from viridarium.application.care_events import CareEventService
 from viridarium.application.care_schedules import CareScheduleService
 from viridarium.application.health import GetHealthStatus
 from viridarium.application.locations import LocationService
@@ -50,6 +54,7 @@ class Container:
     plant_service: PlantService
     photo_service: PhotoService
     care_schedule_service: CareScheduleService
+    care_event_service: CareEventService
 
 
 def build_container(settings: Settings) -> Container:
@@ -74,6 +79,9 @@ def build_container(settings: Settings) -> Container:
     care_schedule_service = CareScheduleService(
         SqlAlchemyCareScheduleRepository(session_factory)
     )
+    care_event_service = CareEventService(
+        SqlAlchemyCareEventRepository(session_factory)
+    )
     return Container(
         settings=settings,
         engine=engine,
@@ -83,4 +91,5 @@ def build_container(settings: Settings) -> Container:
         plant_service=plant_service,
         photo_service=photo_service,
         care_schedule_service=care_schedule_service,
+        care_event_service=care_event_service,
     )

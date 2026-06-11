@@ -196,3 +196,48 @@ def test_upgrade_creates_care_schedule_table_and_downgrade_drops_it(
         assert "plant" in after
     finally:
         engine.dispose()
+
+
+def test_upgrade_creates_care_event_table_and_downgrade_drops_it(  # B-I37
+    sqlite_url: str,
+) -> None:
+    cfg = make_alembic_config(sqlite_url)
+    engine = create_engine(sqlite_url)
+
+    command.upgrade(cfg, "head")
+    try:
+        inspector = inspect(engine)
+        assert "care_event" in set(inspector.get_table_names())
+
+        cols = {col["name"] for col in inspector.get_columns("care_event")}
+        assert cols == {
+            "id",
+            "plant_id",
+            "type",
+            "happened_on",
+            "note",
+            "photo_id",
+            "health",
+            "created_at",
+        }
+        assert "updated_at" not in cols  # events immutable (append-only)
+
+        fks = inspector.get_foreign_keys("care_event")
+        plant_fk = next(fk for fk in fks if fk["referred_table"] == "plant")
+        assert plant_fk["options"].get("ondelete") == "CASCADE"
+        photo_fk = next(fk for fk in fks if fk["referred_table"] == "photo")
+        assert photo_fk["options"].get("ondelete") == "SET NULL"
+
+        indexes = inspector.get_indexes("care_event")
+        index_cols = [idx["column_names"] for idx in indexes]
+        assert ["plant_id"] in index_cols  # ix_care_event_plant_id
+
+        command.downgrade(cfg, "0005")
+        after = set(inspect(engine).get_table_names())
+        assert "care_event" not in after
+        assert "care_schedule" in after
+        assert "photo" in after
+        assert "plant" in after
+        assert "plant_tag" in after
+    finally:
+        engine.dispose()

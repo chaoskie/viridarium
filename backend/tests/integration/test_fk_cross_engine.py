@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Iterator
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -24,6 +25,9 @@ from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from tests.integration.conftest import make_alembic_config
+from viridarium.adapters.outbound.db.care_event_repository import (
+    SqlAlchemyCareEventRepository,
+)
 from viridarium.adapters.outbound.db.care_schedule_repository import (
     SqlAlchemyCareScheduleRepository,
 )
@@ -35,6 +39,7 @@ from viridarium.adapters.outbound.db.location_repository import (
     SqlAlchemyLocationRepository,
 )
 from viridarium.adapters.outbound.db.models import (
+    CareEventModel,
     CareScheduleModel,
     PhotoModel,
     PlantTagModel,
@@ -43,6 +48,7 @@ from viridarium.adapters.outbound.db.photo_repository import (
     SqlAlchemyPhotoRepository,
 )
 from viridarium.adapters.outbound.db.plant_repository import SqlAlchemyPlantRepository
+from viridarium.domain.care_event import CareEventType, NewCareEvent
 from viridarium.domain.care_schedule import CareType, Dormancy, NewCareSchedule
 from viridarium.domain.location import NewLocation
 from viridarium.domain.photo import NewPhoto
@@ -118,6 +124,30 @@ def _count_care_schedule_rows(
             )
             or 0
         )
+
+
+def _count_care_event_rows(
+    session_factory: sessionmaker[Session], plant_id: int
+) -> int:
+    with session_factory() as session:
+        return (
+            session.scalar(
+                select(func.count())
+                .select_from(CareEventModel)
+                .where(CareEventModel.plant_id == plant_id)
+            )
+            or 0
+        )
+
+
+def _new_event(photo_id: int | None = None) -> NewCareEvent:
+    return NewCareEvent(
+        type=CareEventType.OBSERVE if photo_id else CareEventType.WATER,
+        happened_on=date(2026, 6, 1),
+        note=None,
+        photo_id=photo_id,
+        health=None,
+    )
 
 
 def test_deleting_a_room_orphans_its_plants_to_homeless(fk_engine: Engine) -> None:
@@ -225,3 +255,51 @@ def test_deleting_a_plant_cascades_its_care_schedule_rows(fk_engine: Engine) -> 
     plants.delete(plant.id)
 
     assert _count_care_schedule_rows(session_factory, plant.id) == 0  # CASCADE fired
+
+
+def test_deleting_a_plant_cascades_its_care_event_rows(fk_engine: Engine) -> None:
+    """CASCADE on the real engine: a plant delete removes its care_event rows
+    (B-I35, AC5): the history dies with the plant, on both engines."""
+    session_factory = create_session_factory(fk_engine)
+    plants = SqlAlchemyPlantRepository(session_factory)
+    events = SqlAlchemyCareEventRepository(session_factory)
+
+    plant = plants.add(_new_plant("FK event cascade plant", None, ()))
+    events.add(plant.id, _new_event())
+    events.add(plant.id, _new_event())
+    assert _count_care_event_rows(session_factory, plant.id) == 2
+
+    plants.delete(plant.id)
+
+    assert _count_care_event_rows(session_factory, plant.id) == 0  # CASCADE fired
+
+
+def test_deleting_a_photo_nulls_event_photo_id(fk_engine: Engine) -> None:
+    """SET NULL on the real engine: deleting the linked photo severs the event's
+    ``photo_id`` but preserves the event row (B-I36, ARCH-011). Self-cleans."""
+    session_factory = create_session_factory(fk_engine)
+    plants = SqlAlchemyPlantRepository(session_factory)
+    photos = SqlAlchemyPhotoRepository(session_factory)
+    events = SqlAlchemyCareEventRepository(session_factory)
+
+    plant = plants.add(_new_plant("FK photo set-null plant", None, ()))
+    try:
+        photo = photos.add(
+            NewPhoto(
+                plant_id=plant.id,
+                stored_filename="fk-event-link.jpg",
+                content_type="image/jpeg",
+                size_bytes=10,
+            ),
+            make_cover=True,
+        )
+        event = events.add(plant.id, _new_event(photo_id=photo.id))
+        assert event.photo_id == photo.id
+
+        photos.delete(plant.id, photo.id)
+
+        reloaded = events.list_for_plant(plant.id)
+        assert [e.id for e in reloaded] == [event.id]  # event preserved
+        assert reloaded[0].photo_id is None  # SET NULL fired
+    finally:
+        plants.delete(plant.id)

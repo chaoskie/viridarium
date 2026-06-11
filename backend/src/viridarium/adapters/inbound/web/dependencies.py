@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from fastapi import Request
 
+from viridarium.application.care_events import CareEventService
 from viridarium.application.care_schedules import CareScheduleService
 from viridarium.application.locations import LocationService
 from viridarium.application.photos import PhotoService
@@ -43,4 +44,10 @@ def get_photo_service(request: Request) -> PhotoService:
 def get_care_schedule_service(request: Request) -> CareScheduleService:
     """Return the application's care-schedule service from the composition root."""
     service: CareScheduleService = request.app.state.care_schedule_service
+    return service
+
+
+def get_care_event_service(request: Request) -> CareEventService:
+    """Return the application's care-event service from the composition root."""
+    service: CareEventService = request.app.state.care_event_service
     return service
