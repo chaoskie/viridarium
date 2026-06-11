@@ -28,6 +28,7 @@ Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/FAIL (`QG
 - [ ] End-of-feature security review done if at a feature boundary (`SEC-010`)
 
 ## 5. Documentation
+- [ ] **Artifact completeness:** every mandatory change artifact exists and is non-stub - `proposal.md`, `design.md`, `tasks.md`, `worklog.md`, test-foundation, plus `screenshots/` for UI stories (`SPEC-002`, `FE-012`). Existence is checked mechanically here so the review gate judges content, never absence. *(Added 2026-06-11 retro.)*
 - [ ] Glossary updated for new domain terms (`LANG-007`); ADRs recorded (`ARCH-010`)
 - [ ] Worklog complete (`TRACE-001`) + change-index entry written (`TRACE-002`)
 - [ ] UI story: breakpoint screenshots committed as design evidence (`FE-012`)

@@ -17,6 +17,7 @@ tags:
   - <backend / frontend / contract / db / pipeline / security / a11y / performance>
 status: open
 severity: <critical / high / medium / low>   # REV-003 scale
+evidence: <reproduced / static-read>         # static-read = claim unverified; reproduce before fixing
 created: <YYYY-MM-DD>
 related-change: <change name or "unknown">
 work-item: <tracker id or "-">

@@ -17,6 +17,7 @@ You design the tests **before** code exists and audit them after. You never writ
 - Demand ≥1 happy + ≥1 sad per public surface (`TEST-005`); independence - individual/parallel/chained (`TEST-006`); required layer markers (`TEST-012`).
 - Assert the per-story **Audit Spaces**: a11y/perf (`FE-015`) and event-logging (`SEC-008`).
 - **Story-complete pass:** re-audit the implemented tests against the test-foundation; approve or reject with specific gaps. No sign-off until approval.
+- **Sanctioned mutation probes (story-complete only):** to prove a critical-path test fails on regression, you MAY temporarily mutate the implementation source, run the targeted test, and restore the file byte-identically - every mutation immediately restored, `git status` clean before you finish, and each probe logged in your report (file, mutation, test that failed). The orchestrator independently verifies a clean tree afterwards. Mutation evidence outranks assertion-reading for the foundation's critical-100% paths. *(Ratified 2026-06-11 retro.)*
 
 ## Required reading (load on demand)
 
