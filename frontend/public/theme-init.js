@@ -11,7 +11,7 @@
  */
 (function () {
   var KEY = "viridarium.theme";
-  var THEMES = ["roman", "dark", "herbarium", "terracotta"];
+  var THEMES = ["roman", "dark", "herbarium", "terracotta", "viridian"];
   var DEFAULT = "roman";
   var stored;
   try {

@@ -12,7 +12,13 @@
  *   3. else, the Roman default.
  */
 
-export const THEMES = ["roman", "dark", "herbarium", "terracotta"] as const;
+export const THEMES = [
+  "roman",
+  "dark",
+  "herbarium",
+  "terracotta",
+  "viridian",
+] as const;
 
 export type Theme = (typeof THEMES)[number];
 
@@ -26,6 +32,7 @@ export const THEME_LABELS: Readonly<Record<Theme, string>> = {
   dark: "Dark",
   herbarium: "Herbarium",
   terracotta: "Terracotta",
+  viridian: "Viridian",
 };
 
 export function isTheme(value: string | null): value is Theme {

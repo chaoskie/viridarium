@@ -38,7 +38,13 @@ describe("entry HTML complies with the strict CSP", () => {
     // KEY and the theme list MUST stay in sync with themeController.ts.
     expect(themeInit).toContain('"viridarium.theme"');
     expect(controller).toContain('"viridarium.theme"');
-    for (const theme of ["roman", "dark", "herbarium", "terracotta"]) {
+    for (const theme of [
+      "roman",
+      "dark",
+      "herbarium",
+      "terracotta",
+      "viridian",
+    ]) {
       expect(themeInit).toContain(`"${theme}"`);
     }
   });

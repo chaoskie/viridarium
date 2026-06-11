@@ -112,6 +112,7 @@ const THEME_SELECTORS: Readonly<Record<string, string>> = {
   dark: '[data-theme="dark"]',
   terracotta: '[data-theme="terracotta"]',
   herbarium: '[data-theme="herbarium"]',
+  viridian: '[data-theme="viridian"]',
 };
 
 describe("theme contrast (WCAG AA)", () => {
