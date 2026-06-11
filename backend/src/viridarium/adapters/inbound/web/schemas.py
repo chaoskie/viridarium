@@ -10,6 +10,7 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from viridarium.domain.care_event import CareEvent, CareEventType, Health
 from viridarium.domain.care_schedule import CareSchedule, CareType, Dormancy
 from viridarium.domain.photo import Photo
 from viridarium.domain.plant import LightLevel, PotMaterial
@@ -160,6 +161,63 @@ class PhotoResponse(BaseModel):
             is_cover=photo.is_cover,
             created_at=photo.created_at,
             url=f"/api/v1/plants/{photo.plant_id}/photos/{photo.id}",
+        )
+
+
+class CareEventCreate(BaseModel):
+    """Request body for POST /api/v1/plants/{id}/events (US-3.2, append-only).
+
+    ``type`` validates against the closed ``CareEventType`` enum (unknown -> 422).
+    ``happened_on`` defaults to today; backdating is allowed but a **future date is
+    422** (the ``field_validator``). ``note`` mirrors the plant notes 10000-char cap;
+    the empty string is accepted as-is (no normalization). ``photo_id`` and ``health``
+    are optional - the same-plant photo rule and the health-only-on-observe rule are
+    semantic (service-level), not shape rules, so they reject there.
+    """
+
+    type: CareEventType
+    happened_on: date = Field(default_factory=date.today)
+    note: str | None = Field(default=None, max_length=10000)
+    photo_id: int | None = Field(default=None)
+    health: Health | None = Field(default=None)
+
+    @field_validator("happened_on")
+    @classmethod
+    def _reject_future(cls, value: date) -> date:
+        if value > date.today():
+            raise ValueError("happened_on must not be in the future")
+        return value
+
+
+class CareEventResponse(BaseModel):
+    """Public shape of a care event (security boundary, ARCH-007).
+
+    Unlike CareSchedule this **does expose the surrogate ``id``**: DELETE is keyed by
+    event id (proposal response shape). Events are immutable, so there is no
+    ``updated_at``.
+    """
+
+    id: int
+    plant_id: int
+    type: CareEventType
+    happened_on: date
+    note: str | None
+    photo_id: int | None
+    health: Health | None
+    created_at: datetime
+
+    @classmethod
+    def from_domain(cls, event: CareEvent) -> CareEventResponse:
+        """Build the wire response from a domain :class:`CareEvent`."""
+        return cls(
+            id=event.id,
+            plant_id=event.plant_id,
+            type=event.type,
+            happened_on=event.happened_on,
+            note=event.note,
+            photo_id=event.photo_id,
+            health=event.health,
+            created_at=event.created_at,
         )
 
 

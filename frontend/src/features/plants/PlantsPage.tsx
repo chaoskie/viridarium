@@ -10,6 +10,7 @@ import { CareScheduleModal } from "./CareScheduleModal";
 import { DeletePlantDialog } from "./DeletePlantDialog";
 import { PhotoGalleryModal } from "./PhotoGalleryModal";
 import { PlantFormModal } from "./PlantFormModal";
+import { QuickCareActions } from "./QuickCareActions";
 import { usePlants } from "./usePlants";
 
 type ModalState =
@@ -378,55 +379,59 @@ export function PlantsPage(): ReactNode {
                     ) : null}
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  <Button
-                    variant="ghost"
-                    aria-label={`View photos of ${plant.name}`}
-                    onClick={() => {
-                      setModal({ kind: "photos", plant });
-                    }}
-                  >
-                    Photos
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    aria-label={`Configure care schedules for ${plant.name}`}
-                    onClick={() => {
-                      setModal({ kind: "schedules", plant });
-                    }}
-                  >
-                    Schedules
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    aria-label={`${plant.archived ? "Unarchive" : "Archive"} ${plant.name}`}
-                    onClick={() => {
-                      // Reversible (A4) - no confirm dialog.
-                      void (plant.archived
-                        ? unarchive(plant.id)
-                        : archive(plant.id));
-                    }}
-                  >
-                    {plant.archived ? "Unarchive" : "Archive"}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    aria-label={`Edit ${plant.name}`}
-                    onClick={() => {
-                      setModal({ kind: "edit", plant });
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    aria-label={`Delete ${plant.name}`}
-                    onClick={() => {
-                      setModal({ kind: "delete", plant });
-                    }}
-                  >
-                    Delete
-                  </Button>
+                <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+                  {/* US-3.2 quick care logging; self-contained (page stays thin). */}
+                  <QuickCareActions plant={plant} />
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="ghost"
+                      aria-label={`View photos of ${plant.name}`}
+                      onClick={() => {
+                        setModal({ kind: "photos", plant });
+                      }}
+                    >
+                      Photos
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      aria-label={`Configure care schedules for ${plant.name}`}
+                      onClick={() => {
+                        setModal({ kind: "schedules", plant });
+                      }}
+                    >
+                      Schedules
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      aria-label={`${plant.archived ? "Unarchive" : "Archive"} ${plant.name}`}
+                      onClick={() => {
+                        // Reversible (A4) - no confirm dialog.
+                        void (plant.archived
+                          ? unarchive(plant.id)
+                          : archive(plant.id));
+                      }}
+                    >
+                      {plant.archived ? "Unarchive" : "Archive"}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      aria-label={`Edit ${plant.name}`}
+                      onClick={() => {
+                        setModal({ kind: "edit", plant });
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="danger"
+                      aria-label={`Delete ${plant.name}`}
+                      onClick={() => {
+                        setModal({ kind: "delete", plant });
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </li>
             );

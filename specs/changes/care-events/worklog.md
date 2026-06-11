@@ -1,0 +1,13 @@
+# Worklog - care-events (US-3.2)
+
+`time · actor · action · artifact · ref` (newest first). Story ids only, no tracker UUIDs.
+
+## Entries
+
+- `~13:30 · orchestrator/Fable · orchestrator verify PASS: re-ran both suites myself (308 backend / 160 frontend, static gates clean, fe build OK); live-OpenAPI cross-check (events = POST/GET + DELETE only, NO update route - append-only confirmed); API probes (shape exact incl. id, health-on-water 422, future 422, unknown plant 404 plant-reason); production-path smoke in real browser: quick-tap water logged w/ role=status feedback, modal observe+health logged, ordering newest-first, ZERO console errors · feat/us-3.2-care-events · QG-004/TEST-010-precursor`
+- `~13:25 · build-agent-FE/Fable · frontend lane complete: careEvents client + useCareEvents + LogCareModal + QuickCareActions (+6 LOC in PlantsPage only); F-1..F-17 all covered; reds recorded per-component before implementation (import-resolution failures, verbatim in lane report); 160 fe tests green, lint/tsc/prettier/build clean · frontend/src · TEST-014`
+- `~13:25 · build-agent-BE/Fable · backend lane complete: domain/care_event + migration 0006 (CASCADE plant / SET NULL photo, reversible both ways) + repository + service (plant guard FIRST, same-plant photo guard, health-only-on-observe) + router (no update route) + wiring; 308 tests green, 99.49% cov, new modules 100%; deviations: id-desc final ORDER BY tiebreak (second-granular created_at on sqlite, intent preserved); B-I35-37 tests authored WITH implementation (no independent red - prior agent never wrote them; flagged honestly); B-U9 proven at integration layer instead of unit · backend/src · TEST-014/ARCH-011`
+- `~13:15 · orchestrator/Fable · TEST-014 red recorded for both lanes before any implementation existed: backend collection error ModuleNotFoundError viridarium.application.care_events (unit+integration suites); frontend careEvents.test.ts "Failed to resolve import ./careEvents". Lanes interrupted by session limit 11:15, resumed 13:12 with fresh finisher agents against the same red tests · tests · TEST-014`
+- `~11:10 · test-engineer/Fable · test-foundation written: 67 numbered cases (13 B-U, 37 B-I incl. dual-engine + migration, 17 F), 4 critical-100% paths (append-only, health-on-observe, 404-reason/no-PII, cross-plant photo); response contract pins id in CareEventResponse · specs/changes/care-events/test-foundation.md · SPEC-003`
+
+- `~11:05 · orchestrator/Fable · story pickup: ticket to In Progress; PO ratified inline-upload photo decision; proposal w/ exact API contract written (DoR PASS); branch feat/us-3.2-care-events off main · specs/changes/care-events/proposal.md · SPEC-001/QG-001`

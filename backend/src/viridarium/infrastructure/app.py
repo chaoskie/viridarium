@@ -11,6 +11,9 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from viridarium.adapters.inbound.web.care_events import (
+    router as care_events_router,
+)
 from viridarium.adapters.inbound.web.care_schedules import (
     router as care_schedules_router,
 )
@@ -18,6 +21,12 @@ from viridarium.adapters.inbound.web.health import router as health_router
 from viridarium.adapters.inbound.web.locations import router as locations_router
 from viridarium.adapters.inbound.web.photos import router as photos_router
 from viridarium.adapters.inbound.web.plants import router as plants_router
+from viridarium.domain.care_event import (
+    CareEventNotFoundError,
+    HealthRequiresObserveError,
+    PhotoNotForPlantError,
+    PlantNotFoundForEventError,
+)
 from viridarium.domain.care_schedule import (
     CareScheduleNotFoundError,
     PlantNotFoundForScheduleError,
@@ -47,6 +56,7 @@ def _build_api_router() -> APIRouter:
     api.include_router(plants_router)
     api.include_router(photos_router)
     api.include_router(care_schedules_router)
+    api.include_router(care_events_router)
     return api
 
 
@@ -74,6 +84,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.plant_service = container.plant_service
     app.state.photo_service = container.photo_service
     app.state.care_schedule_service = container.care_schedule_service
+    app.state.care_event_service = container.care_event_service
 
     # Error-to-HTTP via a registered handler (ADR-C): domain raises typed errors;
     # the app factory maps each to a status. The body carries no PII (SEC-001),
@@ -133,6 +144,35 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         _request: Request, exc: CareScheduleNotFoundError
     ) -> JSONResponse:
         return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+    # Care-event errors (US-3.2). The addressed plant missing (guard first,
+    # VIRIDARIUM-48) and a missing/cross-plant event are 404; the health-on-non-observe
+    # rule and an unknown/cross-plant photo_id are body-reference failures -> 422. Each
+    # body carries ids + closed-enum values only - never the plant name or the note
+    # free text (SEC-001/SEC-007).
+    @app.exception_handler(PlantNotFoundForEventError)
+    async def _plant_not_found_for_event(
+        _request: Request, exc: PlantNotFoundForEventError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+    @app.exception_handler(CareEventNotFoundError)
+    async def _care_event_not_found(
+        _request: Request, exc: CareEventNotFoundError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+    @app.exception_handler(HealthRequiresObserveError)
+    async def _health_requires_observe(
+        _request: Request, exc: HealthRequiresObserveError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+    @app.exception_handler(PhotoNotForPlantError)
+    async def _photo_not_for_plant(
+        _request: Request, exc: PhotoNotForPlantError
+    ) -> JSONResponse:
+        return JSONResponse(status_code=422, content={"detail": str(exc)})
 
     # Secure-by-default posture (SEC-003, SEC-011).
     app.middleware("http")(security_headers_middleware)

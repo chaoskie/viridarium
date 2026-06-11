@@ -139,6 +139,42 @@ class PhotoModel(Base):
     )
 
 
+class CareEventModel(Base):
+    """A plant's care-event row (US-3.2, append-only).
+
+    Owned child of ``plant`` with ``ON DELETE CASCADE`` so the history dies with the
+    plant (like photos). ``photo_id`` is a nullable FK to ``photo`` with ``ON DELETE
+    SET NULL``: deleting the linked photo severs the link but preserves the event.
+    Enums are stored as ``String`` (D3, portable - no native DB enum types, ARCH-011)
+    and validated at the edge. Events are immutable (AC4), so there is no
+    ``updated_at`` (only the server-set ``created_at``, ADR-A). ``plant_id`` is
+    indexed for the per-plant list. The FK actions only fire on SQLite with the
+    ``foreign_keys`` pragma (set in ``engine.py``).
+    """
+
+    __tablename__ = "care_event"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    plant_id: Mapped[int] = mapped_column(
+        ForeignKey("plant.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    type: Mapped[str] = mapped_column(String(10), nullable=False)
+    happened_on: Mapped[date] = mapped_column(Date(), nullable=False)
+    note: Mapped[str | None] = mapped_column(String(10000), nullable=True)
+    photo_id: Mapped[int | None] = mapped_column(
+        ForeignKey("photo.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    health: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+
 class CareScheduleModel(Base):
     """A plant's care schedule row (US-3.1).
 
