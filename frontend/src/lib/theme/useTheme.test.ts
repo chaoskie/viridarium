@@ -81,7 +81,13 @@ describe("useTheme", () => {
 
   it("cycleTheme advances and wraps through the full set", () => {
     const { result } = renderHook(() => useTheme());
-    const order = ["dark", "herbarium", "terracotta", "roman"] as const;
+    const order = [
+      "dark",
+      "herbarium",
+      "terracotta",
+      "viridian",
+      "roman",
+    ] as const;
     for (const expected of order) {
       act(() => {
         result.current.cycleTheme();

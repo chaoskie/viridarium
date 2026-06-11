@@ -12,6 +12,8 @@
  *   - [data-theme="dark"]       - greenhouse at night (warm-dark, first-class).
  *   - [data-theme="terracotta"] - retained, warm clay sticker look.
  *   - [data-theme="herbarium"]  - retained, botanical editorial.
+ *   - [data-theme="viridian"]   - candidate, Victorian glasshouse (PO experiment
+ *     2026-06-11; lock-in pending PO review).
  *
  * The theme controller sets data-theme on <html>; absent the attribute the
  * :root defaults (Roman) render, so Roman is the no-JS / pre-paint default.
@@ -245,6 +247,82 @@
   --bg-texture-size: 26px 26px;
 
   /* No meander motif in Terracotta */
+  --motif-meander: none;
+
+  /* Sizing baselines */
+  --size-tap-min: 44px;
+}
+
+/* ------------------------------------------------------------------------- *
+ * THEME - Viridian (Victorian glasshouse) - CANDIDATE, PO experiment
+ * The pigment the app is named after: pale glass-green surfaces, deep pine
+ * ink, viridian brand accent, fern + brass secondaries, glass-pane texture.
+ * First green-led, sans-body theme. All pairs AA-verified (contrast guard).
+ * ------------------------------------------------------------------------- */
+[data-theme="viridian"] {
+  /* Surfaces - glass-pale greens */
+  --color-surface: #eef4ee; /* misted glass page */
+  --color-surface-raised: #f7faf6; /* bright pane tiles */
+  --color-surface-sunken: #e0eae0; /* shaded well */
+
+  /* Text / ink - deep pine */
+  --color-ink: #20312a; /* pine (>=12:1 on surface) */
+  --color-ink-muted: #4c6155; /* sage-grey (>=5.9:1 on surface) */
+  --color-ink-inverse: #f7faf6; /* pane-white on viridian fills */
+
+  /* Brand / interactive - viridian green */
+  --color-accent: #1f6f5b; /* viridian */
+  --color-accent-strong: #15543f; /* deep viridian (hover) */
+  --color-accent-soft: #d9eadd; /* leaf tint (active nav) */
+
+  /* Secondary + tertiary accents */
+  --color-accent-2: #5c7d4e; /* fern */
+  --color-accent-2-strong: #43603a; /* fern-deep */
+  --color-accent-3: #a07c33; /* brass (fill only) */
+  --color-accent-3-strong: #6f5520; /* brass-deep for AA text */
+
+  /* Semantic status - red stays reserved for danger only */
+  --color-danger: #ab3c30; /* madder */
+  --color-warning: #6f5520; /* brass-deep (AA text) */
+  --color-success: #15543f; /* deep viridian */
+
+  /* Structure - pane hairlines */
+  --color-border: #b8cdbb; /* glazing-bar hairline */
+  --color-ring: #1f6f5b;
+  --color-overlay: rgba(32, 49, 42, 0.45);
+
+  /* Typography - shipped families only (CSP-safe, zero new deps):
+     botanical display, the most readable body we have, specimen-tag labels */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-label: "IBM Plex Mono", ui-monospace, monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Radii - airy, soft glass */
+  --radius-card: 0.75rem; /* 12px */
+  --radius-control: 0.5rem; /* 8px */
+  --radius-pill: 9999px;
+
+  /* Structure widths - hairlines */
+  --border-width-card: 1px;
+  --border-width-control: 1px;
+
+  /* Elevation - soft green-tinted depth, like shade behind glass */
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 2px 10px rgba(32, 49, 42, 0.08);
+  --shadow-raised: 0 6px 20px rgba(32, 49, 42, 0.14);
+
+  /* Background texture - sunlight wash + glasshouse pane grid */
+  --bg-texture: radial-gradient(
+      ellipse 900px 500px at 50% -10%,
+      rgba(255, 255, 255, 0.55),
+      transparent 60%
+    ),
+    radial-gradient(circle at 85% 5%, rgba(31, 111, 91, 0.05), transparent 45%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M0 55h56M55 0v56' stroke='%2320312a' stroke-opacity='0.045' stroke-width='1'/%3E%3C/svg%3E");
+  --bg-texture-size: auto;
+
+  /* No meander motif in Viridian */
   --motif-meander: none;
 
   /* Sizing baselines */

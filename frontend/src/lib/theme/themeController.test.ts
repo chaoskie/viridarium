@@ -82,6 +82,7 @@ describe("themeController", () => {
         "dark",
         "herbarium",
         "terracotta",
+        "viridian",
       ] as const) {
         persistTheme(theme);
         expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe(theme);
@@ -100,11 +101,12 @@ describe("themeController", () => {
   });
 
   describe("switching", () => {
-    it("cycles roman -> dark -> herbarium -> terracotta -> roman", () => {
+    it("cycles roman -> dark -> herbarium -> terracotta -> viridian -> roman", () => {
       expect(nextTheme("roman")).toBe("dark");
       expect(nextTheme("dark")).toBe("herbarium");
       expect(nextTheme("herbarium")).toBe("terracotta");
-      expect(nextTheme("terracotta")).toBe("roman");
+      expect(nextTheme("terracotta")).toBe("viridian");
+      expect(nextTheme("viridian")).toBe("roman");
     });
   });
 
