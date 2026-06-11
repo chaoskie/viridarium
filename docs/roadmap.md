@@ -29,7 +29,7 @@ Release-gate items (block the v0.1 tag, not the stories):
 
 - **CSP bug**: backend-served SPA blocks Google Fonts and the inline theme pre-paint script. Must be fixed before any "usable" claim.
 - **CI Node 20 deprecation**: bump `setup-uv` before 2026-06-16 (hard external deadline, falls inside this phase).
-- **Cut v0.1.0**: sync version fields, tag, convert CHANGELOG `[Unreleased]`, per the ratified bump-gate policy.
+- **Cut v0.1.0**: sync version fields, tag, convert CHANGELOG `[Unreleased]`, per the bump-gate policy **ratified by the PO 2026-06-11** (minor per completed epic, patch for deploy-worthy fixes, breaking-in-minor while 0.x, 1.0.0 only at declared API stability).
 
 Scope refinement vs spec §5: the spec lists all of E3 in v0.1. This roadmap takes the E3 core (US-3.2 through US-3.5) into v0.1 and moves US-3.6 (snooze/skip) and US-3.7 (bulk watering) to v0.2: both are conveniences layered on top of due computation, and neither is needed for the app to be usable. US-3.8 was already marked v1.5 in the spec.
 
@@ -44,7 +44,13 @@ Goal: the dashboard is finished and automations can read due-state without scrap
 - **US-5.1** REST API `/api/v1` + OpenAPI docs. Largely satisfied incrementally (every story ships its endpoints and the OpenAPI docs already serve); the remaining story is formalization: completeness check against the UI surface, doc polish, and the "everything UI-reachable is API-reachable" audit.
 - **US-5.2** `GET /api/v1/due` endpoint (the automation poll)
 - **US-5.3** ICS calendar feed (per instance and per location)
-- **A11y contrast audit** across all themes (WCAG AA), folded into the FE gate
+- **Theme model v2** (PO-ratified 2026-06-11): light/dark becomes a toggle orthogonal
+  to theme choice; **Viridian becomes the default theme**; the standalone Dark theme
+  becomes Roman's dark variant; Viridian gains a dark variant
+- **Delete-plant dialog hardening**: state the cascading data loss, offer
+  archive-instead as the primary action
+- **A11y contrast audit** across all themes (WCAG AA, per theme x mode after theme
+  model v2), folded into the FE gate
 
 ## Phase v0.3 - automation, hardening, polish
 
@@ -53,6 +59,9 @@ Goal: write-side automation, API guarantees, and the quality backlog.
 - **US-5.4** Outbound webhooks on due/overdue transitions (retry/backoff, ntfy example)
 - **US-5.5** API stability rules + contract test suite (additive-only within v1)
 - **US-5.6** Full data export endpoint (JSON + photo archive)
+- **Observability/structured logging** (PO-ratified 2026-06-11, was a candidate):
+  request/event logging without PII, levels, optional JSON output; closes the SEC-008
+  gap; the US-2.3 debt line folds in
 - **Bulk plant location management** + orphaned/homeless plant handling (D-009 follow-up)
 - **Phone layout polish**: floating/overflowing elements
 - **Tech-debt burn-down**: upload body-size limit, CoverThumb N+1, PlantsPage decomposition, dual-engine integration harness, Modal focus-trap, filter-reset on mutation, 422 field heuristic, schema length-vs-trim
@@ -84,9 +93,9 @@ Carried from the US-3.1 architect pass and the E3 handoff:
 Ideas with a ticket on the board but no spec backing yet. Each needs PO ratification plus a spec amendment before it enters a phase.
 
 - **Data import / restore**: the counterpart to US-5.6 export. Export without import is half a data-freedom story (restore after disaster, migrate between instances, seed from another tool). Natural phase: v0.3, alongside US-5.6.
-- **Observability / structured logging**: resolves the SEC-008 gap as a real story (request logging with no PII, log levels, optional JSON output for log shippers) instead of piecemeal debt. Natural phase: v0.3.
+- **Plant transfer via QR code** (PO idea 2026-06-11): two localhost instances can never connect, but trading a plant should carry its history - generate a QR representing one plant (attributes, schedules, care history; photos likely excluded for capacity), scan and import it as a new plant elsewhere. Needs a payload-format spec-explore; relates to US-5.6 and the import candidate.
 
-PO ideas captured 2026-06-11 (each needs a spec-explore pass plus a product-spec amendment; all gated on an **extension/plugin architecture decision**, also ticketed - are these core domain extensions or a real plugin surface?):
+PO ideas captured 2026-06-11 (each needs a spec-explore pass plus a product-spec amendment; all gated on an **extension/plugin architecture decision**, also ticketed - are these core domain extensions or a real plugin surface? PO decided 2026-06-11: that exploration runs **after v0.1 ships**):
 
 - **Garden (outdoor) plants**: planting locations, season-driven care, lifecycle dates.
 - **Bonsai support**: specialized care types (pruning, wiring, multi-year repot cycles); first concrete pressure on the deliberately closed water/feed enum.
