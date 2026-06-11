@@ -71,6 +71,22 @@ logging (US-3.7), any change to CareSchedule or the schedule UI.
   (no update route exists; OpenAPI cross-checked).
 - AC5: both engines green in CI; everything UI-reachable is API-reachable.
 
+## Implementation notes and ratified deviations (comply-or-explain, PRIN-X)
+
+- **Ordering third key:** the repository orders by `happened_on` desc, `created_at`
+  desc, **then `id` desc**. The third key is a permitted extension of the two-key
+  contract above: `created_at` is second-granular on SQLite, so same-second appends
+  would otherwise tie; `id` desc preserves the created-at-desc intent
+  deterministically on both engines. (Review LOW-1, ratified 2026-06-11.)
+- **TEST-014 exception for B-I35/B-I36/B-I37** (dual-engine CASCADE / SET NULL +
+  migration reversibility tests): authored alongside the implementation, without an
+  independent red run. Cause: the original build lane was killed by a session usage
+  limit after writing the endpoint/unit reds but before these three; the finisher
+  agent wrote them with the code. The deviation is recorded in the worklog, the
+  story-complete re-audit read all three and judged they assert structural facts a
+  wrong migration/FK would fail (and they mirror the proven 0005 precedent).
+  **Approved as a one-off; not a precedent.** (Review HIGH-1, ratified 2026-06-11.)
+
 ## Sizing
 
 Two disjoint-file lanes (backend/ vs frontend/), ~400-500 LOC new logic per lane

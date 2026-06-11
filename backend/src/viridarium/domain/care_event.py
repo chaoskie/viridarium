@@ -121,9 +121,9 @@ class HealthRequiresObserveError(Exception):
     closed-enum type value (no PII, no free text - SEC-007).
     """
 
-    def __init__(self, type: CareEventType) -> None:
-        self.type = type
-        super().__init__(f"health is only valid on observe events, not {type}")
+    def __init__(self, event_type: CareEventType) -> None:
+        self.event_type = event_type
+        super().__init__(f"health is only valid on observe events, not {event_type}")
 
 
 class CareEventRepository(Protocol):

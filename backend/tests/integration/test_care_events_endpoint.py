@@ -290,7 +290,8 @@ def test_list_newest_first_by_created_at(client: TestClient) -> None:  # B-I20
 
     listed = client.get(_events_url(plant_id)).json()
 
-    # Same happened_on (today): created_at desc tiebreak -> reverse insertion order.
+    # Same happened_on (today) and same-second created_at on SQLite: the id desc
+    # final tiebreak preserves the created-at-desc intent (newest insert first).
     assert [e["note"] for e in listed] == ["third", "second", "first"]
 
 
