@@ -20,6 +20,14 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource/atkinson-hyperlegible": "^5.2.8",
+    "@fontsource/baloo-2": "^5.2.7",
+    "@fontsource/cinzel": "^5.2.8",
+    "@fontsource/cormorant-garamond": "^5.2.11",
+    "@fontsource/eb-garamond": "^5.2.7",
+    "@fontsource/fraunces": "^5.2.9",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/spectral": "^5.2.8",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.4"

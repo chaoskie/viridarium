@@ -7,57 +7,15 @@
     <title>Viridarium</title>
 
     <!--
-      Theme fonts for all four themes (FE-001 lock):
-        Roman + Dark -> Cinzel (display/label) + EB Garamond (body)
-                        + Cormorant Garamond (italic accent / ledgers)
-        Terracotta   -> Baloo 2 (display) + Atkinson Hyperlegible (body)
-        Herbarium    -> Fraunces (display) + Spectral (body) + IBM Plex Mono
-      Loaded from Google Fonts with preconnect.
-      Follow-up: self-host via @fontsource for offline-first
-      (see specs/changes/theme-roman-dark-responsive/proposal.md non-goals).
-    -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+      Theme fonts (FE-001 lock) are self-hosted via @fontsource and imported by
+      the bundle (src/styles/fonts.ts): same-origin under the strict CSP and
+      fully offline (VIRIDARIUM-37).
 
-    <!--
-      Pre-paint theme application (avoids a flash of the wrong theme).
-      Mirrors src/lib/theme/themeController.ts; kept inline + tiny so it runs
-      before the bundle. Precedence (D-008): a stored choice always wins; else
-      honor the OS prefers-color-scheme (dark -> dark); else the Roman default.
-      KEY + valid values MUST match the controller.
+      theme-init.js applies the persisted theme before paint; it stays a
+      blocking same-origin script so it runs ahead of the bundle. Its KEY and
+      theme list mirror src/lib/theme/themeController.ts.
     -->
-    <script>
-      (function () {
-        var KEY = "viridarium.theme";
-        var THEMES = ["roman", "dark", "herbarium", "terracotta"];
-        var DEFAULT = "roman";
-        var stored;
-        try {
-          stored = window.localStorage.getItem(KEY);
-        } catch (e) {
-          stored = null;
-        }
-        var theme;
-        if (THEMES.indexOf(stored) >= 0) {
-          theme = stored;
-        } else {
-          var prefersDark = false;
-          try {
-            prefersDark =
-              window.matchMedia &&
-              window.matchMedia("(prefers-color-scheme: dark)").matches;
-          } catch (e) {
-            prefersDark = false;
-          }
-          theme = prefersDark ? "dark" : DEFAULT;
-        }
-        document.documentElement.setAttribute("data-theme", theme);
-      })();
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>
