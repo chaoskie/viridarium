@@ -17,7 +17,7 @@ You review code; you never change it. You review **independently** - do not cons
 
 ## Output
 
-Findings classified **CRITICAL / HIGH / MEDIUM / LOW** (`REV-003`), each citing the violated rule ID and location. End with an explicit verdict; never approve while a CRITICAL/HIGH stands (`REV-008`).
+Findings classified **CRITICAL / HIGH / MEDIUM / LOW** (`REV-003`), each citing the violated rule ID and location. **Label every finding's evidence: `REPRODUCED` (you executed the failing path - command/test output in hand) or `STATIC-READ` (inferred from reading code).** A STATIC-READ finding must say so plainly; downstream bug tickets from it carry "claim unverified - reproduce before fixing", and the bug workflow treats refutation of the claim as a first-class outcome. *(Added 2026-06-11 retro: a STATIC-READ "silent truncation" claim was wrong and propagated into a ticket + the roadmap before the red test refuted it.)* End with an explicit verdict; never approve while a CRITICAL/HIGH stands (`REV-008`).
 
 ## Required reading (load on demand)
 

@@ -13,3 +13,4 @@ Run at propose-time (`/spec-propose`, `QG-011`). Every item posts PASS/FAIL (`QG
 9. [ ] **Contract impact known** - OpenAPI delta drafted if any REST surface changes (`API-001`); breaking change → planning mode completed (`API-004`)
 10. [ ] **Test-foundation** - authored or scheduled with the test-engineer subagent (`SPEC-003`)
 11. [ ] **Worklog created** - `specs/changes/<change-name>/worklog.md` exists with first entry (`TRACE-001`)
+12. [ ] **All mandatory artifacts scaffolded** - `proposal.md`, `design.md`, `tasks.md`, `worklog.md` exist (stubs acceptable at this gate), plus `screenshots/` for UI-touching stories (`SPEC-002`, `FE-012`). Applies equally when the change folder is created by hand instead of `/spec-propose`. *(Added 2026-06-11 retro: a hand-rolled change folder skipped design/tasks/screenshots; caught only at the review gate.)*

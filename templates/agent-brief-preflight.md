@@ -11,6 +11,15 @@ During the work (test-first evidence, `TEST-014`):
 
 5. Write the tests first and **paste the failing run (the "red") into the change worklog** - the test names + the failing assertion/error - BEFORE writing the implementation that turns them green. Then implement to green. The orchestrator records this as the PRIN-III evidence; a worklog with no red-before-green is a deviation.
 
-6. **Use the spec's domain vocabulary verbatim.** Enum values, field names, and status terms come from `docs/product-spec.md` (and the change's design) EXACTLY as written. Inventing or extending a domain enum/field (e.g. adding pot materials the spec doesn't list, renaming light levels) is a **SPEC-001 / PRIN-IV violation**, not a judgment call - and never label invented values as "the spec wire form." If the spec seems wrong or incomplete, STOP and raise it; do not improve it silently.
+6. **Be crash-resumable.** Write ALL red tests for your lane (in test-foundation
+   case order) before any implementation, and append a one-line checkpoint to
+   `specs/changes/<change-name>/lane-state.md` after each completed case-group
+   (e.g. `BE - B-I1..14 red recorded - implementing repository`). If you are
+   interrupted, a finisher agent must be able to resume losslessly from the red
+   tests + the last checkpoint line. *(Added 2026-06-11 retro: two lanes were
+   killed mid-story by a session usage limit; recovery worked only because the
+   reds happened to exist, and three late tests lost their independent red.)*
 
-Rationale: preflight 1-4 from retro 2026-06-07 (npm 10/11 lockfile skew found at docker build time); step 5 from retro 2026-06-08 (test-first mandated but only trusted, not evidenced); step 6 from the E2 retro 2026-06-10 (a build agent invented enum values + mislabeled them, caught only by the orchestrator's OpenAPI-vs-spec cross-check).
+7. **Use the spec's domain vocabulary verbatim.** Enum values, field names, and status terms come from `docs/product-spec.md` (and the change's design) EXACTLY as written. Inventing or extending a domain enum/field (e.g. adding pot materials the spec doesn't list, renaming light levels) is a **SPEC-001 / PRIN-IV violation**, not a judgment call - and never label invented values as "the spec wire form." If the spec seems wrong or incomplete, STOP and raise it; do not improve it silently.
+
+Rationale: preflight 1-4 from retro 2026-06-07 (npm 10/11 lockfile skew found at docker build time); step 5 from retro 2026-06-08 (test-first mandated but only trusted, not evidenced); step 7 from the E2 retro 2026-06-10 (a build agent invented enum values + mislabeled them, caught only by the orchestrator's OpenAPI-vs-spec cross-check).

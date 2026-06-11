@@ -12,14 +12,16 @@
 
 BACKEND_DIR := backend
 # `uv run` executes inside the backend project venv reproducibly.
-UV_RUN := uv run --project $(BACKEND_DIR)
+# --frozen: the lockfile never re-resolves implicitly (retro 2026-06-11);
+# dependency changes require an explicit `uv lock`.
+UV_RUN := uv run --frozen --project $(BACKEND_DIR)
 
 .PHONY: backend-install lint format format-check typecheck imports \
         test-unit test-integration test-coverage audit quality-gates \
         dev-backend help
 
 backend-install: ## Sync backend deps into the uv-managed venv
-	uv sync --project $(BACKEND_DIR) --extra dev
+	uv sync --frozen --project $(BACKEND_DIR) --extra dev
 
 lint: ## ruff check (lint + security S rules) (QG-001)
 	$(UV_RUN) ruff check $(BACKEND_DIR)/src $(BACKEND_DIR)/tests
@@ -31,10 +33,10 @@ format-check: ## ruff format --check (QG-001)
 	$(UV_RUN) ruff format --check $(BACKEND_DIR)/src $(BACKEND_DIR)/tests
 
 typecheck: ## mypy strict on domain+application, looser on adapters (QG-001)
-	cd $(BACKEND_DIR) && uv run mypy src/viridarium
+	cd $(BACKEND_DIR) && uv run --frozen mypy src/viridarium
 
 imports: ## import-linter hexagonal boundary contracts (ARCH-003)
-	cd $(BACKEND_DIR) && uv run lint-imports --config pyproject.toml
+	cd $(BACKEND_DIR) && uv run --frozen lint-imports --config pyproject.toml
 
 test-unit: ## pytest unit layer (QG-002, TEST-012)
 	$(UV_RUN) pytest $(BACKEND_DIR)/tests -m unit
