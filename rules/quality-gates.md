@@ -81,3 +81,11 @@ A new or repaired quality gate (CI job, Makefile target, perf/a11y/event-logging
 - **One expected outcome per assertion** - never widen an assertion (e.g. `assert x in (a, b)`) to make a gate tolerant.
 A gate without a bites-proof is advisory, not a gate. *(Added 2026-06-11, cross-pollinated from sibling-project retros: a sibling project discovered a perf gate that had counted zero queries since inception - instrumentation attached to a test-only engine, fixtures with no data.)*
 *Targets:* developers, test-engineer, pipeline-medic, ci, reviewer-gate.
+
+### QG-016 - Completion language is gate-bound
+An agent MUST NOT declare a story, phase, or change "done", "complete", or "ready" until the matching gate checklist (QG-004 for phase/story advancement, the DoD for merge/archive) has been **posted with its results**. Until that moment, status language states exactly what is pending - e.g. "implementation complete; review and DoD gates pending". A premature completion claim is a gate violation in itself, even if the work later passes every gate. Implements [[00-constitution#PRIN-VIII Self-Verifying Advancement|PRIN-VIII]]. *(Added 2026-06-11, cross-pollinated from sibling-project retros: "Phase 1 done" was claimed with the reviewer, test-engineer, and security gates all unrun.)*
+*Targets:* all agents, reviewer-gate, retrospective, DoD template.
+
+### QG-017 - No paper gates
+Every numeric or mechanical bar the rules cite (coverage floors, lint/format, boundary contracts, audit levels) MUST be enforced by a tool that **fails the build/pipeline on breach** - a Makefile target plus its CI mirror. The wiring is verified when the bar is introduced (bites-proof, QG-015), and the **enforced run's output is referenced at the DoD gate** - never assumed from the rule text. A bar that exists only in prose is not a gate. *(Added 2026-06-11, cross-pollinated from sibling-project retros: a sibling project carried an 80% coverage rule on paper while an entire layer sat at 0% under a green build - no coverage check was wired anywhere.)*
+*Targets:* ci, pipeline-medic, test-engineer, reviewer-gate, DoD template.

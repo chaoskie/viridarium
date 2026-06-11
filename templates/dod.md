@@ -1,6 +1,6 @@
 # Definition of Done
 
-Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/WATCH/FAIL (`QG-004`); any FAIL blocks archive/merge; any WATCH records its caveat in the worklog for the next retro.
+Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/WATCH/FAIL (`QG-004`); any FAIL blocks archive/merge; any WATCH records its caveat in the worklog for the next retro. Until this checklist is posted with results, the change is not "done" - completion language is gate-bound (`QG-016`).
 
 ## 1. Functional
 - [ ] Every acceptance criterion met and verified (story-complete check)
@@ -17,9 +17,11 @@ Run at archive-time (`/spec-archive`, `QG-012`). Every item posts PASS/WATCH/FAI
 - [ ] Coverage: overall floor 85%; diff-cover ≥80%; domain/app branch ≥95% (`QG-002`)
 - [ ] Required pytest layer markers present in every test file (`TEST-012`)
 - [ ] Test-foundation re-audit **approved** by the test-engineer subagent (`SPEC-003`)
+- [ ] Scenario-to-test traceability: every test-foundation scenario maps to a named implemented test or an explicit worklogged deferral; neither blocks (`TEST-015`) *(Added 2026-06-11, cross-pollinated from sibling-project retros.)*
 - [ ] Test-first evidence: the failing run (the "red") is recorded in the worklog before the green commit (`TEST-014`)
 - [ ] Empirical review done: red-verify of the new tests + ≥1 mutation spot-check on new wiring, run in a throwaway copy, outcomes in the worklog (`REV-010`)
 - [ ] If the change adds or repairs a quality gate: bites-proof recorded - the gate demonstrably failed against the broken property in a throwaway copy (`QG-015`)
+- [ ] No paper gates: every numeric/mechanical bar this change relies on is enforced by a tool that fails the pipeline on breach, and the enforced run's output is referenced here - never assumed (`QG-017`) *(Added 2026-06-11, cross-pollinated from sibling-project retros.)*
 - [ ] Playwright acceptance green (`TEST-009`, `CI-010`); ran on both SQLite and PostgreSQL paths (`ARCH-011`)
 - [ ] UI story: verified via the **production path** - built SPA served *through the backend* (not just vite dev / in-process TestClient), **zero page/console errors** (`TEST-010`). Catches CSP-class bugs (security headers vs external assets/inline scripts) invisible to dev-mode + API-only tests. *(Added 2026-06-08, sprint-2 retro.)*
 - [ ] Audit Spaces green: a11y / perf (`FE-015`) + event-logging (`SEC-008`)

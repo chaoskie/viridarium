@@ -65,3 +65,7 @@ The suite MUST satisfy `QG-002` (overall coverage floor 85%; diff-cover 80% on n
 ### TEST-014 — Test-first evidence (the red)
 Test-first ([[00-constitution#PRIN-III Test-First|PRIN-III]]) is **auditable from artifacts, not trusted from a claim**. For each story (or lane), the build agent records the **failing-test run that precedes the implementation** in the change worklog: the test names plus the failing assertion/error output (the "red"), before the commit that turns them green. Coverage + a passing suite prove the tests exist and pass; this proves they were written first. A story whose worklog shows no red-before-green is a PRIN-III deviation requiring comply-or-explain. *(Added 2026-06-08, sprint-2 retro, closing the sprint-1 carry-forward.)*
 *Targets:* developers, test-engineer, reviewer-gate, DoD template.
+
+### TEST-015 - Scenario-to-test traceability
+Every scenario in the change's test-foundation (`SPEC-003`) MUST map, at the DoD gate, to either a **named implemented test** or an **explicit deferral recorded in the worklog**. A scenario with neither blocks the gate. The mapping is produced by the test-engineer's story-complete re-audit; "the suite is green" is not a substitute for it. *(Added 2026-06-11, cross-pollinated from sibling-project retros: the headline spec scenario was specified, broken in four places, and tested nowhere.)*
+*Targets:* test-engineer, reviewer-gate, DoD template.
