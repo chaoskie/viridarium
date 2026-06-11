@@ -22,7 +22,7 @@ Findings are classified **CRITICAL / HIGH / MEDIUM / LOW**. CRITICAL and HIGH MU
 *Targets:* all reviewers, pull-request template, td workflow.
 
 ### REV-004 — Independent reviewer
-At least one full review pass MUST be performed by a reviewer (agent or human) that did **not** write the code under review. An implementer never solely approves their own change.
+At least one full review pass MUST be performed by a reviewer (agent or human) that did **not** write the code under review. An implementer never solely approves their own change. **Auditable, not trusted:** the worklog records both actors (`TRACE-006`), and the reviewing actor MUST differ from the implementing actor - the DoD checks this mechanically. *(Amended 2026-06-11, cross-pollinated from sibling-project retros.)*
 *Targets:* reviewer-gate, DoD template.
 
 ### REV-005 — code-reviewer mandatory checks (pointers)
@@ -55,3 +55,11 @@ A change MUST NOT be approved (no "thumb up", no gate pass) while any CRITICAL/H
 
 ### REV-009 → QG-010
 Commit/merge gating (human confirm vs autonomous-loop opt-in) is defined in `QG-010`. Not restated.
+
+### REV-010 - Empirical review (mechanical teeth)
+Review is adversarial and empirical, briefed to refute rather than confirm. For any change that adds or modifies tests or wiring, the review gate MUST execute, in a throwaway copy of the repo (QG-008):
+1. **Red-verify** - revert the production diff (keep the new tests) and run the new tests: they MUST fail against the reverted code. A new test that still passes is tautological (`TEST-004`) and a HIGH finding. (Complements `TEST-014`: that rule audits the author's red; this one has the reviewer reproduce it independently.)
+2. **Mutation spot-check** - break at least one newly added wiring line (a route registration, a handler call, a query filter, an event hook) and confirm a test fails. Minimum one per review.
+3. **Browser-verify** - any UX-affecting claim is verified against a running build via the production path (per the DoD), not inferred from reading components. Playwright output counts; reading JSX does not.
+Findings from these checks carry `REPRODUCED` evidence by construction. *(Added 2026-06-11, cross-pollinated from sibling-project retros, where empirical review caught two would-have-shipped defects that green gates had passed.)*
+*Targets:* code-reviewer, reviewer-gate, review workflow, DoD template.

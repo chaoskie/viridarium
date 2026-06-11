@@ -1,6 +1,6 @@
 # Definition of Ready
 
-Run at propose-time (`/spec-propose`, `QG-011`). Every item posts PASS/FAIL (`QG-004`); any FAIL stops intake.
+Run at propose-time (`/spec-propose`, `QG-011`). Every item posts PASS/WATCH/FAIL (`QG-004`); any FAIL stops intake; any WATCH records its caveat for the next retro.
 
 1. [ ] **Approved to start** - the maintainer agrees this change should happen now
 2. [ ] **Story format** - "As `<role>`, I want `<what>`, so that `<why>`" (`SPEC-004`)
@@ -14,3 +14,4 @@ Run at propose-time (`/spec-propose`, `QG-011`). Every item posts PASS/FAIL (`QG
 10. [ ] **Test-foundation** - authored or scheduled with the test-engineer subagent (`SPEC-003`)
 11. [ ] **Worklog created** - `specs/changes/<change-name>/worklog.md` exists with first entry (`TRACE-001`)
 12. [ ] **All mandatory artifacts scaffolded** - `proposal.md`, `design.md`, `tasks.md`, `worklog.md` exist (stubs acceptable at this gate), plus `screenshots/` for UI-touching stories (`SPEC-002`, `FE-012`). Applies equally when the change folder is created by hand instead of `/spec-propose`. *(Added 2026-06-11 retro: a hand-rolled change folder skipped design/tasks/screenshots; caught only at the review gate.)*
+13. [ ] **Open questions zeroed** - every ambiguity and unknown in the change is enumerated in the proposal; each **scope-affecting** question was asked to the maintainer and answered **before** this gate passes; the proposal states `Open questions: none` explicitly (silence or an absent section is not a pass). Non-scope-affecting unknowns may stay listed as assumptions, each with the answer the work proceeds on. *(Added 2026-06-11, cross-pollinated from sibling-project retros: implementing past an unasked scope question is the most expensive class of rework.)*

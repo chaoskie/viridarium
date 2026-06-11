@@ -40,7 +40,7 @@ Test-first is auditable, not trusted: a build agent records the **failing-test r
 Every push results in a fully green pipeline. No "pre-existing failures". A pull request MUST NOT merge on a red pipeline. Governs `CI-*`, `QG-*`.
 
 ### PRIN-VIII Self-Verifying Advancement
-An agent MAY advance autonomously only after running an explicit gate-check whose PASS/FAIL results are posted before advancing. Any FAIL halts. Silent advancement is a violation. Governs `QG-*`, `TRACE-*`.
+An agent MAY advance autonomously only after running an explicit gate-check whose PASS/WATCH/FAIL results are posted before advancing. Any FAIL halts. A WATCH passes only with its caveat recorded for the next retrospective (semantics in `QG-004`). Silent advancement is a violation. Governs `QG-*`, `TRACE-*`. *(Amended 2026-06-11: WATCH verdict added, cross-pollinated from sibling-project retros.)*
 
 ### PRIN-IX Minimal Changes
 Change only what the task requires. Unrelated refactors, renames, dependency bumps, and formatter cascades MUST NOT ride along. Formatters run only on touched files. Governs `REV-*`, `SPEC-*`.
@@ -60,3 +60,4 @@ Every unit of work keeps a worklog capturing the AI and user steps that produced
 | 2026-06-07 | PRIN-VI | Parallel execution of independent, disjoint-file stories permitted under a single gating orchestrator | Sprint-1 retro, fork F1 |
 | 2026-06-08 | PRIN-VI | LOC soft budget applies per disjoint delivery lane when one story runs as parallel lanes (hard ceiling stays per story) | Sprint-2 retro, fork |
 | 2026-06-08 | PRIN-III | Test-first requires a recorded red-run in the worklog before the green commit (see TEST-014) | Sprint-2 retro, fork |
+| 2026-06-11 | PRIN-VIII | Gate-check vocabulary extended to PASS/WATCH/FAIL; WATCH = pass with a recorded caveat that must surface in the next retrospective (QG-004) | Cross-pollination from sibling-project retros |

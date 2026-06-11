@@ -29,7 +29,11 @@ Overall coverage floor is **85%**. New/changed code MUST meet **80% diff-cover**
 *Targets:* test-engineer.
 
 ### QG-004 — Gate-check matrix between phases
-Before advancing a phase or story, the agent MUST post an explicit PASS/FAIL checklist (one line + justification per item). Any FAIL halts advancement. Implements [[00-constitution#PRIN-VIII Self-Verifying Advancement|PRIN-VIII]].
+Before advancing a phase or story, the agent MUST post an explicit PASS/WATCH/FAIL checklist (one line + justification per item). Verdict semantics:
+- **PASS** - the item is met, no reservations.
+- **WATCH** - the item passes **with a recorded caveat** (a known weakness, an assumption taken on, a concern deferred). A WATCH does not block advancement, but its caveat MUST be logged in the worklog and MUST surface in the next retrospective (`LANG-009`); a WATCH whose caveat never reaches a retro is a violation. WATCH is never a euphemism for FAIL.
+- **FAIL** - halts advancement. No exceptions.
+Implements [[00-constitution#PRIN-VIII Self-Verifying Advancement|PRIN-VIII]]. *(Amended 2026-06-11: WATCH added, cross-pollinated from sibling-project retros.)*
 *Targets:* all agents, spec-apply, retrospective.
 
 ### QG-005 — Story sign-off
@@ -45,8 +49,8 @@ An agent fixing a failure MUST stop and escalate after **3 retries on the same f
 *Targets:* all agents, bug workflow, pipeline-medic.
 
 ### QG-008 — WIP rollback points
-Commit a WIP checkpoint after each completed task group so any failure has a clean rollback point. (Subject to the commit-gating posture in QG-010.)
-*Targets:* developers, spec-apply.
+Commit a WIP checkpoint after each completed task group so any failure has a clean rollback point. (Subject to the commit-gating posture in QG-010.) **Destructive experiments** (reverting diffs to prove a test red, mutating code to trip a gate, bulk deletions, history surgery) run only in a **throwaway copy of the repo** (e.g. under `/tmp`), never in the working tree. *(Amended 2026-06-11, cross-pollinated from sibling-project retros.)*
+*Targets:* developers, spec-apply, reviewer-gate.
 
 ### QG-009 — File-size ceilings
 New source files: **250 LOC soft ceiling** (exceed only with inline justification). Test files: **500 LOC hard max** (split by endpoint / scenario group).
@@ -69,3 +73,11 @@ The source project mandated a SonarQube quality gate as a binding external gate.
 
 ### QG-014 RETIRED (not applicable: no external Sigrid gate in this project)
 The source project mandated a Sigrid maintainability star bar as a binding external gate. No equivalent external maintainability service is used here; maintainability is upheld by PRIN-I, the file-size ceilings (QG-009), and code review (`REV-*`).
+
+### QG-015 - Gates must bite (bites-proof)
+A new or repaired quality gate (CI job, Makefile target, perf/a11y/event-logging audit, custom check) MUST ship with a **demonstrated red**: break the guarded property in a throwaway copy (QG-008) and show the gate failing, with the red recorded in the worklog. Corollaries:
+- **Instrument the app's own resources** - the gate measures the engine/connection/build the application actually uses at runtime, never a test-only stand-in.
+- **Trippable fixtures** - gate fixtures are seeded with real data so the failure path is reachable; a gate that has never fired is presumed broken until red-proven.
+- **One expected outcome per assertion** - never widen an assertion (e.g. `assert x in (a, b)`) to make a gate tolerant.
+A gate without a bites-proof is advisory, not a gate. *(Added 2026-06-11, cross-pollinated from sibling-project retros: a sibling project discovered a perf gate that had counted zero queries since inception - instrumentation attached to a test-only engine, fixtures with no data.)*
+*Targets:* developers, test-engineer, pipeline-medic, ci, reviewer-gate.
