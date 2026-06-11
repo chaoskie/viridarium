@@ -86,16 +86,22 @@ Ideas with a ticket on the board but no spec backing yet. Each needs PO ratifica
 - **Data import / restore**: the counterpart to US-5.6 export. Export without import is half a data-freedom story (restore after disaster, migrate between instances, seed from another tool). Natural phase: v0.3, alongside US-5.6.
 - **Observability / structured logging**: resolves the SEC-008 gap as a real story (request logging with no PII, log levels, optional JSON output for log shippers) instead of piecemeal debt. Natural phase: v0.3.
 
+PO ideas captured 2026-06-11 (each needs a spec-explore pass plus a product-spec amendment; all gated on an **extension/plugin architecture decision**, also ticketed - are these core domain extensions or a real plugin surface?):
+
+- **Garden (outdoor) plants**: planting locations, season-driven care, lifecycle dates.
+- **Bonsai support**: specialized care types (pruning, wiring, multi-year repot cycles); first concrete pressure on the deliberately closed water/feed enum.
+- **Pots collection**: pots as first-class inventory (sizes, materials, which plant sits in which pot, empty pots for repotting); may stay core given how close it is to the existing inventory.
+
 Parked ideas (deliberately out of scope per spec §6, revisit only post-v1): weather-aware scheduling via the open API, MQTT/sensor ingestion, repot scheduling, native notifications (stay delegated to webhook/ICS consumers).
 
 ## Known bugs and tech debt
 
-All tracked on the board. Severity-ordered register as of 2026-06-10:
+All tracked on the board. Severity-ordered register as of 2026-06-11:
 
 | Item | Severity | Phase |
 |---|---|---|
-| CSP blocks Google Fonts + inline theme script when SPA served by backend | high | v0.1 gate |
-| CI actions on deprecated Node 20 (deadline 2026-06-16) | low (time-boxed) | v0.1 gate |
+| CSP blocks Google Fonts + inline theme script when SPA served by backend | high | **fixed 2026-06-11** (fonts self-hosted, script externalized) |
+| CI actions on deprecated Node 20 (deadline 2026-06-16) | low (time-boxed) | **fixed 2026-06-11** |
 | Upload body-size limit missing (defense-in-depth) | medium | v0.3 |
 | SEC-008 structured logging gap | medium | v0.3 (or candidate story) |
 | CoverThumb N+1 on plant list | medium | v0.3 |
@@ -103,8 +109,8 @@ All tracked on the board. Severity-ordered register as of 2026-06-10:
 | Dual-engine integration harness missing (ARCH-011 risk) | medium | v0.3 |
 | Modal focus-trap + schema length-vs-trim | low | v0.3 |
 | Filter-reset on mutation + 422 field heuristic | low | v0.3 |
-| Photo upload writes the file to disk before the DB insert; a failure orphans the file | medium | v0.3 |
-| Plant form accepts a decimal pot size; backend silently truncates it to an int | medium | v0.3 |
-| Schedule GET/DELETE return a wrong-reason 404 when the plant itself is missing | low | v0.3 |
+| Photo upload writes the file to disk before the DB insert; a failure orphans the file | medium | **fixed 2026-06-11** |
+| Plant form accepts a decimal pot size; backend rejects it as a confusing wrong-field 422 | medium | **fixed 2026-06-11** (triage corrected: never truncated) |
+| Schedule GET/DELETE return a wrong-reason 404 when the plant itself is missing | low | **fixed 2026-06-11** |
 
-The last three rows come from the 2026-06-10 code review pass; each is filed as an individual bug ticket on the board with file/line evidence and a fix direction.
+The last three rows came from the 2026-06-10 code review pass and were fixed test-first the next day; the remaining open rows are the v0.3 tech-debt burn-down.
