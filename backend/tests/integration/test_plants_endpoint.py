@@ -452,6 +452,7 @@ def test_openapi_exposes_plant_paths_query_params_and_schema(
         "archived",
         "created_at",
         "updated_at",
+        "schedules",  # additive US-3.3 due field (proposal §API, non-breaking)
     }
 
 

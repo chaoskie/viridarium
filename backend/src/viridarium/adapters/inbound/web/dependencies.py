@@ -11,6 +11,7 @@ from fastapi import Request
 
 from viridarium.application.care_events import CareEventService
 from viridarium.application.care_schedules import CareScheduleService
+from viridarium.application.due import DueQueryService
 from viridarium.application.locations import LocationService
 from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
@@ -50,4 +51,10 @@ def get_care_schedule_service(request: Request) -> CareScheduleService:
 def get_care_event_service(request: Request) -> CareEventService:
     """Return the application's care-event service from the composition root."""
     service: CareEventService = request.app.state.care_event_service
+    return service
+
+
+def get_due_query_service(request: Request) -> DueQueryService:
+    """Return the application's due-query service from the composition root."""
+    service: DueQueryService = request.app.state.due_query_service
     return service

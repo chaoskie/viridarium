@@ -34,6 +34,7 @@ from viridarium.adapters.outbound.db.plant_repository import (
 )
 from viridarium.application.care_events import CareEventService
 from viridarium.application.care_schedules import CareScheduleService
+from viridarium.application.due import DefaultWinterWindowProvider, DueQueryService
 from viridarium.application.health import GetHealthStatus
 from viridarium.application.locations import LocationService
 from viridarium.application.photos import PhotoService
@@ -55,6 +56,7 @@ class Container:
     photo_service: PhotoService
     care_schedule_service: CareScheduleService
     care_event_service: CareEventService
+    due_query_service: DueQueryService
 
 
 def build_container(settings: Settings) -> Container:
@@ -76,11 +78,16 @@ def build_container(settings: Settings) -> Container:
         photo_repository=photo_repository,
         photo_storage=photo_storage,
     )
-    care_schedule_service = CareScheduleService(
-        SqlAlchemyCareScheduleRepository(session_factory)
-    )
-    care_event_service = CareEventService(
-        SqlAlchemyCareEventRepository(session_factory)
+    care_schedule_repository = SqlAlchemyCareScheduleRepository(session_factory)
+    care_event_repository = SqlAlchemyCareEventRepository(session_factory)
+    care_schedule_service = CareScheduleService(care_schedule_repository)
+    care_event_service = CareEventService(care_event_repository)
+    # The due engine (US-3.3) reuses the two repositories for its batch reads and reads
+    # the winter window through the default provider (US-3.5 replaces it additively).
+    due_query_service = DueQueryService(
+        schedule_repository=care_schedule_repository,
+        event_repository=care_event_repository,
+        window_provider=DefaultWinterWindowProvider(),
     )
     return Container(
         settings=settings,
@@ -92,4 +99,5 @@ def build_container(settings: Settings) -> Container:
         photo_service=photo_service,
         care_schedule_service=care_schedule_service,
         care_event_service=care_event_service,
+        due_query_service=due_query_service,
     )

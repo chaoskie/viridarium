@@ -82,6 +82,29 @@ class SqlAlchemyCareScheduleRepository:
             ).all()
             return [_to_domain(m) for m in models]
 
+    def enabled_for_plants(self, plant_ids: list[int]) -> dict[int, list[CareSchedule]]:
+        """Enabled schedules grouped per plant id (US-3.3 batch read, ARCH-011).
+
+        One ``SELECT ... WHERE plant_id IN (:ids) AND enabled = true`` over the given
+        ids; disabled rows are excluded. Empty ``plant_ids`` short-circuits to ``{}``.
+        Rows are grouped into per-plant lists (water-first within a plant).
+        """
+        if not plant_ids:
+            return {}
+        with self._session_factory() as session:
+            models = session.scalars(
+                select(CareScheduleModel)
+                .where(
+                    CareScheduleModel.plant_id.in_(plant_ids),
+                    CareScheduleModel.enabled.is_(True),
+                )
+                .order_by(_CARE_TYPE_ORDER)
+            ).all()
+            grouped: dict[int, list[CareSchedule]] = {}
+            for model in models:
+                grouped.setdefault(model.plant_id, []).append(_to_domain(model))
+            return grouped
+
     def get(self, plant_id: int, care_type: CareType) -> CareSchedule:
         with self._session_factory() as session:
             model = self._load(session, plant_id, care_type)

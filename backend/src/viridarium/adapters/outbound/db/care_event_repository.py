@@ -14,7 +14,9 @@ would otherwise tie; ``id`` desc preserves the created-at-desc intent).
 
 from __future__ import annotations
 
-from sqlalchemy import select
+from datetime import date
+
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from viridarium.adapters.outbound.db.models import (
@@ -29,6 +31,7 @@ from viridarium.domain.care_event import (
     Health,
     NewCareEvent,
 )
+from viridarium.domain.care_schedule import CareType
 
 
 def _to_domain(model: CareEventModel) -> CareEvent:
@@ -78,6 +81,36 @@ class SqlAlchemyCareEventRepository:
                 )
             ).all()
             return [_to_domain(m) for m in models]
+
+    def latest_event_dates(
+        self, plant_ids: list[int], types: set[CareType]
+    ) -> dict[tuple[int, CareType], date]:
+        """Grouped ``MAX(happened_on)`` per ``(plant_id, type)`` (US-3.3, ARCH-011).
+
+        One standard ``SELECT ... GROUP BY plant_id, type`` over the given ids and the
+        wire values of ``types``; portable across SQLite and PostgreSQL. Empty
+        ``plant_ids`` short-circuits to ``{}`` without touching the DB.
+        """
+        if not plant_ids:
+            return {}
+        type_values = {t.value for t in types}
+        with self._session_factory() as session:
+            rows = session.execute(
+                select(
+                    CareEventModel.plant_id,
+                    CareEventModel.type,
+                    func.max(CareEventModel.happened_on),
+                )
+                .where(
+                    CareEventModel.plant_id.in_(plant_ids),
+                    CareEventModel.type.in_(type_values),
+                )
+                .group_by(CareEventModel.plant_id, CareEventModel.type)
+            ).all()
+            return {
+                (plant_id, CareType(type_value)): happened_on
+                for plant_id, type_value, happened_on in rows
+            }
 
     def delete(self, plant_id: int, event_id: int) -> None:
         with self._session_factory() as session:
