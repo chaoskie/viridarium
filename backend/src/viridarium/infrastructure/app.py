@@ -85,6 +85,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.photo_service = container.photo_service
     app.state.care_schedule_service = container.care_schedule_service
     app.state.care_event_service = container.care_event_service
+    app.state.due_query_service = container.due_query_service
 
     # Error-to-HTTP via a registered handler (ADR-C): domain raises typed errors;
     # the app factory maps each to a status. The body carries no PII (SEC-001),

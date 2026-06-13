@@ -18,7 +18,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import StrEnum
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
+
+if TYPE_CHECKING:
+    from viridarium.domain.care_schedule import CareType
 
 
 class CareEventType(StrEnum):
@@ -135,6 +138,19 @@ class CareEventRepository(Protocol):
 
     def list_for_plant(self, plant_id: int) -> list[CareEvent]:
         """Return the plant's events: ``happened_on`` desc, ``created_at`` desc."""
+        ...
+
+    def latest_event_dates(
+        self, plant_ids: list[int], types: set[CareType]
+    ) -> dict[tuple[int, CareType], date]:
+        """Return ``MAX(happened_on)`` per ``(plant_id, care_type)`` (US-3.3 batch).
+
+        One grouped query over the given plant ids and care types; only matching types
+        appear (a ``repot``/``observe`` event never produces a key). A plant with no
+        matching event has no key. Empty ``plant_ids`` returns ``{}`` without a query.
+        The ``CareType`` keys reuse the schedule vocab so the due engine can look up by
+        ``(plant_id, schedule.care_type)`` directly.
+        """
         ...
 
     def delete(self, plant_id: int, event_id: int) -> None:

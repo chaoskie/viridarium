@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from viridarium.domain.care_event import CareEvent, CareEventType, Health
 from viridarium.domain.care_schedule import CareSchedule, CareType, Dormancy
+from viridarium.domain.due import ScheduleDue
 from viridarium.domain.photo import Photo
 from viridarium.domain.plant import LightLevel, PotMaterial
 
@@ -114,8 +115,39 @@ class PlantUpdate(PlantCreate):
     """Request body for PUT /api/v1/plants/{id} (full-replace, ADR-D)."""
 
 
+class ScheduleDueResponse(BaseModel):
+    """Public due state for one enabled schedule of a non-archived plant (US-3.3).
+
+    Exactly three fields - no schedule id, interval, winter interval, dormancy, or
+    enabled flag cross this boundary (those are config, surfaced by the separate
+    ``/plants/{id}/schedules`` endpoint; ARCH-007). ``next_due`` is ``null`` only when
+    the schedule is paused inside the window (dormant this season); ``overdue_days`` is
+    ``null`` iff ``next_due`` is ``null`` (the both-null invariant), else ``>= 0``.
+    """
+
+    care_type: CareType
+    next_due: date | None
+    overdue_days: int | None
+
+    @classmethod
+    def from_domain(cls, due: ScheduleDue) -> ScheduleDueResponse:
+        """Build the wire response from a domain :class:`ScheduleDue`."""
+        return cls(
+            care_type=due.care_type,
+            next_due=due.next_due,
+            overdue_days=due.overdue_days,
+        )
+
+
 class PlantResponse(BaseModel):
-    """Public shape of a plant (security boundary, ARCH-007)."""
+    """Public shape of a plant (security boundary, ARCH-007).
+
+    ``schedules`` is the additive US-3.3 due field: one entry per enabled schedule of a
+    non-archived plant (an archived plant or disabled schedule yields no entry). The
+    router composes it from the :class:`~viridarium.application.due.DueQueryService`
+    output - it is not read off the domain ``Plant`` (which has no due), so it defaults
+    to an empty list on the write paths that build a ``PlantResponse`` directly.
+    """
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -132,6 +164,7 @@ class PlantResponse(BaseModel):
     archived: bool
     created_at: datetime
     updated_at: datetime
+    schedules: list[ScheduleDueResponse] = Field(default_factory=list)
 
 
 class PhotoResponse(BaseModel):

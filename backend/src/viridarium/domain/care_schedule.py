@@ -111,6 +111,16 @@ class CareScheduleRepository(Protocol):
         """Return the plant's schedules ordered water-first (0-2 rows)."""
         ...
 
+    def enabled_for_plants(self, plant_ids: list[int]) -> dict[int, list[CareSchedule]]:
+        """Return the enabled schedules grouped per plant id (US-3.3 batch read).
+
+        One query over the given plant ids filtered to ``enabled = true``; disabled
+        schedules are excluded. A plant with no enabled schedule has no key. Empty
+        ``plant_ids`` returns ``{}`` without a query. Used by the due engine to avoid an
+        N+1 over the plant page.
+        """
+        ...
+
     def get(self, plant_id: int, care_type: CareType) -> CareSchedule:
         """Return the row or raise :class:`CareScheduleNotFoundError`."""
         ...

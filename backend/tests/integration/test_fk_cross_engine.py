@@ -303,3 +303,82 @@ def test_deleting_a_photo_nulls_event_photo_id(fk_engine: Engine) -> None:
         assert reloaded[0].photo_id is None  # SET NULL fired
     finally:
         plants.delete(plant.id)
+
+
+def test_latest_event_dates_grouped_max_runs_on_both_engines(
+    fk_engine: Engine,
+) -> None:
+    """B-I33 (US-3.3, ARCH-011): the grouped MAX(happened_on) GROUP BY plant_id, type
+    and the enabled = true filter run identically on the engine resolved from
+    ``DATABASE_URL`` (SQLite local, PostgreSQL CI leg). Self-cleans its own rows."""
+    session_factory = create_session_factory(fk_engine)
+    plants = SqlAlchemyPlantRepository(session_factory)
+    events = SqlAlchemyCareEventRepository(session_factory)
+    schedules = SqlAlchemyCareScheduleRepository(session_factory)
+
+    plant = plants.add(_new_plant("FK due grouped-MAX plant", None, ()))
+    try:
+        d1, d2, d3 = date(2026, 6, 1), date(2026, 6, 10), date(2026, 6, 20)
+        events.add(
+            plant.id,
+            NewCareEvent(
+                type=CareEventType.WATER,
+                happened_on=d1,
+                note=None,
+                photo_id=None,
+                health=None,
+            ),
+        )
+        events.add(
+            plant.id,
+            NewCareEvent(
+                type=CareEventType.WATER,
+                happened_on=d2,
+                note=None,
+                photo_id=None,
+                health=None,
+            ),
+        )
+        events.add(
+            plant.id,
+            NewCareEvent(
+                type=CareEventType.FEED,
+                happened_on=d3,
+                note=None,
+                photo_id=None,
+                health=None,
+            ),
+        )
+
+        latest = events.latest_event_dates([plant.id], {CareType.WATER, CareType.FEED})
+        assert latest == {
+            (plant.id, CareType.WATER): d2,
+            (plant.id, CareType.FEED): d3,
+        }
+
+        # The enabled = true filter shares the IN (:ids) + boolean shape that differs
+        # most between engines (SQLite has no native boolean).
+        schedules.upsert(
+            plant.id,
+            NewCareSchedule(
+                care_type=CareType.WATER,
+                interval_days=7,
+                winter_interval_days=None,
+                dormancy=Dormancy.WINTER_INTERVAL,
+                enabled=True,
+            ),
+        )
+        schedules.upsert(
+            plant.id,
+            NewCareSchedule(
+                care_type=CareType.FEED,
+                interval_days=30,
+                winter_interval_days=None,
+                dormancy=Dormancy.PAUSED,
+                enabled=False,
+            ),
+        )
+        enabled = schedules.enabled_for_plants([plant.id])
+        assert [s.care_type for s in enabled[plant.id]] == [CareType.WATER]
+    finally:
+        plants.delete(plant.id)
