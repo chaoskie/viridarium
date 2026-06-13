@@ -382,3 +382,45 @@ def test_latest_event_dates_grouped_max_runs_on_both_engines(
         assert [s.care_type for s in enabled[plant.id]] == [CareType.WATER]
     finally:
         plants.delete(plant.id)
+
+
+def test_app_settings_singleton_upsert_round_trips_on_both_engines(
+    fk_engine: Engine,
+) -> None:
+    """B-I8 (US-3.5, ARCH-011): the portable singleton upsert round-trips identically on
+    the engine resolved from ``DATABASE_URL`` (SQLite local, PostgreSQL CI leg). The
+    boolean ``seasonal_aware`` (SQLite has no native boolean) + the smallint month/day
+    columns + the select-then-insert/update upsert are the portability shapes here.
+    Self-cleans (resets to the default) on exit."""
+    from viridarium.adapters.outbound.db.app_settings_repository import (
+        SqlAlchemyAppSettingsRepository,
+    )
+    from viridarium.adapters.outbound.db.models import AppSettingsModel
+    from viridarium.domain.app_settings import SeasonalSettings
+    from viridarium.domain.due import WinterWindow
+
+    session_factory = create_session_factory(fk_engine)
+    repo = SqlAlchemyAppSettingsRepository(session_factory)
+    try:
+        first = SeasonalSettings(
+            seasonal_aware=False,
+            window=WinterWindow(start_month=5, start_day=1, end_month=9, end_day=1),
+        )
+        repo.put(first)
+        assert repo.get() == first  # boolean + smallints round-trip on both engines
+
+        second = SeasonalSettings(
+            seasonal_aware=True,
+            window=WinterWindow(start_month=11, start_day=1, end_month=3, end_day=1),
+        )
+        repo.put(second)
+        with session_factory() as session:
+            count = session.scalar(select(func.count()).select_from(AppSettingsModel))
+        assert count == 1  # the portable upsert UPDATEs id=1, never inserts a 2nd
+        assert repo.get() == second
+    finally:
+        with session_factory() as session:
+            row = session.get(AppSettingsModel, 1)
+            if row is not None:
+                session.delete(row)
+                session.commit()

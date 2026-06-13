@@ -17,6 +17,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    SmallInteger,
     String,
     UniqueConstraint,
     func,
@@ -212,6 +213,33 @@ class CareScheduleModel(Base):
         nullable=False,
         server_default=func.now(),
     )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
+class AppSettingsModel(Base):
+    """The singleton app-settings row (US-3.5).
+
+    Exactly one row, ``id = 1`` (the singleton surrogate, never crosses the response
+    boundary, ARCH-007). The portable select-then-insert/update upsert in the repository
+    always targets id=1, never inserts a second row. The month/day columns are smallint
+    (portable, ARCH-011); ``seasonal_aware`` is boolean (SQLite has no native
+    boolean, so portability is proven cross-engine). No row is seeded - the lazy
+    default lives in the service. ``updated_at`` is server-set (ADR-A).
+    """
+
+    __tablename__ = "app_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    seasonal_aware: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    start_month: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    start_day: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    end_month: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    end_day: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

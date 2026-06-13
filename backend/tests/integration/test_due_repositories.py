@@ -29,9 +29,11 @@ from viridarium.adapters.outbound.db.engine import (
     create_session_factory,
 )
 from viridarium.adapters.outbound.db.plant_repository import SqlAlchemyPlantRepository
-from viridarium.application.due import DefaultWinterWindowProvider, DueQueryService
+from viridarium.application.due import DueQueryService
+from viridarium.domain.app_settings import SeasonalSettings
 from viridarium.domain.care_event import CareEventType, NewCareEvent
 from viridarium.domain.care_schedule import CareType, Dormancy, NewCareSchedule
+from viridarium.domain.due import WinterWindow
 from viridarium.domain.plant import NewPlant
 
 pytestmark = pytest.mark.integration
@@ -242,11 +244,25 @@ def test_enabled_schedule_less_plant_key_absent(
 
 
 # ============================================== 4d. DueQueryService assembly (Q1)
+class _DefaultSettingsProvider:
+    """A settings provider returning the US-3.3 spec default (seasonal on, Nov1-Mar1).
+
+    These US-3.3 assembly tests run with ``_TODAY`` in summer (outside the default
+    window) and ``seasonal_aware=True``, so behaviour is identical to US-3.3.
+    """
+
+    def current(self) -> SeasonalSettings:
+        return SeasonalSettings(
+            seasonal_aware=True,
+            window=WinterWindow(start_month=11, start_day=1, end_month=3, end_day=1),
+        )
+
+
 def _due_service(session_factory: sessionmaker[Session]) -> DueQueryService:
     return DueQueryService(
         schedule_repository=SqlAlchemyCareScheduleRepository(session_factory),
         event_repository=SqlAlchemyCareEventRepository(session_factory),
-        window_provider=DefaultWinterWindowProvider(),
+        settings_provider=_DefaultSettingsProvider(),
         today_provider=lambda: _TODAY,
     )
 
@@ -367,7 +383,7 @@ def test_service_query_count_is_bounded_no_n_plus_one(
         service = DueQueryService(
             schedule_repository=SqlAlchemyCareScheduleRepository(counting_factory),
             event_repository=SqlAlchemyCareEventRepository(counting_factory),
-            window_provider=DefaultWinterWindowProvider(),
+            settings_provider=_DefaultSettingsProvider(),
             today_provider=lambda: _TODAY,
         )
         with _count_statements(counting_engine) as count_n:

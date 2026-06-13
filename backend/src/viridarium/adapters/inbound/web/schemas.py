@@ -8,8 +8,15 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
+from viridarium.domain.app_settings import SeasonalSettings
 from viridarium.domain.care_event import CareEvent, CareEventType, Health
 from viridarium.domain.care_schedule import CareSchedule, CareType, Dormancy
 from viridarium.domain.due import ScheduleDue
@@ -303,4 +310,86 @@ class CareScheduleResponse(BaseModel):
             enabled=schedule.enabled,
             created_at=schedule.created_at,
             updated_at=schedule.updated_at,
+        )
+
+
+# Days-per-month upper bound, leap-year-agnostic (Feb allows 1-29; the 30-day months
+# allow 1-30; the rest 1-31). The month-aware day validator rejects impossible combos.
+_DAYS_IN_MONTH: dict[int, int] = {
+    1: 31,
+    2: 29,
+    3: 31,
+    4: 30,
+    5: 31,
+    6: 30,
+    7: 31,
+    8: 31,
+    9: 30,
+    10: 31,
+    11: 30,
+    12: 31,
+}
+
+
+class WinterWindowSchema(BaseModel):
+    """The winter window as year-agnostic ``(month, day)`` endpoints (US-3.5).
+
+    Months are 1-12; days are validated **month-aware** (Feb<=29 leap-year-agnostic,
+    the 30-day months<=30, the rest<=31) so impossible combos (Feb 30, Apr 31) are
+    rejected -> 422 with field-locations only, no PII (settings carry no free text).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    start_month: int = Field(ge=1, le=12)
+    start_day: int = Field(ge=1, le=31)
+    end_month: int = Field(ge=1, le=12)
+    end_day: int = Field(ge=1, le=31)
+
+    @model_validator(mode="after")
+    def _reject_impossible_day(self) -> WinterWindowSchema:
+        """Reject a day above the month's leap-year-agnostic upper bound."""
+        if self.start_day > _DAYS_IN_MONTH[self.start_month]:
+            raise ValueError("start_day is invalid for start_month")
+        if self.end_day > _DAYS_IN_MONTH[self.end_month]:
+            raise ValueError("end_day is invalid for end_month")
+        return self
+
+
+class SettingsUpdate(BaseModel):
+    """Request body for PUT /api/v1/settings (US-3.5).
+
+    ``seasonal_aware`` is the strict global toggle (a non-bool -> 422);
+    ``winter_window`` carries the month-aware-validated endpoints.
+    ``extra="forbid"`` rejects stray keys.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    seasonal_aware: bool
+    winter_window: WinterWindowSchema
+
+
+class SettingsResponse(BaseModel):
+    """Public shape of the app settings (security boundary, ARCH-007).
+
+    Exactly ``{seasonal_aware, winter_window:{start_month, start_day, end_month,
+    end_day}}`` - the singleton ``id`` and ``updated_at`` never cross the boundary. PUT
+    echoes this same shape (GET == PUT response).
+    """
+
+    seasonal_aware: bool
+    winter_window: WinterWindowSchema
+
+    @classmethod
+    def from_domain(cls, settings: SeasonalSettings) -> SettingsResponse:
+        """Build the wire response from a domain :class:`SeasonalSettings`."""
+        return cls(
+            seasonal_aware=settings.seasonal_aware,
+            winter_window=WinterWindowSchema(
+                start_month=settings.window.start_month,
+                start_day=settings.window.start_day,
+                end_month=settings.window.end_month,
+                end_day=settings.window.end_day,
+            ),
         )

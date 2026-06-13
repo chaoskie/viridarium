@@ -21,6 +21,7 @@ from viridarium.adapters.inbound.web.health import router as health_router
 from viridarium.adapters.inbound.web.locations import router as locations_router
 from viridarium.adapters.inbound.web.photos import router as photos_router
 from viridarium.adapters.inbound.web.plants import router as plants_router
+from viridarium.adapters.inbound.web.settings import router as settings_router
 from viridarium.domain.care_event import (
     CareEventNotFoundError,
     HealthRequiresObserveError,
@@ -57,6 +58,7 @@ def _build_api_router() -> APIRouter:
     api.include_router(photos_router)
     api.include_router(care_schedules_router)
     api.include_router(care_events_router)
+    api.include_router(settings_router)
     return api
 
 
@@ -85,6 +87,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.photo_service = container.photo_service
     app.state.care_schedule_service = container.care_schedule_service
     app.state.care_event_service = container.care_event_service
+    app.state.app_settings_service = container.app_settings_service
     app.state.due_query_service = container.due_query_service
 
     # Error-to-HTTP via a registered handler (ADR-C): domain raises typed errors;

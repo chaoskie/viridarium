@@ -64,24 +64,50 @@ class ScheduleDue:
     overdue_days: int | None
 
 
+def _due_from(
+    care_type: CareType,
+    last_event_on: date | None,
+    today: date,
+    interval: int,
+) -> ScheduleDue:
+    """The shared no-event/overdue tail (US-3.5): both on-path and off-path use it.
+
+    No matching event -> due immediately (``next_due = today``, ``overdue = 0``). Else
+    ``next_due = last_event_on + interval`` and ``overdue = max(0, today - next_due)``
+    (the due day itself is not overdue). Keyed by the schedule's ``care_type``.
+    """
+    if last_event_on is None:
+        return ScheduleDue(care_type, next_due=today, overdue_days=0)
+    next_due = last_event_on + timedelta(days=interval)
+    overdue = max(0, (today - next_due).days)
+    return ScheduleDue(care_type, next_due=next_due, overdue_days=overdue)
+
+
 def compute_due(
     schedule: CareSchedule,
     last_event_on: date | None,
     today: date,
     window: WinterWindow,
+    seasonal_aware: bool,
 ) -> ScheduleDue:
     """Compute the due state for one enabled schedule (the caller pre-filtered).
 
     Precondition: ``schedule.enabled`` is ``True`` and the owning plant is not archived
-    (the query service / router enforce both). Branch order matches proposal §3:
+    (the query service / router enforce both).
+
+    When ``seasonal_aware`` is ``False`` (US-3.5 global toggle off) the function ignores
+    both the window AND ``paused`` entirely and returns the plain ``interval_days`` due
+    via the shared tail (never null). When ``True`` the behaviour is exactly US-3.3:
 
     1. in-window + paused -> never due this window (``next_due``/``overdue_days`` null);
     2. in-window + winter_interval with ``winter_interval_days`` set -> winter cadence;
     3. otherwise -> the normal ``interval_days`` (normal season, or winter fallback when
-       ``winter_interval_days`` is unset);
-    4. no matching event -> due immediately (``next_due = today``, ``overdue = 0``);
-    5. else ``next_due = last_event_on + interval``; overdue ``max(0, today-next_due)``.
+       ``winter_interval_days`` is unset), then the shared no-event/overdue tail.
     """
+    if not seasonal_aware:
+        return _due_from(
+            schedule.care_type, last_event_on, today, schedule.interval_days
+        )
     in_window = window.contains(today)
     if in_window and schedule.dormancy is Dormancy.PAUSED:
         return ScheduleDue(schedule.care_type, next_due=None, overdue_days=None)
@@ -93,8 +119,4 @@ def compute_due(
         interval = schedule.winter_interval_days
     else:
         interval = schedule.interval_days
-    if last_event_on is None:
-        return ScheduleDue(schedule.care_type, next_due=today, overdue_days=0)
-    next_due = last_event_on + timedelta(days=interval)
-    overdue = max(0, (today - next_due).days)
-    return ScheduleDue(schedule.care_type, next_due=next_due, overdue_days=overdue)
+    return _due_from(schedule.care_type, last_event_on, today, interval)

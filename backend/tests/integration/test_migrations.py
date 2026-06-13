@@ -241,3 +241,47 @@ def test_upgrade_creates_care_event_table_and_downgrade_drops_it(  # B-I37
         assert "plant_tag" in after
     finally:
         engine.dispose()
+
+
+def test_upgrade_creates_app_settings_table_and_downgrade_drops_it(  # B-I7
+    sqlite_url: str,
+) -> None:
+    cfg = make_alembic_config(sqlite_url)
+    engine = create_engine(sqlite_url)
+
+    command.upgrade(cfg, "head")
+    try:
+        from sqlalchemy import text
+
+        inspector = inspect(engine)
+        assert "app_settings" in set(inspector.get_table_names())
+
+        cols = {col["name"] for col in inspector.get_columns("app_settings")}
+        assert cols == {
+            "id",
+            "seasonal_aware",
+            "start_month",
+            "start_day",
+            "end_month",
+            "end_day",
+            "updated_at",
+        }
+
+        pk = inspector.get_pk_constraint("app_settings")
+        assert pk["constrained_columns"] == ["id"]
+
+        # No row is seeded - the lazy default lives in the service (proposal).
+        with engine.connect() as conn:
+            count = conn.execute(text("SELECT COUNT(*) FROM app_settings")).scalar()
+        assert count == 0
+
+        command.downgrade(cfg, "0006")
+        after = set(inspect(engine).get_table_names())
+        assert "app_settings" not in after
+        assert "care_event" in after
+        assert "care_schedule" in after
+        assert "photo" in after
+        assert "plant" in after
+        assert "plant_tag" in after
+    finally:
+        engine.dispose()
