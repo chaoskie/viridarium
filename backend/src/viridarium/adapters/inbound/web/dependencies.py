@@ -15,6 +15,7 @@ from viridarium.application.due import DueQueryService
 from viridarium.application.locations import LocationService
 from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
+from viridarium.application.settings import AppSettingsService
 from viridarium.domain.health import HealthProbe
 
 
@@ -57,4 +58,10 @@ def get_care_event_service(request: Request) -> CareEventService:
 def get_due_query_service(request: Request) -> DueQueryService:
     """Return the application's due-query service from the composition root."""
     service: DueQueryService = request.app.state.due_query_service
+    return service
+
+
+def get_app_settings_service(request: Request) -> AppSettingsService:
+    """Return the application's app-settings service from the composition root."""
+    service: AppSettingsService = request.app.state.app_settings_service
     return service

@@ -12,6 +12,9 @@ from dataclasses import dataclass
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from viridarium.adapters.outbound.db.app_settings_repository import (
+    SqlAlchemyAppSettingsRepository,
+)
 from viridarium.adapters.outbound.db.care_event_repository import (
     SqlAlchemyCareEventRepository,
 )
@@ -34,11 +37,15 @@ from viridarium.adapters.outbound.db.plant_repository import (
 )
 from viridarium.application.care_events import CareEventService
 from viridarium.application.care_schedules import CareScheduleService
-from viridarium.application.due import DefaultWinterWindowProvider, DueQueryService
+from viridarium.application.due import DueQueryService
 from viridarium.application.health import GetHealthStatus
 from viridarium.application.locations import LocationService
 from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
+from viridarium.application.settings import (
+    AppSettingsService,
+    ServiceSeasonalSettingsProvider,
+)
 from viridarium.domain.health import HealthProbe
 from viridarium.infrastructure.settings import Settings
 
@@ -56,6 +63,7 @@ class Container:
     photo_service: PhotoService
     care_schedule_service: CareScheduleService
     care_event_service: CareEventService
+    app_settings_service: AppSettingsService
     due_query_service: DueQueryService
 
 
@@ -82,12 +90,18 @@ def build_container(settings: Settings) -> Container:
     care_event_repository = SqlAlchemyCareEventRepository(session_factory)
     care_schedule_service = CareScheduleService(care_schedule_repository)
     care_event_service = CareEventService(care_event_repository)
+    # The app settings (US-3.5): the singleton repository + the service that owns the
+    # lazy default; the due engine reads the window AND the seasonal-aware flag through
+    # the settings-backed provider (replacing the US-3.3 hardcoded window provider).
+    app_settings_service = AppSettingsService(
+        SqlAlchemyAppSettingsRepository(session_factory)
+    )
     # The due engine (US-3.3) reuses the two repositories for its batch reads and reads
-    # the winter window through the default provider (US-3.5 replaces it additively).
+    # the seasonal settings once per query via the settings-backed provider (US-3.5).
     due_query_service = DueQueryService(
         schedule_repository=care_schedule_repository,
         event_repository=care_event_repository,
-        window_provider=DefaultWinterWindowProvider(),
+        settings_provider=ServiceSeasonalSettingsProvider(app_settings_service),
     )
     return Container(
         settings=settings,
@@ -99,5 +113,6 @@ def build_container(settings: Settings) -> Container:
         photo_service=photo_service,
         care_schedule_service=care_schedule_service,
         care_event_service=care_event_service,
+        app_settings_service=app_settings_service,
         due_query_service=due_query_service,
     )

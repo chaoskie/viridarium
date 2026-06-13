@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { PlaceholderPage } from "@/components/PlaceholderPage";
 import { PlantsPage } from "@/features/plants/PlantsPage";
 import { RoomsPage } from "@/features/rooms/RoomsPage";
+import { SettingsPage } from "@/features/settings/SettingsPage";
 import { TodayPage } from "@/features/today/TodayPage";
 
 export function App(): ReactNode {
@@ -15,10 +16,7 @@ export function App(): ReactNode {
         <Route path="/plants" element={<PlantsPage />} />
         <Route path="/rooms" element={<RoomsPage />} />
         <Route path="/journal" element={<PlaceholderPage title="Journal" />} />
-        <Route
-          path="/settings"
-          element={<PlaceholderPage title="Settings" />}
-        />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<PlaceholderPage title="Not found" />} />
       </Routes>
     </AppShell>

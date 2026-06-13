@@ -39,6 +39,7 @@ One per care type per plant. Care types in v1: `water`, `feed`. (Repotting is lo
 - `winter_interval_days` (optional; used during the winter window)
 - `dormancy` behavior: during winter window, `feed` schedules can be `paused` (default for feed), `water` schedules use winter interval if set
 - Winter window: configurable app-wide, default Nov 1 to Mar 1 (northern hemisphere; both dates configurable so southern hemisphere works)
+- **Seasonal-aware care toggle** (app-wide; PO-ratified 2026-06-13): a single global switch, **on by default**. When on, the winter window + per-schedule `winter_interval_days`/`dormancy` apply (the due rule below). When **off**, the due engine ignores **both** the winter interval **and** `paused` dormancy: every schedule uses its plain `interval_days` year-round. Per-schedule settings are retained while off, just not applied. The toggle and the window dates are the app settings surfaced by US-3.5.
 - `enabled` flag
 
 **Due computation (the core rule):** `next_due = date(last matching CareEvent) + effective_interval`. No matching event yet → due immediately (surfaces new plants). `overdue_days = today - next_due` when positive. Effective interval = winter interval when today is in the winter window and one is set; a paused schedule is never due during the window.
@@ -76,7 +77,7 @@ Walking skeleton: FastAPI + React build, SQLite/Postgres via DATABASE_URL, Alemb
 - US-3.2 Log care events (quick action from list/dashboard: "watered today", with optional backdate/note/photo).
 - US-3.3 Due computation per the core rule, exposed on every plant read.
 - US-3.4 Care history timeline per plant (events + photos interleaved).
-- US-3.5 App settings: winter window dates.
+- US-3.5 App settings: the global seasonal-aware toggle (on by default) and the winter window dates (editable month/day, year-wrapping, with a "return to default" of Nov 1 - Mar 1). The due engine reads these instead of the hardcoded default. The season indicator + info affordance is a separate dashboard story (board #61), not part of US-3.5.
 - US-3.6 Snooze and skip on due tasks per the due-task action model.
 - US-3.7 Bulk action: "mark all due plants in a location as watered" (one tap after the watering round).
 - US-3.8 Suggested starting intervals from plant attributes (pot size/material/drainage + light level), via a transparent lookup table; suggestions only, always editable. (v1.5)

@@ -18,6 +18,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from viridarium.application.due import DueQueryService
+from viridarium.domain.app_settings import SeasonalSettings
 from viridarium.domain.due import WinterWindow
 
 pytestmark = pytest.mark.integration
@@ -145,7 +146,7 @@ def test_detail_paused_in_window_serializes_as_json_null(
     client.app.state.due_query_service = DueQueryService(  # type: ignore[attr-defined]
         schedule_repository=container.due_query_service.schedule_repository,
         event_repository=container.due_query_service.event_repository,
-        window_provider=_StaticWindowProvider(always_window),
+        settings_provider=_StaticSettingsProvider(always_window),
         today_provider=date.today,
     )
 
@@ -156,12 +157,14 @@ def test_detail_paused_in_window_serializes_as_json_null(
     assert water["overdue_days"] is None
 
 
-class _StaticWindowProvider:
+class _StaticSettingsProvider:
+    """A settings provider with a fixed window and seasonal-aware on (US-3.3 path)."""
+
     def __init__(self, window: WinterWindow) -> None:
         self._window = window
 
-    def current_window(self) -> WinterWindow:
-        return self._window
+    def current(self) -> SeasonalSettings:
+        return SeasonalSettings(seasonal_aware=True, window=self._window)
 
 
 def test_detail_archived_plant_empty_schedules(client: TestClient) -> None:
