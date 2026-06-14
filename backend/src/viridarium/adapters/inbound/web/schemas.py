@@ -154,6 +154,12 @@ class PlantResponse(BaseModel):
     router composes it from the :class:`~viridarium.application.due.DueQueryService`
     output - it is not read off the domain ``Plant`` (which has no due), so it defaults
     to an empty list on the write paths that build a ``PlantResponse`` directly.
+
+    ``cover_photo_id`` is the additive cover-photo id (plant-list-nplus1): the id of
+    the plant's ``is_cover`` photo, or ``null`` when it has no cover. Like ``schedules``
+    it is composed at the router (one batch read on the list path, the single id on
+    detail), not read off the domain ``Plant`` (which stays free of photo concerns,
+    ARCH-006), so it defaults to ``None`` on the write paths that build a response.
     """
 
     model_config = ConfigDict(from_attributes=True)
@@ -172,6 +178,7 @@ class PlantResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     schedules: list[ScheduleDueResponse] = Field(default_factory=list)
+    cover_photo_id: int | None = Field(default=None)
 
 
 class PhotoResponse(BaseModel):

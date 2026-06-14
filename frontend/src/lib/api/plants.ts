@@ -53,6 +53,7 @@ export interface Plant {
   readonly notes: string | null;
   readonly tags: readonly string[];
   readonly archived: boolean;
+  readonly cover_photo_id: number | null;
   readonly created_at: string;
   readonly updated_at: string;
 }

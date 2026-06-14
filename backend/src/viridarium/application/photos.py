@@ -23,6 +23,7 @@ unlink never leaves a dangling row.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 
 from viridarium.domain.photo import (
@@ -97,6 +98,16 @@ class PhotoService:
     def get(self, plant_id: int, photo_id: int) -> Photo:
         """Return one photo; raises ``PhotoNotFoundError`` (incl. cross-plant)."""
         return self._repository.get(plant_id, photo_id)
+
+    def cover_ids_for_plants(self, plant_ids: Sequence[int]) -> dict[int, int]:
+        """Return the cover photo id per plant in one batch read (no-cover omitted).
+
+        Backs the plant-list cover composition (plant-list-nplus1): the router calls it
+        once over the page's ids, keeping the list path flat (no per-plant photo read).
+        ``Sequence[int]`` (not ``list[int]``) sidesteps this class's ``list`` method
+        shadowing the builtin in annotation resolution; the repo port takes a list.
+        """
+        return self._repository.cover_ids_for_plants(list(plant_ids))
 
     def set_cover(self, plant_id: int, photo_id: int) -> Photo:
         """Make one photo the cover (single-cover invariant in-tx)."""

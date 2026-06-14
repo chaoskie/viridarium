@@ -384,6 +384,45 @@ def test_latest_event_dates_grouped_max_runs_on_both_engines(
         plants.delete(plant.id)
 
 
+def test_cover_ids_for_plants_runs_on_both_engines(fk_engine: Engine) -> None:
+    """plant-list-nplus1 (ARCH-011): the grouped ``is_cover`` + ``plant_id IN (:ids)``
+    cover read runs identically on the engine resolved from ``DATABASE_URL`` (SQLite
+    local, PostgreSQL CI leg). The boolean ``is_cover`` filter (SQLite has no native
+    boolean) + the IN-list are the portability shapes here. Self-cleans its own rows."""
+    session_factory = create_session_factory(fk_engine)
+    plants = SqlAlchemyPlantRepository(session_factory)
+    photos = SqlAlchemyPhotoRepository(session_factory)
+
+    with_cover = plants.add(_new_plant("FK cover plant", None, ()))
+    no_cover = plants.add(_new_plant("FK no-cover plant", None, ()))
+    try:
+        cover = photos.add(
+            NewPhoto(
+                plant_id=with_cover.id,
+                stored_filename="fk-cover.jpg",
+                content_type="image/jpeg",
+                size_bytes=10,
+            ),
+            make_cover=True,
+        )
+        photos.add(
+            NewPhoto(
+                plant_id=with_cover.id,
+                stored_filename="fk-extra.png",
+                content_type="image/png",
+                size_bytes=10,
+            ),
+            make_cover=False,
+        )
+
+        result = photos.cover_ids_for_plants([with_cover.id, no_cover.id])
+
+        assert result == {with_cover.id: cover.id}  # no-cover plant omitted
+    finally:
+        plants.delete(with_cover.id)
+        plants.delete(no_cover.id)
+
+
 def test_app_settings_singleton_upsert_round_trips_on_both_engines(
     fk_engine: Engine,
 ) -> None:
