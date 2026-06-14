@@ -9,7 +9,7 @@ dependencies = [
     # fastapi >=0.119 admits the patched starlette line (>=0.49) that fixes
     # CVE-2025-54121 / CVE-2025-62727 / PYSEC-2026-161 (SEC-009).
     "fastapi>=0.119.0,<0.137.0",
-    "starlette>=0.49.1,<1.3.0",
+    "starlette>=0.49.1,<1.4.0",
     "uvicorn[standard]>=0.34.0,<0.50.0",
     "sqlalchemy>=2.0.36,<2.1.0",
     "alembic>=1.14.0,<1.19.0",
