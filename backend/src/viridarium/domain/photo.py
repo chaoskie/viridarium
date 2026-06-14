@@ -128,6 +128,10 @@ class PhotoRepository(Protocol):
         """Return the photo or raise :class:`PhotoNotFoundError` (incl. cross-plant)."""
         ...
 
+    def cover_ids_for_plants(self, plant_ids: list[int]) -> dict[int, int]:
+        """Return the cover photo id per plant, one grouped read (no-cover omitted)."""
+        ...
+
     def set_cover(self, plant_id: int, photo_id: int) -> Photo:
         """Make exactly one photo the cover (clears others in-tx) or raise not-found."""
         ...

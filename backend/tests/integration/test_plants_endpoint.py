@@ -453,6 +453,7 @@ def test_openapi_exposes_plant_paths_query_params_and_schema(
         "created_at",
         "updated_at",
         "schedules",  # additive US-3.3 due field (proposal §API, non-breaking)
+        "cover_photo_id",  # additive plant-list-nplus1 cover id (non-breaking)
     }
 
 

@@ -68,6 +68,29 @@ def _load_tags(session: Session, plant_id: int) -> tuple[str, ...]:
     return tuple(rows)
 
 
+def _load_tags_batch(
+    session: Session, plant_ids: list[int]
+) -> dict[int, tuple[str, ...]]:
+    """Return the tags for many plants in one grouped read (list-path N+1 fix).
+
+    One ``SELECT plant_id, tag ... WHERE plant_id IN (:ids) ORDER BY plant_id, tag``
+    over the given ids; the per-plant tuples are built in ``tag`` order, matching the
+    single-row :func:`_load_tags` exactly. Empty ``plant_ids`` short-circuits to ``{}``
+    without touching the DB. Portable (no engine-specific SQL, ARCH-011).
+    """
+    if not plant_ids:
+        return {}
+    rows = session.execute(
+        select(PlantTagModel.plant_id, PlantTagModel.tag)
+        .where(PlantTagModel.plant_id.in_(plant_ids))
+        .order_by(PlantTagModel.plant_id, PlantTagModel.tag)
+    ).all()
+    tags_by_plant: dict[int, list[str]] = {}
+    for plant_id, tag in rows:
+        tags_by_plant.setdefault(plant_id, []).append(tag)
+    return {plant_id: tuple(tags) for plant_id, tags in tags_by_plant.items()}
+
+
 def _write_tags(session: Session, plant_id: int, tags: tuple[str, ...]) -> None:
     """Insert the tag rows for a plant (deduped by the composite PK upstream)."""
     for tag in dict.fromkeys(tags):
@@ -119,7 +142,10 @@ class SqlAlchemyPlantRepository:
                 stmt = stmt.where(PlantModel.archived.is_(bool(plant_filter.archived)))
             stmt = stmt.order_by(PlantModel.name)
             models = session.scalars(stmt).all()
-            return [_to_domain(m, _load_tags(session, m.id)) for m in models]
+            # One grouped tag read for the whole page (no per-row N+1); a plant with no
+            # tags is absent from the map, so default to the empty tuple.
+            tags_by_plant = _load_tags_batch(session, [m.id for m in models])
+            return [_to_domain(m, tags_by_plant.get(m.id, ())) for m in models]
 
     def get(self, plant_id: int) -> Plant:
         with self._session_factory() as session:

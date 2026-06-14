@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, Query, Response, status
 
 from viridarium.adapters.inbound.web.dependencies import (
     get_due_query_service,
+    get_photo_service,
     get_plant_service,
 )
 from viridarium.adapters.inbound.web.schemas import (
@@ -25,6 +26,7 @@ from viridarium.adapters.inbound.web.schemas import (
     ScheduleDueResponse,
 )
 from viridarium.application.due import DueQueryService
+from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
 from viridarium.domain.plant import NewPlant, Plant, PlantFilter
 
@@ -32,16 +34,21 @@ router = APIRouter(prefix="/plants", tags=["plants"])
 
 ServiceDep = Annotated[PlantService, Depends(get_plant_service)]
 DueServiceDep = Annotated[DueQueryService, Depends(get_due_query_service)]
+PhotoServiceDep = Annotated[PhotoService, Depends(get_photo_service)]
 
 
-def _with_due(plant: Plant, due: DueQueryService) -> PlantResponse:
-    """Compose a plant read with its computed ``schedules`` due field (US-3.3).
+def _with_due(
+    plant: Plant, due: DueQueryService, photos: PhotoService
+) -> PlantResponse:
+    """Compose a plant read with its ``schedules`` due field (US-3.3) + cover id.
 
     An archived plant is excluded from due computation entirely (empty schedules); a
-    non-archived plant gets one entry per enabled schedule. The field is composed here,
-    not read off the domain ``Plant`` (which has no due).
+    non-archived plant gets one entry per enabled schedule. ``cover_photo_id`` is the
+    plant's single cover id (or ``None``); both fields are composed here, not read off
+    the domain ``Plant`` (which has neither due nor photo concerns, ARCH-006).
     """
     response = PlantResponse.model_validate(plant)
+    response.cover_photo_id = photos.cover_ids_for_plants([plant.id]).get(plant.id)
     if plant.archived:
         return response
     due_by_plant = due.for_plants([plant.id])
@@ -82,6 +89,7 @@ def create_plant(body: PlantCreate, service: ServiceDep) -> PlantResponse:
 def list_plants(
     service: ServiceDep,
     due: DueServiceDep,
+    photos: PhotoServiceDep,
     q: Annotated[str | None, Query()] = None,
     location_id: Annotated[int | None, Query()] = None,
     tag: Annotated[str | None, Query()] = None,
@@ -109,20 +117,26 @@ def list_plants(
     # AC7); archived plants are excluded from the computation and get empty schedules.
     active_ids = [p.id for p in plants if not p.archived]
     due_by_plant = due.for_plants(active_ids)
+    # One batch cover read for the whole page -> the list path stays flat (no per-card
+    # photo request, plant-list-nplus1); a plant with no cover is absent from the map.
+    cover_by_plant = photos.cover_ids_for_plants([p.id for p in plants])
     responses: list[PlantResponse] = []
     for plant in plants:
         response = PlantResponse.model_validate(plant)
         response.schedules = [
             ScheduleDueResponse.from_domain(d) for d in due_by_plant.get(plant.id, [])
         ]
+        response.cover_photo_id = cover_by_plant.get(plant.id)
         responses.append(response)
     return responses
 
 
 @router.get("/{plant_id}", response_model=PlantResponse, summary="Get a plant")
-def get_plant(plant_id: int, service: ServiceDep, due: DueServiceDep) -> PlantResponse:
-    """Get one plant by id, with its computed ``schedules`` due field (US-3.3)."""
-    return _with_due(service.get(plant_id), due)
+def get_plant(
+    plant_id: int, service: ServiceDep, due: DueServiceDep, photos: PhotoServiceDep
+) -> PlantResponse:
+    """Get one plant by id, with its ``schedules`` due field (US-3.3) + cover id."""
+    return _with_due(service.get(plant_id), due, photos)
 
 
 @router.put("/{plant_id}", response_model=PlantResponse, summary="Replace a plant")

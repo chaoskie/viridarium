@@ -84,6 +84,30 @@ class SqlAlchemyPhotoRepository:
             model = self._require(session, plant_id, photo_id)
             return _to_domain(model)
 
+    def cover_ids_for_plants(self, plant_ids: list[int]) -> dict[int, int]:
+        """Return the ``is_cover`` photo id per plant in one grouped read.
+
+        One ``SELECT plant_id, id ... WHERE is_cover AND plant_id IN (:ids)`` over the
+        given ids (the single-cover invariant guarantees at most one row per plant). A
+        plant with no cover is absent from the map (not a null entry). Empty
+        ``plant_ids`` short-circuits to ``{}`` without touching the DB. Portable (no
+        engine-specific SQL, ARCH-011).
+        """
+        if not plant_ids:
+            return {}
+        with self._session_factory() as session:
+            rows = session.execute(
+                select(PhotoModel.plant_id, PhotoModel.id)
+                .where(
+                    PhotoModel.is_cover.is_(True),
+                    PhotoModel.plant_id.in_(plant_ids),
+                )
+                # One row per plant under the single-cover invariant; order by id so the
+                # map is deterministic (highest id wins) if it is ever broken.
+                .order_by(PhotoModel.plant_id, PhotoModel.id)
+            ).tuples()
+            return dict(rows.all())
+
     def set_cover(self, plant_id: int, photo_id: int) -> Photo:
         with self._session_factory() as session:
             model = self._require(session, plant_id, photo_id)

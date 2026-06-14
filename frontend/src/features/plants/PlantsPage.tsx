@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { fetchLocations, type Location } from "@/lib/api/locations";
 import type { Plant, PlantFilter } from "@/lib/api/plants";
-import { fetchPhotos, photoUrl } from "@/lib/api/photos";
+import { photoUrl } from "@/lib/api/photos";
 
 import { CareScheduleModal } from "./CareScheduleModal";
 import { DeletePlantDialog } from "./DeletePlantDialog";
@@ -22,32 +22,13 @@ type ModalState =
   | { readonly kind: "schedules"; readonly plant: Plant };
 
 /**
- * A small, self-contained cover thumbnail for a plant card. Fetches the plant's
- * photos lazily on mount (so it never blocks the list render) and shows the
- * `is_cover` image, or a neutral placeholder when there is none / the fetch
- * fails. Deliberately simple: no shared state, no ret-on-error.
+ * A small, self-contained cover thumbnail for a plant card. Renders the cover
+ * image directly from `plant.cover_photo_id` (composed onto the plant read), or
+ * a neutral placeholder when the plant has no cover. Fires no photo requests of
+ * its own, so the list render stays free of per-card N+1 traffic.
  */
-function CoverThumb({ plant }: { readonly plant: Plant }): ReactNode {
-  const [coverId, setCoverId] = useState<number | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void fetchPhotos(plant.id)
-      .then((photos) => {
-        if (active) {
-          const cover = photos.find((photo) => photo.is_cover);
-          setCoverId(cover?.id ?? null);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setCoverId(null);
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [plant.id]);
+export function CoverThumb({ plant }: { readonly plant: Plant }): ReactNode {
+  const coverId = plant.cover_photo_id;
 
   if (coverId === null) {
     return (
