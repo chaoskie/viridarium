@@ -7,6 +7,7 @@ appear here. Use cases return domain types; this layer maps them to the wire sha
 from __future__ import annotations
 
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import (
     BaseModel,
@@ -16,6 +17,7 @@ from pydantic import (
     model_validator,
 )
 
+from viridarium.application.timeline import TimelineEntry, TimelineEvent, TimelinePhoto
 from viridarium.domain.app_settings import SeasonalSettings
 from viridarium.domain.care_event import CareEvent, CareEventType, Health
 from viridarium.domain.care_schedule import CareSchedule, CareType, Dormancy
@@ -400,3 +402,83 @@ class SettingsResponse(BaseModel):
                 end_day=settings.window.end_day,
             ),
         )
+
+
+class TimelinePhotoSchema(BaseModel):
+    """The nested photo reference of a timeline entry (security boundary, ARCH-007).
+
+    Exactly ``{id, url}`` - never the on-disk ``stored_filename`` (ARCH-007), nor
+    ``content_type``/``size_bytes``/``is_cover``/``created_at``. ``url`` reuses the
+    :class:`PhotoResponse` bytes-endpoint recipe.
+    """
+
+    id: int
+    url: str
+
+    @classmethod
+    def from_ref(cls, plant_id: int, photo_id: int) -> TimelinePhotoSchema:
+        """Build the nested photo ref for ``plant_id``/``photo_id``."""
+        return cls(id=photo_id, url=f"/api/v1/plants/{plant_id}/photos/{photo_id}")
+
+
+class TimelineEventEntry(BaseModel):
+    """A care-event timeline entry (``kind:"event"``, US-3.4 §7).
+
+    ``date`` is the event's ``happened_on``; ``health`` is non-null only on observe
+    events; ``photo`` is the inline linked photo or ``null``.
+    """
+
+    kind: Literal["event"] = "event"
+    date: date
+    event_type: CareEventType
+    note: str | None
+    health: Health | None
+    photo: TimelinePhotoSchema | None
+
+    @classmethod
+    def from_domain(cls, plant_id: int, entry: TimelineEvent) -> TimelineEventEntry:
+        """Build the wire event entry from a domain :class:`TimelineEvent`."""
+        return cls(
+            date=entry.date,
+            event_type=entry.event_type,
+            note=entry.note,
+            health=entry.health,
+            photo=(
+                TimelinePhotoSchema.from_ref(plant_id, entry.photo.id)
+                if entry.photo is not None
+                else None
+            ),
+        )
+
+
+class TimelinePhotoEntry(BaseModel):
+    """A standalone (unlinked) photo timeline entry (``kind:"photo"``, US-3.4 §7).
+
+    ``date`` is the photo's ``created_at.date()``; ``photo`` is always present.
+    """
+
+    kind: Literal["photo"] = "photo"
+    date: date
+    photo: TimelinePhotoSchema
+
+    @classmethod
+    def from_domain(cls, plant_id: int, entry: TimelinePhoto) -> TimelinePhotoEntry:
+        """Build the wire photo entry from a domain :class:`TimelinePhoto`."""
+        return cls(
+            date=entry.date,
+            photo=TimelinePhotoSchema.from_ref(plant_id, entry.photo.id),
+        )
+
+
+# The discriminated timeline entry: ``kind`` selects the arm (§7). FastAPI emits this as
+# a oneOf with the ``kind`` discriminator in the OpenAPI array response.
+TimelineEntryResponse = TimelineEventEntry | TimelinePhotoEntry
+
+
+def timeline_entry_to_response(
+    plant_id: int, entry: TimelineEntry
+) -> TimelineEntryResponse:
+    """Map one domain :class:`TimelineEntry` to its wire arm (event | photo)."""
+    if isinstance(entry, TimelineEvent):
+        return TimelineEventEntry.from_domain(plant_id, entry)
+    return TimelinePhotoEntry.from_domain(plant_id, entry)

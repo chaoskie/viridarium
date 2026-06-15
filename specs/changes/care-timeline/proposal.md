@@ -23,13 +23,12 @@ As a plant owner, I want to open a plant and see everything that ever happened t
    browsing is a **separate future feature**: a per-plant **photobook** with tabbed
    sections (filed as a candidate, NOT this story).
 
-### Residual assumption to confirm at build (low-cost to flip)
+### Residual assumption - CONFIRMED by PO 2026-06-15
 
-Standalone photos (uploaded directly, not linked to any event) **do** interleave into the
-timeline by their `created_at` date, per the spec's "photos appear inline at their date."
-If the PO prefers an **events-only timeline** (all photo browsing deferred to the
-photobook), dropping standalone-photo entries is a small change. Proceeding on the
-spec-faithful interleave; flag confirmed at build pickup.
+Standalone photos (uploaded directly, not linked to any event) **do interleave** into the
+timeline by their `created_at` date (spec-faithful: "photos appear inline at their date").
+PO confirmed the interleave (not events-only) at pickup. The foundation's flip instruction
+is resolved to: standalone photos emit as `kind:"photo"` entries.
 
 ## Backend (ARCH-006 query module)
 

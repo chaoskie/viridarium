@@ -46,6 +46,7 @@ from viridarium.application.settings import (
     AppSettingsService,
     ServiceSeasonalSettingsProvider,
 )
+from viridarium.application.timeline import TimelineQueryService
 from viridarium.domain.health import HealthProbe
 from viridarium.infrastructure.settings import Settings
 
@@ -65,6 +66,7 @@ class Container:
     care_event_service: CareEventService
     app_settings_service: AppSettingsService
     due_query_service: DueQueryService
+    timeline_query_service: TimelineQueryService
 
 
 def build_container(settings: Settings) -> Container:
@@ -103,6 +105,12 @@ def build_container(settings: Settings) -> Container:
         event_repository=care_event_repository,
         settings_provider=ServiceSeasonalSettingsProvider(app_settings_service),
     )
+    # The timeline read (US-3.4) reuses the event + photo repositories' list reads and
+    # merges in memory (ARCH-006, no new persistence).
+    timeline_query_service = TimelineQueryService(
+        event_repository=care_event_repository,
+        photo_repository=photo_repository,
+    )
     return Container(
         settings=settings,
         engine=engine,
@@ -115,4 +123,5 @@ def build_container(settings: Settings) -> Container:
         care_event_service=care_event_service,
         app_settings_service=app_settings_service,
         due_query_service=due_query_service,
+        timeline_query_service=timeline_query_service,
     )
