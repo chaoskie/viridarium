@@ -423,6 +423,92 @@ def test_cover_ids_for_plants_runs_on_both_engines(fk_engine: Engine) -> None:
         plants.delete(no_cover.id)
 
 
+def test_timeline_merge_orders_identically_on_both_engines(  # B-I17
+    fk_engine: Engine,
+) -> None:
+    """B-I17 (US-3.4, ARCH-011): the merged, deduped timeline orders identically on the
+    engine resolved from ``DATABASE_URL`` (SQLite local, PostgreSQL CI leg).
+
+    The two underlying list reads are already proven dual-engine; the net-new
+    portability concern is that the in-memory merge produces the SAME feed on both -
+    the ``created_at`` datetime tiebreak + the ``created_at.date()`` photo date must
+    compare identically. Builds a backdated event, an event with a linked photo, and a
+    standalone photo; asserts the backdated event lands in its ``happened_on`` slot, the
+    linked photo is inline-only, and the standalone photo is present. Self-cleans."""
+    from viridarium.application.timeline import (
+        TimelineEvent,
+        TimelinePhoto,
+        TimelineQueryService,
+    )
+
+    session_factory = create_session_factory(fk_engine)
+    plants = SqlAlchemyPlantRepository(session_factory)
+    events = SqlAlchemyCareEventRepository(session_factory)
+    photos = SqlAlchemyPhotoRepository(session_factory)
+    service = TimelineQueryService(events, photos)
+
+    plant = plants.add(_new_plant("FK timeline merge plant", None, ()))
+    try:
+        linked_photo = photos.add(
+            NewPhoto(
+                plant_id=plant.id,
+                stored_filename="fk-tl-linked.jpg",
+                content_type="image/jpeg",
+                size_bytes=10,
+            ),
+            make_cover=False,
+        )
+        standalone = photos.add(
+            NewPhoto(
+                plant_id=plant.id,
+                stored_filename="fk-tl-standalone.png",
+                content_type="image/png",
+                size_bytes=10,
+            ),
+            make_cover=False,
+        )
+        # Two events dated well in the PAST so the standalone photo's created_at.date()
+        # (the DB insert date = run day) is always later, regardless of when the test
+        # runs - no real-clock dependence (TEST-006).
+        events.add(
+            plant.id,
+            NewCareEvent(
+                type=CareEventType.OBSERVE,
+                happened_on=date(2026, 5, 10),
+                note=None,
+                photo_id=linked_photo.id,
+                health=None,
+            ),
+        )
+        events.add(
+            plant.id,
+            NewCareEvent(
+                type=CareEventType.WATER,
+                happened_on=date(2026, 5, 1),  # backdated, older
+                note=None,
+                photo_id=None,
+                health=None,
+            ),
+        )
+
+        entries = service.for_plant(plant.id)
+
+        # The linked photo is inline-only (never a TimelinePhoto), the standalone is
+        # present, the backdated event sits in its happened_on slot (last, oldest).
+        photo_entries = [e for e in entries if isinstance(e, TimelinePhoto)]
+        assert [p.photo.id for p in photo_entries] == [standalone.id]
+        kinds = [type(e).__name__ for e in entries]
+        # standalone photo (today) > observe event (05-10) > water event (05-01)
+        assert kinds == ["TimelinePhoto", "TimelineEvent", "TimelineEvent"]
+        event_entries = [e for e in entries if isinstance(e, TimelineEvent)]
+        assert event_entries[0].photo is not None
+        assert event_entries[0].photo.id == linked_photo.id
+        assert event_entries[1].photo is None
+        assert event_entries[1].date == date(2026, 5, 1)
+    finally:
+        plants.delete(plant.id)
+
+
 def test_app_settings_singleton_upsert_round_trips_on_both_engines(
     fk_engine: Engine,
 ) -> None:

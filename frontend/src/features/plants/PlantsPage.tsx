@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/Button";
 import { fetchLocations, type Location } from "@/lib/api/locations";
@@ -330,7 +331,13 @@ export function PlantsPage(): ReactNode {
                   <div className="flex flex-col gap-1.5">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-display text-xl font-semibold text-ink">
-                        {plant.name}
+                        <Link
+                          to={`/plants/${String(plant.id)}`}
+                          aria-label={`View ${plant.name}'s history`}
+                          className="hover:text-accent-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+                        >
+                          {plant.name}
+                        </Link>
                       </h2>
                       {plant.archived ? (
                         <span className="rounded-pill border-control border-border bg-surface-sunken px-2 py-0.5 font-label text-xs uppercase tracking-widest text-ink-muted">

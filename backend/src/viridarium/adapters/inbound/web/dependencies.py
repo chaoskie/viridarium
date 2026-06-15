@@ -16,6 +16,7 @@ from viridarium.application.locations import LocationService
 from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
 from viridarium.application.settings import AppSettingsService
+from viridarium.application.timeline import TimelineQueryService
 from viridarium.domain.health import HealthProbe
 
 
@@ -64,4 +65,10 @@ def get_due_query_service(request: Request) -> DueQueryService:
 def get_app_settings_service(request: Request) -> AppSettingsService:
     """Return the application's app-settings service from the composition root."""
     service: AppSettingsService = request.app.state.app_settings_service
+    return service
+
+
+def get_timeline_query_service(request: Request) -> TimelineQueryService:
+    """Return the application's timeline-query service from the composition root."""
+    service: TimelineQueryService = request.app.state.timeline_query_service
     return service
