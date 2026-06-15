@@ -33,7 +33,7 @@ The dev server proxies `/api/*` to the FastAPI backend at
 src/
   components/        shared UI (AppShell, PlaceholderPage)
   features/          feature areas; MUST NOT import each other (FE-008)
-    today/           the "Today" page + HealthBadge
+    today/           the Today view (US-4.1 dashboard)
   lib/
     api/             typed fetch client (client.ts) + endpoint modules
   styles/

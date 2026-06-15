@@ -35,6 +35,20 @@ export const LIGHT_LEVELS: readonly LightLevel[] = [
 ];
 
 /**
+ * One enabled schedule's due state as returned inside `PlantResponse.schedules`
+ * (the additive US-3.3 field; `ScheduleDueResponse` on the wire). `care_type` is
+ * the closed schedule vocabulary `water`/`feed` - NOT the four-member
+ * `CareEventType`. `next_due` is null only when the schedule is paused/dormant
+ * inside the window; `overdue_days` is null iff `next_due` is null (the
+ * both-null invariant), else `>= 0`.
+ */
+export interface ScheduleDue {
+  readonly care_type: "water" | "feed";
+  readonly next_due: string | null;
+  readonly overdue_days: number | null;
+}
+
+/**
  * A persisted plant as returned by `GET /api/v1/plants` (`PlantResponse`).
  *
  * Server response fields are snake_case (design §1). `location_id` is null when
@@ -54,6 +68,12 @@ export interface Plant {
   readonly tags: readonly string[];
   readonly archived: boolean;
   readonly cover_photo_id: number | null;
+  /**
+   * One entry per enabled schedule of the plant, carrying its computed due
+   * state (US-3.3, additive; already on the wire). Archived plants and plants
+   * with no enabled schedule carry `[]`.
+   */
+  readonly schedules: readonly ScheduleDue[];
   readonly created_at: string;
   readonly updated_at: string;
 }

@@ -6,13 +6,14 @@ import { App } from "@/App";
 
 describe("App shell", () => {
   beforeEach(() => {
-    // Keep the health request from hitting the network during the smoke test.
+    // Keep the Today page's plants/locations requests from hitting the network
+    // during the shell smoke tests; an empty list settles to the empty-state.
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ status: "ok" }),
+        json: () => Promise.resolve([]),
       } as Response),
     );
   });
@@ -55,7 +56,17 @@ describe("App shell", () => {
     }
   });
 
-  it("renders the Today page at the root route", () => {
+  it("renders the Today page at the root route", async () => {
+    // The Today view (US-4.1) loads plants + locations; with an empty list it
+    // settles on the friendly empty-state.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([]),
+      } as Response),
+    );
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
@@ -63,9 +74,9 @@ describe("App shell", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 1, name: /the garden asks/i }),
+      screen.getByRole("heading", { level: 1, name: /^Today$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/backend status/i)).toBeInTheDocument();
+    await screen.findByText(/nothing due/i);
   });
 
   it("uses plain-English functional labels only - no Latin (D-008)", () => {

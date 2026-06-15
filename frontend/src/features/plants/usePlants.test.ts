@@ -19,6 +19,7 @@ const PLANT: Plant = {
   tags: ["rare"],
   cover_photo_id: null,
   archived: false,
+  schedules: [],
   created_at: "2026-06-08T10:00:00Z",
   updated_at: "2026-06-08T10:00:00Z",
 };
