@@ -77,7 +77,8 @@ help: ## List available targets
 
 FRONTEND_DIR := frontend
 
-.PHONY: fe-install fe-lint fe-format-check fe-typecheck fe-test fe-build dev-frontend
+.PHONY: fe-install fe-lint fe-format-check fe-typecheck fe-test fe-build \
+        fe-e2e fe-e2e-install dev-frontend
 
 fe-install: ## Install frontend dependencies (npm ci against the lockfile)
 	cd $(FRONTEND_DIR) && npm ci
@@ -96,6 +97,12 @@ fe-test: ## Vitest run (jsdom + Testing Library)
 
 fe-build: ## Production build (FE-007 budget)
 	cd $(FRONTEND_DIR) && npm run build
+
+fe-e2e-install: ## Install the Playwright Chromium browser for the acceptance suite
+	cd $(FRONTEND_DIR) && npx playwright install --with-deps chromium
+
+fe-e2e: ## Playwright acceptance suite (TEST-009; boots backend + built frontend)
+	cd $(FRONTEND_DIR) && npx playwright test
 
 dev-frontend: ## Vite dev server (/api proxied to localhost:8000)
 	cd $(FRONTEND_DIR) && npm run dev

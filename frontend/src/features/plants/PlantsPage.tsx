@@ -326,11 +326,13 @@ export function PlantsPage(): ReactNode {
                 key={plant.id}
                 className="flex flex-col gap-3 rounded-card border-card border-border bg-surface-raised p-4 shadow-card sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <CoverThumb plant={plant} />
-                  <div className="flex flex-col gap-1.5">
+                  {/* min-w-0 lets long unbroken names/species wrap instead of
+                      forcing horizontal overflow on a phone (BUG-005). */}
+                  <div className="flex min-w-0 flex-col gap-1.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-display text-xl font-semibold text-ink">
+                      <h2 className="min-w-0 font-display text-xl font-semibold text-ink break-words">
                         <Link
                           to={`/plants/${String(plant.id)}`}
                           aria-label={`View ${plant.name}'s history`}
@@ -346,7 +348,7 @@ export function PlantsPage(): ReactNode {
                       ) : null}
                     </div>
                     {plant.species !== null && plant.species.length > 0 ? (
-                      <p className="font-mono text-base italic text-ink-muted">
+                      <p className="font-mono text-base italic text-ink-muted break-words">
                         {plant.species}
                       </p>
                     ) : null}
@@ -358,7 +360,7 @@ export function PlantsPage(): ReactNode {
                         {plant.tags.map((t) => (
                           <li
                             key={t}
-                            className="rounded-pill border-control border-border bg-surface px-2 py-0.5 font-label text-xs uppercase tracking-widest text-ink-muted"
+                            className="rounded-pill border-control border-border bg-surface px-2 py-0.5 font-label text-xs uppercase tracking-widest text-ink-muted break-words"
                           >
                             {t}
                           </li>

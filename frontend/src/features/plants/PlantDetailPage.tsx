@@ -62,7 +62,7 @@ export function PlantDetailPage(): ReactNode {
           <span aria-hidden="true">←</span>
           Back to plants
         </Link>
-        <h1 className="font-display text-4xl font-extrabold text-ink">
+        <h1 className="font-display text-4xl font-extrabold text-ink break-words">
           {heading}
         </h1>
       </header>
