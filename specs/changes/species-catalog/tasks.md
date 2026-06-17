@@ -20,7 +20,10 @@ in the worklog before the green, per lane.**
 
 ## G3 - Persistence + seed (backend)
 - [ ] `models.py`: `SpeciesModel` (slug unique; nullable defaults).
-- [ ] `seed/species_seed.py`: curated ~25-30 entries (incl. category-level rows).
+- [ ] `seed/species_seed.py`: curated ~25-30 entries (incl. category-level rows). Per
+      species: watering range (min/max days) + a conservative applied average leaning
+      to the drier/longer end (D7); optional `care_notes` raw text (D8). Maintainer to
+      confirm the species list (see worklog: "30 most common houseplants" to draft).
 - [ ] `migrations/versions/0009_create_species_and_seed.py`: create + bulk_insert seed;
       downgrade drops table; batch mode; down_rev = head.
 - [ ] `species_repository.py`: repo + `_to_domain` + portable filter query.

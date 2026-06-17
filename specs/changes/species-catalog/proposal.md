@@ -39,11 +39,19 @@ since the whole epic far exceeds the ~400-500 LOC budget):
 ## Scope of THIS change (Phase 1A, exact - PRIN-IX)
 
 - **Domain:** `Species` entity + `SpeciesRepository` (read-only port). A species
-  carries: `slug`/`id`, `common_name`, `scientific_name` (opt), `category` (opt, e.g.
-  cactus-succulent, foliage, fern), and the four v1 defaults:
-  `light_level` (existing `LightLevel` enum), `water_interval_days`,
-  `feed_interval_days`, `winter_interval_days` (opt), `dormancy` (existing `Dormancy`
-  enum). All default fields optional (a category-level entry may omit specifics).
+  carries identity (`slug`/`id`, `common_name`, `scientific_name` (opt), `category`
+  (opt)) and the v1 defaults (all optional - a category-level entry may omit specifics):
+  - `light_level` (existing `LightLevel` enum)
+  - **Watering, as a range + an applied average:** `water_interval_min_days` and
+    `water_interval_max_days` (the informational range, e.g. 7-14 = "every 1-2 weeks")
+    **plus** `water_interval_days` (the single default we actually apply on prefill,
+    e.g. 10). The applied average **leans to the drier/longer end** on purpose (see D7:
+    drought is safer than overwatering).
+  - `feed_interval_days`
+  - `winter_interval_days` (opt) + `dormancy` (existing `Dormancy` enum)
+  - `care_notes` (opt free text) - a place to capture raw care info we have but
+    haven't structured yet (humidity, "top 2 cm dry between waterings", etc.); a
+    bridge to the Phase-3 dimensions without modelling them now.
 - **Persistence:** `species` table + a curated **seed of ~25-30 common houseplants**
   (incl. broad-behaviour category entries like "cacti & succulents"), loaded via a
   data-seeding migration; dual-engine (SQLite + PostgreSQL), reversible.
@@ -62,7 +70,9 @@ since the whole epic far exceeds the ~400-500 LOC budget):
 ## Acceptance criteria
 
 - AC1: `GET /api/v1/species` returns the seeded catalog (each item: identity +
-  category + the four defaults, defaults nullable); `?category=` and `?q=` filter it.
+  category + the defaults, all nullable: light, the watering range +
+  applied-average, feeding, winter/dormancy, and `care_notes`); `?category=` and
+  `?q=` filter it.
 - AC2: `GET /api/v1/species/{id}` returns one species; unknown id → 404.
 - AC3: the seed loads via migration on **both** SQLite and PostgreSQL (ARCH-011) and
   reverses cleanly; the catalog is identical across engines.

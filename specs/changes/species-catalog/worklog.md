@@ -25,6 +25,7 @@ Checklist per `templates/dor.md` (QG-004 PASS/WATCH/FAIL):
 
 ## Entries
 
+- `14:15 · lars+claude/OPUS · design review approved with refinements: add care_notes free-text (D8); watering = range (min/max) + conservative applied average leaning dry (D7); category starting set OK (cheap to extend); ~25-30 seed size fine. Follow-up: draft the "~30 most common houseplants" candidate list for maintainer review · proposal.md/design.md · review`
 - `11:45 · claude/OPUS · DoR gate PASS (13/13); change scaffolded; botanicum epic + Phase-1A/1B/2/3 roadmap captured (incl. future dimensions + the non-interval-watering & weeks-vs-days challenges) · specs/changes/species-catalog/* · QG-011`
 - `11:40 · lars+claude/OPUS · scope-affecting answers: curated in-repo seed (expandable, categories); prefill & detach but keep species_id record (future "update linked plants?" prompt); v1 defaults = light + water + feed + winter/dormancy; Phase 1 = catalog + pick-to-prefill · proposal.md · SPEC-001/DoR-13`
 - `11:35 · lars · change requested: built-in species catalog ("botanicum") with care defaults, from S25+ soak feedback #6 · proposal.md · -`
