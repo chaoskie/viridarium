@@ -44,6 +44,11 @@ function waterSection(): HTMLElement {
   return screen.getByRole("group", { name: /water/i });
 }
 
+/** The feed section's region, located by its accessible name. */
+function feedSection(): HTMLElement {
+  return screen.getByRole("group", { name: /feed/i });
+}
+
 async function renderWithEmptyList(): Promise<void> {
   // Empty list on mount: water defaults to winter_interval dormancy with no
   // winter interval days, so the hint condition is met.
@@ -100,5 +105,74 @@ describe("CareScheduleModal no-winter-interval hint", () => {
     fireEvent.click(dismiss);
 
     expect(within(water).queryByRole("note")).not.toBeInTheDocument();
+  });
+});
+
+describe("CareScheduleModal preserves unsaved sibling state (BUG-007)", () => {
+  /**
+   * Route fetch by method: the PUT upsert returns the saved feed schedule and
+   * flips the GET to return it on the post-save reload. This is the exact shape
+   * that triggers the loading-placeholder remount the bug rides on.
+   */
+  function routedFetch(): ReturnType<typeof vi.fn> {
+    const feed = {
+      plant_id: 1,
+      care_type: "feed",
+      interval_days: 14,
+      winter_interval_days: null,
+      dormancy: "paused",
+      enabled: true,
+      created_at: "2026-06-17T00:00:00Z",
+      updated_at: "2026-06-17T00:00:01Z",
+    };
+    let saved = false;
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((_path: string, init?: { method?: string }) => {
+        if ((init?.method ?? "GET") === "PUT") {
+          saved = true;
+          return Promise.resolve(okJson(feed));
+        }
+        return Promise.resolve(okJson(saved ? [feed] : []));
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  }
+
+  it("keeps unsaved Water values after the Feed section is saved", async () => {
+    routedFetch();
+    render(<CareScheduleModal plant={PLANT} onClose={() => undefined} />);
+    await waitFor(() => {
+      expect(screen.queryByText(/loading schedules/i)).not.toBeInTheDocument();
+    });
+
+    // Type a watering interval but do NOT save the Water section.
+    const waterInterval =
+      within(waterSection()).getByLabelText(/^interval \(days\)/i);
+    fireEvent.change(waterInterval, { target: { value: "7" } });
+
+    // Fill and save the Feed section, which triggers an upsert + reload.
+    const feed = feedSection();
+    fireEvent.change(within(feed).getByLabelText(/^interval \(days\)/i), {
+      target: { value: "14" },
+    });
+    fireEvent.click(
+      within(feed).getByRole("button", { name: /save the feed schedule/i }),
+    );
+
+    // Reload completed once the Feed section shows its Remove control (only
+    // rendered for a persisted schedule).
+    await waitFor(() => {
+      expect(
+        within(feedSection()).getByRole("button", {
+          name: /remove the feed schedule/i,
+        }),
+      ).toBeInTheDocument();
+    });
+
+    // The unsaved Water interval must survive the sibling save.
+    expect(
+      within(waterSection()).getByLabelText(/^interval \(days\)/i),
+    ).toHaveValue(7);
   });
 });
