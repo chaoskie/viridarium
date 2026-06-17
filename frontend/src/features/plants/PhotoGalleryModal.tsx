@@ -46,8 +46,13 @@ export function PhotoGalleryModal({
   );
   const [selected, setSelected] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [viewingId, setViewingId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileInputId = useId();
+
+  // The photo opened in the full-size view, looked up by id so a reload can't
+  // leave a stale object; if it vanishes we fall back to the grid (BUG-008).
+  const viewing = photos.find((photo) => photo.id === viewingId) ?? null;
 
   async function handleUpload(): Promise<void> {
     if (selected === null) {
@@ -66,98 +71,133 @@ export function PhotoGalleryModal({
   return (
     <Modal title={`Photos - ${plant.name}`} onClose={onClose}>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={fileInputId} className={LABEL_CLASSES}>
-            Add a photo (JPEG, PNG, or WebP)
-          </label>
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              ref={fileInputRef}
-              id={fileInputId}
-              type="file"
-              accept={ACCEPT}
-              className="min-h-tap-min font-body text-sm text-ink file:mr-3 file:min-h-tap-min file:rounded-control file:border-control file:border-border file:bg-surface file:px-3 file:font-label file:text-sm file:font-semibold file:uppercase file:tracking-widest file:text-ink"
-              onChange={(event) => {
-                const file = event.target.files?.[0] ?? null;
-                setSelected(file);
-              }}
-            />
-            <Button
-              variant="primary"
-              aria-label={`Upload a photo for ${plant.name}`}
-              disabled={selected === null || busy}
-              onClick={() => {
-                void handleUpload();
-              }}
-            >
-              {busy ? "Uploading..." : "Upload"}
-            </Button>
-          </div>
-        </div>
-
-        {error !== null ? (
-          <p className="font-body text-sm text-danger" role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        {loading ? (
-          <p
-            className="font-label text-sm uppercase tracking-wide text-ink-muted"
-            aria-live="polite"
-          >
-            Loading photos...
-          </p>
-        ) : null}
-
-        {!loading && error === null && photos.length === 0 ? (
-          <p className="font-body text-base text-ink-muted">
-            No photos yet. Upload one above.
-          </p>
-        ) : null}
-
-        {!loading && photos.length > 0 ? (
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {photos.map((photo) => (
-              <li
-                key={photo.id}
-                className="flex flex-col items-center gap-2 rounded-card border-card border-border bg-surface p-2 shadow-card"
+        {viewing !== null ? (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
+              <Button
+                variant="ghost"
+                aria-label="Back to all photos"
+                onClick={() => {
+                  setViewingId(null);
+                }}
               >
-                <img
-                  src={photoUrl(plant.id, photo.id)}
-                  alt={`${plant.name} photo`}
-                  loading="lazy"
-                  className={THUMB_CLASSES}
+                ← Back to all photos
+              </Button>
+              {viewing.is_cover ? (
+                <span className={PILL_CLASSES}>Cover</span>
+              ) : null}
+            </div>
+            <img
+              src={photoUrl(plant.id, viewing.id)}
+              alt={`${plant.name} photo, full size`}
+              className="max-h-[60vh] w-full rounded-card border-card border-border object-contain"
+            />
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={fileInputId} className={LABEL_CLASSES}>
+                Add a photo (JPEG, PNG, or WebP)
+              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  id={fileInputId}
+                  type="file"
+                  accept={ACCEPT}
+                  className="min-h-tap-min font-body text-sm text-ink file:mr-3 file:min-h-tap-min file:rounded-control file:border-control file:border-border file:bg-surface file:px-3 file:font-label file:text-sm file:font-semibold file:uppercase file:tracking-widest file:text-ink"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    setSelected(file);
+                  }}
                 />
-                {photo.is_cover ? (
-                  <span className={PILL_CLASSES}>Cover</span>
-                ) : null}
-                <div className="flex w-full flex-col gap-1.5">
-                  {!photo.is_cover ? (
-                    <Button
-                      variant="ghost"
-                      aria-label={`Set this photo as the cover for ${plant.name}`}
+                <Button
+                  variant="primary"
+                  aria-label={`Upload a photo for ${plant.name}`}
+                  disabled={selected === null || busy}
+                  onClick={() => {
+                    void handleUpload();
+                  }}
+                >
+                  {busy ? "Uploading..." : "Upload"}
+                </Button>
+              </div>
+            </div>
+
+            {error !== null ? (
+              <p className="font-body text-sm text-danger" role="alert">
+                {error}
+              </p>
+            ) : null}
+
+            {loading ? (
+              <p
+                className="font-label text-sm uppercase tracking-wide text-ink-muted"
+                aria-live="polite"
+              >
+                Loading photos...
+              </p>
+            ) : null}
+
+            {!loading && error === null && photos.length === 0 ? (
+              <p className="font-body text-base text-ink-muted">
+                No photos yet. Upload one above.
+              </p>
+            ) : null}
+
+            {!loading && photos.length > 0 ? (
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {photos.map((photo) => (
+                  <li
+                    key={photo.id}
+                    className="flex flex-col items-center gap-2 rounded-card border-card border-border bg-surface p-2 shadow-card"
+                  >
+                    <button
+                      type="button"
+                      aria-label={`View this photo of ${plant.name} at full size`}
+                      className="rounded-control focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
                       onClick={() => {
-                        void setCover(photo.id);
+                        setViewingId(photo.id);
                       }}
                     >
-                      Set cover
-                    </Button>
-                  ) : null}
-                  <Button
-                    variant="danger"
-                    aria-label={`Delete this photo of ${plant.name}`}
-                    onClick={() => {
-                      void remove(photo.id);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+                      <img
+                        src={photoUrl(plant.id, photo.id)}
+                        alt={`${plant.name} photo`}
+                        loading="lazy"
+                        className={THUMB_CLASSES}
+                      />
+                    </button>
+                    {photo.is_cover ? (
+                      <span className={PILL_CLASSES}>Cover</span>
+                    ) : null}
+                    <div className="flex w-full flex-col gap-1.5">
+                      {!photo.is_cover ? (
+                        <Button
+                          variant="ghost"
+                          aria-label={`Set this photo as the cover for ${plant.name}`}
+                          onClick={() => {
+                            void setCover(photo.id);
+                          }}
+                        >
+                          Set cover
+                        </Button>
+                      ) : null}
+                      <Button
+                        variant="danger"
+                        aria-label={`Delete this photo of ${plant.name}`}
+                        onClick={() => {
+                          void remove(photo.id);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </>
+        )}
 
         <div className="flex justify-end">
           <Button variant="ghost" onClick={onClose}>

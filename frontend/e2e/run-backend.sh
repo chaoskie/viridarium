@@ -14,6 +14,13 @@ rm -f "${DB}"
 # Absolute path -> sqlite:////home/... (four slashes); matches the CI pattern.
 export DATABASE_URL="sqlite:///${DB}"
 
+# Throwaway photo storage (the default /data/photos isn't writable in dev/CI).
+# Wiped each run so uploads in the acceptance suite start clean.
+PHOTOS="${ROOT}/frontend/.e2e/photos"
+rm -rf "${PHOTOS}"
+mkdir -p "${PHOTOS}"
+export PHOTOS_DIR="${PHOTOS}"
+
 cd "${ROOT}/backend"
 uv run --frozen alembic upgrade head
 exec uv run --frozen uvicorn viridarium.main:app --app-dir src --port "${PORT}"
