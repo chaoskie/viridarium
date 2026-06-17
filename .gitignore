@@ -43,6 +43,9 @@ frontend/dist/
 # Playwright
 test-results/
 playwright-report/
+.playwright/
+# Throwaway backend DB + state booted by the acceptance webServer
+frontend/.e2e/
 
 # Obsidian workspace files (the public docs/ folder may be opened in the app)
 **/.obsidian/

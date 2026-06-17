@@ -24,14 +24,20 @@ export function ThemeToggle(): ReactNode {
 
   return (
     <div className="flex items-center gap-2">
+      {/*
+        The text label is hidden on phones to keep the header within a ~384px
+        viewport (BUG-001/002); the select keeps an always-present accessible name
+        via aria-label. On tablet+ the visible label returns.
+      */}
       <label
         htmlFor={selectId}
-        className="font-label text-xs font-semibold uppercase tracking-widest text-ink-muted"
+        className="hidden font-label text-xs font-semibold uppercase tracking-widest text-ink-muted sm:block"
       >
         Theme
       </label>
       <select
         id={selectId}
+        aria-label="Theme"
         value={theme}
         onChange={handleChange}
         className="min-h-tap-min rounded-control border-control border-border bg-surface px-3 font-label text-xs font-semibold uppercase tracking-widest text-ink focus:outline-none focus:ring-2 focus:ring-ring"

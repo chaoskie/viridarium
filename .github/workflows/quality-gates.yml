@@ -55,6 +55,44 @@ jobs:
       - name: Lint, format, types, tests
         run: make fe-lint fe-format-check fe-typecheck fe-test
 
+  acceptance:
+    name: Playwright acceptance (S25+)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20.19"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      # Lockfile (v3) needs npm 11; node 20 bundles npm 10 (mirrors the frontend job).
+      - name: Pin npm 11 (lockfile compatibility)
+        run: npm install -g npm@11
+      - name: Set up uv (with cache)
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install backend deps
+        run: make backend-install
+      - name: Install frontend deps
+        run: make fe-install
+      # The acceptance webServer boots FastAPI (on a throwaway migrated SQLite DB,
+      # dedicated port 8799) and serves the production frontend build, then drives it
+      # at the Galaxy S25+ viewport (TEST-009). Adds ~a few minutes/run: Chromium
+      # download + full-stack boot + build.
+      - name: Install Playwright Chromium
+        run: cd frontend && npx playwright install --with-deps chromium
+      - name: Acceptance suite
+        run: make fe-e2e
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
   cross-engine:
     name: Cross-engine migrations + integration (${{ matrix.engine }})
     runs-on: ubuntu-latest

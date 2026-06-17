@@ -30,15 +30,18 @@ export function AppShell({ children }: AppShellProps): ReactNode {
     <div className="flex min-h-screen flex-col text-ink">
       <header className="border-b-card border-border bg-surface-raised">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4">
-          <div className="flex items-center gap-3">
+          {/* min-w-0 lets the brand shrink so the row never overflows a narrow
+              phone header (BUG-001); the glyph stays fixed, the wordmark truncates
+              only as a last resort. */}
+          <div className="flex min-w-0 items-center gap-3">
             <span
               aria-hidden="true"
-              className="grid min-h-tap-min min-w-tap-min place-items-center rounded-control border-card border-border bg-surface text-xl text-accent-2-strong shadow-raised"
+              className="grid min-h-tap-min min-w-tap-min shrink-0 place-items-center rounded-control border-card border-border bg-surface text-xl text-accent-2-strong shadow-raised"
             >
               ❦
             </span>
             {/* Wordmark: Latin allowed as the brand (D-008). Interpunct split. */}
-            <span className="font-display text-xl font-semibold uppercase tracking-widest text-ink sm:text-2xl">
+            <span className="truncate font-display text-xl font-semibold uppercase tracking-wide text-ink sm:text-2xl sm:tracking-widest">
               VIRID<span className="text-accent">·ARIVM</span>
             </span>
           </div>

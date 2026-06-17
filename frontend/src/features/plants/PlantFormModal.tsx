@@ -269,17 +269,24 @@ export function PlantFormModal({
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor={acquiredOnId} className={LABEL_CLASSES}>
-            Acquired on
+            Acquired on (optional)
           </label>
           <input
             id={acquiredOnId}
             type="date"
             className={SELECT_CLASSES}
             value={acquiredOn}
+            aria-describedby={`${acquiredOnId}-hint`}
             onChange={(event) => {
               setAcquiredOn(event.target.value);
             }}
           />
+          <p
+            id={`${acquiredOnId}-hint`}
+            className="font-body text-sm text-ink-muted"
+          >
+            Leave blank if you don&apos;t know.
+          </p>
         </div>
 
         <div className="flex flex-col gap-1.5">

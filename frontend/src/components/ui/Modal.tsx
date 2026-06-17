@@ -40,12 +40,15 @@ export function Modal({ title, onClose, children }: ModalProps): ReactNode {
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="flex w-full max-w-md flex-col gap-4 rounded-card border-card border-border bg-surface-raised p-5 shadow-raised outline-none"
+        // Cap the height to the padded viewport (backdrop has p-4 = 2rem vertical)
+        // and let the body scroll, so a tall form is never clipped above the
+        // screen on a phone (BUG-003). dvh tracks the mobile browser chrome.
+        className="flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col gap-4 rounded-card border-card border-border bg-surface-raised p-5 shadow-raised outline-none"
         onClick={(event) => {
           event.stopPropagation();
         }}
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex shrink-0 items-center justify-between gap-3">
           <h2
             id={titleId}
             className="font-display text-2xl font-semibold text-ink"
@@ -61,7 +64,7 @@ export function Modal({ title, onClose, children }: ModalProps): ReactNode {
             ✕
           </button>
         </div>
-        {children}
+        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       </div>
     </div>
   );
