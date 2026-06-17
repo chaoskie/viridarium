@@ -50,13 +50,10 @@ test-coverage: ## full suite with coverage floor 85 (QG-002)
 		--cov-config=$(BACKEND_DIR)/pyproject.toml
 
 audit: ## pip-audit dependency CVE scan (SEC-009)
-	# Ignored advisories carry a justification + revisit date inline (SEC-009) and in
-	# specs/changes/scaffold-backend/proposal.md.
-	# PYSEC-2026-161 (starlette Host-header validation): fix is starlette 1.0.1, which
-	# the current FastAPI line does not yet allow; advisory is below the SEC-009 CVSS>7.5
-	# block bar and off our critical path (no Host-based URL reconstruction in v1).
-	# Revisit 2026-09-01 (or sooner when FastAPI admits starlette >=1.0).
-	cd $(BACKEND_DIR) && uv run pip-audit --ignore-vuln PYSEC-2026-161
+	# No suppressions: the starlette 1.3.1 bump (via fastapi 0.137) retired the prior
+	# PYSEC-2026-161 ignore and cleared CVE-2026-54282/54283/48817/48818 (BUG-006).
+	# Any future ignore carries a justification + revisit date inline (SEC-009).
+	cd $(BACKEND_DIR) && uv run pip-audit
 
 quality-gates: lint format-check typecheck imports test-coverage audit fe-lint fe-format-check fe-typecheck fe-test ## Run the full mechanical gate, backend + frontend (QG-001)
 	@echo "All quality gates passed."
