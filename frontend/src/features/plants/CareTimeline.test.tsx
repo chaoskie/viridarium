@@ -105,11 +105,11 @@ describe("CareTimeline", () => {
 
     // Health rating is visible on the observe entry.
     expect(scope.getByText(/good/i)).toBeInTheDocument();
-    // The inline photo renders with the contracted url.
-    expect(scope.getByRole("img")).toHaveAttribute(
-      "src",
-      "/api/v1/plants/1/photos/12",
-    );
+    // The inline photo renders with the contracted url, uncropped like the
+    // standalone entry (both share TimelinePhotoImage - BUG-009).
+    const inlinePhoto = scope.getByRole("img");
+    expect(inlinePhoto).toHaveAttribute("src", "/api/v1/plants/1/photos/12");
+    expect(inlinePhoto).toHaveClass("object-contain");
 
     // A water entry (photo:null, health:null) carries no image and no health chip.
     const waterEntry = screen
@@ -130,6 +130,17 @@ describe("CareTimeline", () => {
     );
     // It is a photo entry, not mislabelled as an event (no event-type marker).
     expect(scope.queryByTestId(/event-marker-/)).not.toBeInTheDocument();
+  });
+
+  it("renders timeline photos uncropped so portrait images are not cut off (BUG-009)", async () => {
+    stubFetch(okJson(200, SAMPLE_TIMELINE));
+    render(<CareTimeline plantId={1} />);
+
+    const photoEntry = await screen.findByTestId("photo-entry");
+    const img = within(photoEntry).getByRole("img");
+    // The whole image must be shown (contained), never cropped to fill the box.
+    expect(img).toHaveClass("object-contain");
+    expect(img).not.toHaveClass("object-cover");
   });
 
   it("renders an empty state for no history (F-7)", async () => {
