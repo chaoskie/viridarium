@@ -20,6 +20,38 @@ const BACKEND_HEALTH = `http://localhost:${BACKEND_PORT}/api/v1/health`;
 const FRONTEND_URL = "http://localhost:4173";
 const isCI = Boolean(process.env.CI);
 
+// Release-gated multi-device matrix (set E2E_DEVICE_MATRIX=1). OFF per-PR so the
+// PR pipeline stays fast (galaxy-s25-plus + desktop only); the release workflow
+// (.github/workflows/device-matrix.yml) turns it on to re-run the width-sensitive
+// `@layout` specs across the current top-5 mobile CSS viewports. These are the
+// read-only layout checks (overflow / on-screen controls / a11y); the write specs
+// stay single-device because the shared SQLite backend runs workers:1.
+const deviceMatrix = process.env.E2E_DEVICE_MATRIX === "1";
+
+// Top-5 most common mobile CSS viewport widths (heights are the logical device
+// heights). The primary 384x740 (S25+) already covers a tight-height case.
+const MATRIX_VIEWPORTS = [
+  { name: "mobile-360x800", width: 360, height: 800 },
+  { name: "mobile-390x844", width: 390, height: 844 },
+  { name: "mobile-393x852", width: 393, height: 852 },
+  { name: "mobile-412x915", width: 412, height: 915 },
+  { name: "mobile-430x932", width: 430, height: 932 },
+] as const;
+
+const matrixProjects = deviceMatrix
+  ? MATRIX_VIEWPORTS.map((v) => ({
+      name: v.name,
+      // Only the read-only, width-sensitive layout specs (no writes -> no extra
+      // contention on the shared backend, no duplicate screenshot evidence).
+      grep: /@layout/,
+      use: {
+        ...devices["Galaxy S9+"],
+        viewport: { width: v.width, height: v.height },
+        deviceScaleFactor: 3,
+      },
+    }))
+  : [];
+
 export default defineConfig({
   testDir: "./e2e",
   // Acceptance specs only; *.po.ts / *.co.ts / fixtures are support files.
@@ -61,6 +93,8 @@ export default defineConfig({
         viewport: { width: 1280, height: 800 },
       },
     },
+    // Release-gated only: the top-5 mobile-resolution layout matrix (empty per-PR).
+    ...matrixProjects,
   ],
   webServer: [
     {

@@ -1,0 +1,57 @@
+# Release-gated multi-device acceptance (TEST-009, CI-001).
+#
+# The per-PR pipeline (quality-gates.yml) runs the acceptance suite on the
+# Galaxy S25+ primary only, to stay fast. This workflow re-runs the
+# width-sensitive `@layout` specs across the current top-5 mobile CSS viewports
+# (E2E_DEVICE_MATRIX=1), but ONLY when a release is published - so the extra
+# CI minutes are spent at release time, not on every PR. Mirrors publish.yml's
+# trigger so the matrix and the image build gate the same release.
+name: device-matrix
+
+on:
+  release:
+    types: [published]
+  # Manual escape hatch: run the matrix on demand without cutting a release.
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  device-matrix:
+    name: Acceptance device matrix (top-5 mobile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20.19"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      # Lockfile (v3) needs npm 11; node 20 bundles npm 10 (mirrors the acceptance job).
+      - name: Pin npm 11 (lockfile compatibility)
+        run: npm install -g npm@11
+      - name: Set up uv (with cache)
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install backend deps
+        run: make backend-install
+      - name: Install frontend deps
+        run: make fe-install
+      - name: Install Playwright Chromium
+        run: cd frontend && npx playwright install --with-deps chromium
+      - name: Acceptance suite + device matrix
+        run: make fe-e2e-matrix
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-device-matrix
+          path: frontend/playwright-report/
+          retention-days: 7

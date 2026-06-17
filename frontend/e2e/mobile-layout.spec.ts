@@ -7,10 +7,12 @@ import {
 } from "./fixtures";
 
 /**
- * Galaxy S25+ app-shell regressions from the soak (BUG-001, BUG-002). Untagged =>
- * runs on the `galaxy-s25-plus` project only (the desktop project greps `@desktop`).
+ * Galaxy S25+ app-shell regressions from the soak (BUG-001, BUG-002). `@layout`
+ * marks these as read-only, width-sensitive checks: they run on `galaxy-s25-plus`
+ * per-PR and across the release-gated device matrix (the desktop project greps
+ * `@desktop`, so these don't run there).
  */
-test.describe("mobile app shell", () => {
+test.describe("mobile app shell @layout", () => {
   test("opens at 1.0 scale with no horizontal overflow (BUG-001)", async ({
     page,
   }) => {
