@@ -31,6 +31,23 @@ class PotMaterial(StrEnum):
     OTHER = "other"
 
 
+class OuterPotMaterial(StrEnum):
+    """Decorative outer pot (cachepot) material, stored as a string (D3).
+
+    A distinct value space from :class:`PotMaterial` (D2): no ``self-watering`` (an
+    inner/nursery-pot trait), and decorative materials (``woven``, ``metal``, ``glass``)
+    that don't apply to a nursery pot. Values are the spec wire form.
+    """
+
+    CERAMIC = "ceramic"
+    TERRACOTTA = "terracotta"
+    PLASTIC = "plastic"
+    METAL = "metal"
+    WOVEN = "woven"
+    GLASS = "glass"
+    OTHER = "other"
+
+
 class LightLevel(StrEnum):
     """Light level, stored as a string (D3). Values are the spec wire form."""
 
@@ -63,6 +80,10 @@ class Plant:
     archived: bool
     created_at: datetime
     updated_at: datetime
+    # Decorative outer pot (cachepot), additive + optional; ``None`` = no cachepot (D3).
+    # The inner/nursery pot stays in ``pot_size_cm`` / ``pot_material`` (D1).
+    outer_pot_material: OuterPotMaterial | None = None
+    outer_pot_size_cm: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -79,6 +100,8 @@ class NewPlant:
     notes: str | None
     tags: tuple[str, ...]
     archived: bool
+    outer_pot_material: OuterPotMaterial | None = None
+    outer_pot_size_cm: int | None = None
 
 
 @dataclass(frozen=True, slots=True)

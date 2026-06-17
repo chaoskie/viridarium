@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "./client";
 import {
+  OUTER_POT_MATERIALS,
   archivePlant,
   createPlant,
   deletePlant,
@@ -21,6 +22,8 @@ const SAMPLE: Plant = {
   acquired_on: "2026-01-15",
   pot_size_cm: 14,
   pot_material: "terracotta",
+  outer_pot_material: "ceramic",
+  outer_pot_size_cm: 18,
   light_level: "bright-indirect",
   notes: "north window",
   tags: ["rare", "fern"],
@@ -38,6 +41,8 @@ const INPUT: PlantInput = {
   acquired_on: "2026-01-15",
   pot_size_cm: 14,
   pot_material: "terracotta",
+  outer_pot_material: "ceramic",
+  outer_pot_size_cm: 18,
   light_level: "bright-indirect",
   notes: "north window",
   tags: ["rare", "fern"],
@@ -51,6 +56,8 @@ const HOMELESS_INPUT: PlantInput = {
   acquired_on: null,
   pot_size_cm: null,
   pot_material: null,
+  outer_pot_material: null,
+  outer_pot_size_cm: null,
   light_level: null,
   notes: null,
   tags: [],
@@ -323,6 +330,47 @@ describe("plants API client", () => {
     it("throws ApiError on a non-2xx response (incl. 404)", async () => {
       stubFetch(fail(404));
       await expect(archivePlant(99)).rejects.toBeInstanceOf(ApiError);
+    });
+  });
+
+  describe("outer pot (cachepot) fields", () => {
+    it("round-trips outer_pot_material + outer_pot_size_cm in the POST body (F1)", async () => {
+      const fetchMock = stubFetch(okJson(201, SAMPLE));
+      await createPlant(INPUT);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/plants",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify(INPUT),
+        }),
+      );
+      const sent = JSON.parse(
+        (fetchMock.mock.calls[0]?.[1] as { body: string }).body,
+      ) as PlantInput;
+      expect(sent.outer_pot_material).toBe("ceramic");
+      expect(sent.outer_pot_size_cm).toBe(18);
+    });
+
+    it("serializes null outer pot fields for a bare-nursery-pot plant (F2)", async () => {
+      const fetchMock = stubFetch(okJson(201, SAMPLE));
+      await createPlant(HOMELESS_INPUT);
+      const sent = JSON.parse(
+        (fetchMock.mock.calls[0]?.[1] as { body: string }).body,
+      ) as PlantInput;
+      expect(sent.outer_pot_material).toBeNull();
+      expect(sent.outer_pot_size_cm).toBeNull();
+    });
+
+    it("OUTER_POT_MATERIALS equals the 7 backend enum wire values in order (F3)", () => {
+      expect(OUTER_POT_MATERIALS).toEqual([
+        "ceramic",
+        "terracotta",
+        "plastic",
+        "metal",
+        "woven",
+        "glass",
+        "other",
+      ]);
     });
   });
 

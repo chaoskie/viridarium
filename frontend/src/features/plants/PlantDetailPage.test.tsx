@@ -14,6 +14,8 @@ const PLANT: Plant = {
   acquired_on: null,
   pot_size_cm: null,
   pot_material: null,
+  outer_pot_material: null,
+  outer_pot_size_cm: null,
   light_level: null,
   notes: null,
   tags: [],
@@ -73,6 +75,29 @@ describe("PlantDetailPage", () => {
         (call[0] as string).endsWith("/plants/3/timeline"),
       );
       expect(timelineCalls).toHaveLength(1);
+    });
+  });
+
+  it("shows the decorative outer pot in the header when set (cachepot)", async () => {
+    const withOuter: Plant = {
+      ...PLANT,
+      outer_pot_material: "ceramic",
+      outer_pot_size_cm: 18,
+    };
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((path: string) =>
+        Promise.resolve(
+          path.endsWith("/timeline") ? okJson(200, []) : okJson(200, withOuter),
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    renderAt("/plants/3");
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/in a ceramic outer pot \(18 cm\)/i),
+      ).toBeInTheDocument();
     });
   });
 

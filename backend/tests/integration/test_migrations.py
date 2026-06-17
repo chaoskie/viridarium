@@ -76,6 +76,9 @@ def test_upgrade_creates_plant_tables_and_downgrade_drops_them(
             "archived",
             "created_at",
             "updated_at",
+            # additive cachepot columns from 0008 (plant-cachepot); the head column set.
+            "outer_pot_material",
+            "outer_pot_size_cm",
         }
         tag_cols = {col["name"] for col in inspector.get_columns("plant_tag")}
         assert tag_cols == {"plant_id", "tag"}
@@ -283,5 +286,80 @@ def test_upgrade_creates_app_settings_table_and_downgrade_drops_it(  # B-I7
         assert "photo" in after
         assert "plant" in after
         assert "plant_tag" in after
+    finally:
+        engine.dispose()
+
+
+# ---------------------------------- cachepot columns (0008, plant-cachepot, AC3) -----
+# The pre-0008 plant column set (the 0003 columns); 0008 adds exactly the two new ones.
+_PRE_0008_PLANT_COLS = {
+    "id",
+    "name",
+    "species",
+    "location_id",
+    "acquired_on",
+    "pot_size_cm",
+    "pot_material",
+    "light_level",
+    "notes",
+    "archived",
+    "created_at",
+    "updated_at",
+}
+_CACHEPOT_COLS = {"outer_pot_material", "outer_pot_size_cm"}
+
+
+def test_upgrade_adds_cachepot_columns_and_downgrade_drops_them(  # M1 + M2
+    sqlite_url: str,
+) -> None:
+    cfg = make_alembic_config(sqlite_url)
+    engine = create_engine(sqlite_url)
+
+    command.upgrade(cfg, "head")
+    try:
+        # M1: head adds exactly the two nullable cachepot columns to ``plant``.
+        cols = {col["name"]: col for col in inspect(engine).get_columns("plant")}
+        assert set(cols) == _PRE_0008_PLANT_COLS | _CACHEPOT_COLS
+        assert cols["outer_pot_material"]["nullable"] is True
+        assert cols["outer_pot_size_cm"]["nullable"] is True
+
+        # M2: downgrade to 0007 drops exactly the two columns (batch-mode reversible);
+        # the table and all 0003 columns survive.
+        command.downgrade(cfg, "0007")
+        after = {col["name"] for col in inspect(engine).get_columns("plant")}
+        assert after == _PRE_0008_PLANT_COLS
+        assert "plant" in set(inspect(engine).get_table_names())
+    finally:
+        engine.dispose()
+
+
+def test_existing_plant_row_gets_null_cachepot_columns_on_upgrade(  # M3
+    sqlite_url: str,
+) -> None:
+    from sqlalchemy import text
+
+    cfg = make_alembic_config(sqlite_url)
+    engine = create_engine(sqlite_url)
+
+    # Seed a plant row at 0007 (before the cachepot columns exist), then upgrade.
+    command.upgrade(cfg, "0007")
+    try:
+        with engine.begin() as conn:
+            conn.execute(
+                text("INSERT INTO plant (name, archived) VALUES ('Legacy', 0)")
+            )
+
+        command.upgrade(cfg, "head")
+
+        with engine.connect() as conn:
+            row = conn.execute(
+                text(
+                    "SELECT outer_pot_material, outer_pot_size_cm "
+                    "FROM plant WHERE name = 'Legacy'"
+                )
+            ).one()
+        # No backfill, no default (D3): the existing row reads back null/null.
+        assert row.outer_pot_material is None
+        assert row.outer_pot_size_cm is None
     finally:
         engine.dispose()

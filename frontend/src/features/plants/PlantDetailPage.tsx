@@ -54,6 +54,10 @@ export function PlantDetailPage(): ReactNode {
   }, [plantId, validId]);
 
   const heading = state.kind === "ready" ? state.plant.name : "Plant";
+  const outerPot =
+    state.kind === "ready" && state.plant.outer_pot_material !== null
+      ? state.plant
+      : null;
 
   return (
     <section className="flex flex-col gap-6">
@@ -65,6 +69,14 @@ export function PlantDetailPage(): ReactNode {
         <h1 className="font-display text-4xl font-extrabold text-ink break-words">
           {heading}
         </h1>
+        {outerPot ? (
+          <p className="font-body text-sm text-ink-muted">
+            In a {outerPot.outer_pot_material} outer pot
+            {outerPot.outer_pot_size_cm !== null
+              ? ` (${String(outerPot.outer_pot_size_cm)} cm)`
+              : ""}
+          </p>
+        ) : null}
       </header>
 
       {validId ? (

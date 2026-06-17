@@ -13,6 +13,8 @@ const BASE: Plant = {
   acquired_on: null,
   pot_size_cm: null,
   pot_material: null,
+  outer_pot_material: null,
+  outer_pot_size_cm: null,
   light_level: null,
   notes: null,
   tags: [],

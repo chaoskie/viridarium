@@ -23,7 +23,7 @@ from viridarium.domain.care_event import CareEvent, CareEventType, Health
 from viridarium.domain.care_schedule import CareSchedule, CareType, Dormancy
 from viridarium.domain.due import ScheduleDue
 from viridarium.domain.photo import Photo
-from viridarium.domain.plant import LightLevel, PotMaterial
+from viridarium.domain.plant import LightLevel, OuterPotMaterial, PotMaterial
 
 
 class HealthResponse(BaseModel):
@@ -105,6 +105,9 @@ class PlantCreate(BaseModel):
     notes: str | None = Field(default=None, max_length=10000)
     tags: list[str] = Field(default_factory=list, max_length=50)
     archived: bool = Field(default=False)
+    # Decorative outer pot (cachepot), additive + optional (plant-cachepot).
+    outer_pot_material: OuterPotMaterial | None = Field(default=None)
+    outer_pot_size_cm: int | None = Field(default=None, ge=1, le=500)
 
     @field_validator("name")
     @classmethod
@@ -181,6 +184,8 @@ class PlantResponse(BaseModel):
     updated_at: datetime
     schedules: list[ScheduleDueResponse] = Field(default_factory=list)
     cover_photo_id: int | None = Field(default=None)
+    outer_pot_material: OuterPotMaterial | None = Field(default=None)
+    outer_pot_size_cm: int | None = Field(default=None)
 
 
 class PhotoResponse(BaseModel):

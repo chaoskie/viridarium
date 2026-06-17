@@ -8,8 +8,10 @@ import { ApiError } from "@/lib/api/client";
 import type { Location } from "@/lib/api/locations";
 import {
   LIGHT_LEVELS,
+  OUTER_POT_MATERIALS,
   POT_MATERIALS,
   type LightLevel,
+  type OuterPotMaterial,
   type Plant,
   type PlantInput,
   type PotMaterial,
@@ -138,6 +140,14 @@ export function PlantFormModal({
   const [potMaterial, setPotMaterial] = useState<string>(
     plant?.pot_material ?? "",
   );
+  const [outerPotMaterial, setOuterPotMaterial] = useState<string>(
+    plant?.outer_pot_material ?? "",
+  );
+  const [outerPotSizeCm, setOuterPotSizeCm] = useState(
+    plant?.outer_pot_size_cm !== undefined && plant.outer_pot_size_cm !== null
+      ? String(plant.outer_pot_size_cm)
+      : "",
+  );
   const [lightLevel, setLightLevel] = useState<string>(
     plant?.light_level ?? "",
   );
@@ -153,6 +163,7 @@ export function PlantFormModal({
 
   const acquiredOnId = useId();
   const potSizeId = useId();
+  const outerPotSizeId = useId();
   const archivedId = useId();
 
   const locationOptions = [
@@ -166,6 +177,14 @@ export function PlantFormModal({
   const potMaterialOptions = [
     { value: "", label: "Not set" },
     ...POT_MATERIALS.map((material) => ({ value: material, label: material })),
+  ];
+
+  const outerPotMaterialOptions = [
+    { value: "", label: "Not set" },
+    ...OUTER_POT_MATERIALS.map((material) => ({
+      value: material,
+      label: material,
+    })),
   ];
 
   const lightLevelOptions = [
@@ -199,6 +218,9 @@ export function PlantFormModal({
       acquired_on: orNull(acquiredOn),
       pot_size_cm: parseOptionalInt(potSizeCm),
       pot_material: potMaterial === "" ? null : (potMaterial as PotMaterial),
+      outer_pot_material:
+        outerPotMaterial === "" ? null : (outerPotMaterial as OuterPotMaterial),
+      outer_pot_size_cm: parseOptionalInt(outerPotSizeCm),
       light_level: lightLevel === "" ? null : (lightLevel as LightLevel),
       notes: orNull(notes),
       tags: parseTags(tags),
@@ -289,38 +311,75 @@ export function PlantFormModal({
           </p>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={potSizeId} className={LABEL_CLASSES}>
-            Pot size (cm)
-          </label>
-          <input
-            id={potSizeId}
-            type="number"
-            inputMode="numeric"
-            min={POT_SIZE_MIN}
-            max={POT_SIZE_MAX}
-            step={1}
-            className={SELECT_CLASSES}
-            value={potSizeCm}
-            placeholder="Optional"
-            aria-invalid={potSizeError !== null || undefined}
-            onChange={(event) => {
-              setPotSizeCm(event.target.value);
-            }}
-          />
-          {potSizeError ? (
-            <p className="font-body text-sm text-danger" role="alert">
-              {potSizeError}
-            </p>
-          ) : null}
-        </div>
+        <fieldset className="flex flex-col gap-4 border-0 p-0">
+          <legend className={`${LABEL_CLASSES} mb-1`}>
+            Nursery (inner) pot
+          </legend>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={potSizeId} className={LABEL_CLASSES}>
+              Pot size (cm)
+            </label>
+            <input
+              id={potSizeId}
+              type="number"
+              inputMode="numeric"
+              min={POT_SIZE_MIN}
+              max={POT_SIZE_MAX}
+              step={1}
+              className={SELECT_CLASSES}
+              value={potSizeCm}
+              placeholder="Optional"
+              aria-invalid={potSizeError !== null || undefined}
+              onChange={(event) => {
+                setPotSizeCm(event.target.value);
+              }}
+            />
+            {potSizeError ? (
+              <p className="font-body text-sm text-danger" role="alert">
+                {potSizeError}
+              </p>
+            ) : null}
+          </div>
 
-        <FieldSelect
-          label="Pot material"
-          value={potMaterial}
-          options={potMaterialOptions}
-          onChange={setPotMaterial}
-        />
+          <FieldSelect
+            label="Pot material"
+            value={potMaterial}
+            options={potMaterialOptions}
+            onChange={setPotMaterial}
+          />
+        </fieldset>
+
+        <fieldset className="flex flex-col gap-4 border-0 p-0">
+          <legend className={`${LABEL_CLASSES} mb-1`}>
+            Outer / decorative pot (optional)
+          </legend>
+          <FieldSelect
+            label="Outer pot material"
+            value={outerPotMaterial}
+            options={outerPotMaterialOptions}
+            onChange={setOuterPotMaterial}
+          />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={outerPotSizeId} className={LABEL_CLASSES}>
+              Outer pot size (cm)
+            </label>
+            <input
+              id={outerPotSizeId}
+              type="number"
+              inputMode="numeric"
+              min={POT_SIZE_MIN}
+              max={POT_SIZE_MAX}
+              step={1}
+              className={SELECT_CLASSES}
+              value={outerPotSizeCm}
+              placeholder="Optional"
+              onChange={(event) => {
+                setOuterPotSizeCm(event.target.value);
+              }}
+            />
+          </div>
+        </fieldset>
+
         <FieldSelect
           label="Light level"
           value={lightLevel}

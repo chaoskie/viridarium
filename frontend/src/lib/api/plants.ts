@@ -12,6 +12,21 @@ export type PotMaterial =
   | "other";
 
 /**
+ * Outer / decorative pot (cachepot) material wire values (design D2). The
+ * existing `PotMaterial` is the inner/nursery pot; the decorative outer pot has
+ * a distinct material space (no `self-watering`; adds `metal`/`woven`/`glass`).
+ * String-literal union matching the backend `OuterPotMaterial` StrEnum exactly.
+ */
+export type OuterPotMaterial =
+  | "ceramic"
+  | "terracotta"
+  | "plastic"
+  | "metal"
+  | "woven"
+  | "glass"
+  | "other";
+
+/**
  * Light-level wire values (design §1 / D3). String-literal union matching the
  * backend `LightLevel` StrEnum members exactly.
  */
@@ -23,6 +38,20 @@ export const POT_MATERIALS: readonly PotMaterial[] = [
   "plastic",
   "ceramic",
   "self-watering",
+  "other",
+];
+
+/**
+ * All `OuterPotMaterial` values, for rendering the outer-pot select. Order
+ * mirrors the backend `OuterPotMaterial` StrEnum exactly (design D2).
+ */
+export const OUTER_POT_MATERIALS: readonly OuterPotMaterial[] = [
+  "ceramic",
+  "terracotta",
+  "plastic",
+  "metal",
+  "woven",
+  "glass",
   "other",
 ];
 
@@ -63,6 +92,10 @@ export interface Plant {
   readonly acquired_on: string | null;
   readonly pot_size_cm: number | null;
   readonly pot_material: PotMaterial | null;
+  /** Decorative outer pot (cachepot) material, null when there is no cachepot (D3). */
+  readonly outer_pot_material: OuterPotMaterial | null;
+  /** Decorative outer pot size in cm, null when unset/unknown (D3). */
+  readonly outer_pot_size_cm: number | null;
   readonly light_level: LightLevel | null;
   readonly notes: string | null;
   readonly tags: readonly string[];
@@ -86,6 +119,8 @@ export interface PlantInput {
   readonly acquired_on: string | null;
   readonly pot_size_cm: number | null;
   readonly pot_material: PotMaterial | null;
+  readonly outer_pot_material: OuterPotMaterial | null;
+  readonly outer_pot_size_cm: number | null;
   readonly light_level: LightLevel | null;
   readonly notes: string | null;
   readonly tags: readonly string[];

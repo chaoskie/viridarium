@@ -28,6 +28,7 @@ from viridarium.adapters.outbound.db.models import (
 from viridarium.domain.plant import (
     LightLevel,
     NewPlant,
+    OuterPotMaterial,
     Plant,
     PlantFilter,
     PlantNotFoundError,
@@ -55,6 +56,12 @@ def _to_domain(model: PlantModel, tags: tuple[str, ...]) -> Plant:
         archived=model.archived,
         created_at=model.created_at,
         updated_at=model.updated_at,
+        outer_pot_material=(
+            OuterPotMaterial(model.outer_pot_material)
+            if model.outer_pot_material is not None
+            else None
+        ),
+        outer_pot_size_cm=model.outer_pot_size_cm,
     )
 
 
@@ -217,6 +224,12 @@ class SqlAlchemyPlantRepository:
         model.light_level = (
             new_plant.light_level.value if new_plant.light_level is not None else None
         )
+        model.outer_pot_material = (
+            new_plant.outer_pot_material.value
+            if new_plant.outer_pot_material is not None
+            else None
+        )
+        model.outer_pot_size_cm = new_plant.outer_pot_size_cm
         model.notes = new_plant.notes
         model.archived = new_plant.archived
         return model
