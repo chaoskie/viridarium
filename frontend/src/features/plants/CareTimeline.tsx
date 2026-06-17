@@ -61,7 +61,10 @@ function TimelinePhotoImage({
       src={url}
       alt={alt}
       loading="lazy"
-      className="mt-1 max-h-64 w-full rounded-control border-control border-border object-cover"
+      // object-contain (not -cover): the timeline is a history feed, so the
+      // whole photo must show within the height cap - a portrait image is
+      // letterboxed, never cropped to a wide band (BUG-009).
+      className="mt-1 max-h-64 w-full rounded-control border-control border-border object-contain"
     />
   );
 }
