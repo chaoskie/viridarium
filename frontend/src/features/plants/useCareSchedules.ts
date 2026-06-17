@@ -43,6 +43,13 @@ function toMessage(err: unknown): string {
  * each mutation calls the API then reloads so the list reflects the server
  * (mirrors `usePhotos`, design §frontend). Mutations TRAP errors into `error`
  * so the modal can surface friendly copy without a separate form layer.
+ *
+ * `loading` reflects the INITIAL load only - it is armed by the `useState`
+ * initializer and never re-set by a mutation's refetch. Re-arming it on every
+ * `upsert`/`remove` would make the modal swap the whole section list for a
+ * placeholder mid-edit, unmounting the sibling section and discarding its
+ * unsaved local form state (BUG-007). The post-mutation refetch is silent;
+ * the saved section still re-keys on its new `updated_at`.
  */
 export function useCareSchedules(plantId: number): UseCareSchedulesResult {
   const [schedules, setSchedules] = useState<readonly CareSchedule[]>([]);
@@ -50,7 +57,6 @@ export function useCareSchedules(plantId: number): UseCareSchedulesResult {
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async (): Promise<void> => {
-    setLoading(true);
     setError(null);
     try {
       const rows = await fetchSchedules(plantId);
