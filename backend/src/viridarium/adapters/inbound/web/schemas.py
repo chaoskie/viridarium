@@ -184,8 +184,8 @@ class PlantResponse(BaseModel):
     updated_at: datetime
     schedules: list[ScheduleDueResponse] = Field(default_factory=list)
     cover_photo_id: int | None = Field(default=None)
-    outer_pot_material: OuterPotMaterial | None = None
-    outer_pot_size_cm: int | None = None
+    outer_pot_material: OuterPotMaterial | None = Field(default=None)
+    outer_pot_size_cm: int | None = Field(default=None)
 
 
 class PhotoResponse(BaseModel):

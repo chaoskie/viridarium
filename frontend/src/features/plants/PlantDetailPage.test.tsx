@@ -78,6 +78,29 @@ describe("PlantDetailPage", () => {
     });
   });
 
+  it("shows the decorative outer pot in the header when set (cachepot)", async () => {
+    const withOuter: Plant = {
+      ...PLANT,
+      outer_pot_material: "ceramic",
+      outer_pot_size_cm: 18,
+    };
+    const fetchMock = vi
+      .fn()
+      .mockImplementation((path: string) =>
+        Promise.resolve(
+          path.endsWith("/timeline") ? okJson(200, []) : okJson(200, withOuter),
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    renderAt("/plants/3");
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/in a ceramic outer pot \(18 cm\)/i),
+      ).toBeInTheDocument();
+    });
+  });
+
   it("shows the plant name in the header and a back link to the list (F-11)", async () => {
     stubByPath();
     renderAt("/plants/3");

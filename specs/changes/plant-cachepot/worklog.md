@@ -24,6 +24,8 @@ Checklist per `templates/dor.md` (QG-004 PASS/WATCH/FAIL):
 
 ## Entries
 
+- `15:25 · claude/OPUS · review fixes applied + re-gated green (492 backend / 233 frontend): M-1 added PlantDetailPage outer-pot display test; M-2 PlantResponse outer fields -> Field(default=None); M-3 e2e locator substring comment. L-1 (gold vs wicker invalid string) / L-2 (raw lowercase material display) accepted minor · schemas.py, PlantDetailPage.test.tsx, plant-form.co.ts · REV-003`
+- `15:20 · claude/OPUS · REVIEW GATE (3 reviewers): security PASS (0 findings), scope PASS (no creep; fixture+migration-assertion churn justified), code WATCH (2 MEDIUM, addressed above; HIGH self-downgraded - red-run was genuine on a clean venv). No CRITICAL/HIGH/blocking · /review · QG-004`
 - `15:05 · claude/OPUS · G7 acceptance GREEN: 12 Playwright e2e pass at S25+ incl. A1 (outer pot persists + reads back via edit round-trip); FE-012 design-review screenshots (phone + desktop) committed to screenshots/ · e2e/, screenshots/ · TEST-009/FE-012`
 - `15:00 · claude/OPUS · combined gate PASS (QG-004): backend 492 tests / 99.61% cov / pip-audit clean; frontend lint+format+typecheck clean, 232 vitest, build OK. Lanes integrate (OUTER_POT_MATERIALS == backend enum) · - · QG-002/ARCH-011`
 - `14:58 · claude/OPUS · WATCH (carry to retro): (a) backend extended a pre-existing migration column-set assertion for the new head (additive, AC5-safe); enum/entity unit test authored per test-foundation despite the usual frozen-dataclass carve-out. (b) frontend narrowed two inner-pot test regexes /pot size/i -> /^pot size/i to disambiguate from "Outer pot size"; 10 fixture files patched with the two nullable fields (type-forced, mechanical) · - · QG-004/TEST-004`

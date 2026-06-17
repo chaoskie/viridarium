@@ -23,6 +23,7 @@ export class PlantFormComponent {
     this.speciesField = this.dialog.getByLabel("Species");
     this.acquiredOnField = this.dialog.getByLabel("Acquired on");
     this.outerPotMaterial = this.dialog.getByLabel("Outer pot material");
+    // Substring match - the label is "Outer pot size (cm)".
     this.outerPotSize = this.dialog.getByLabel("Outer pot size");
     this.submitButton = this.dialog.getByRole("button", { name: "Add plant" });
     this.saveButton = this.dialog.getByRole("button", {
