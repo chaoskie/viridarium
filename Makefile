@@ -75,7 +75,7 @@ help: ## List available targets
 FRONTEND_DIR := frontend
 
 .PHONY: fe-install fe-lint fe-format-check fe-typecheck fe-test fe-build \
-        fe-e2e fe-e2e-install dev-frontend
+        fe-e2e fe-e2e-matrix fe-e2e-install dev-frontend
 
 fe-install: ## Install frontend dependencies (npm ci against the lockfile)
 	cd $(FRONTEND_DIR) && npm ci
@@ -100,6 +100,9 @@ fe-e2e-install: ## Install the Playwright Chromium browser for the acceptance su
 
 fe-e2e: ## Playwright acceptance suite (TEST-009; boots backend + built frontend)
 	cd $(FRONTEND_DIR) && npx playwright test
+
+fe-e2e-matrix: ## Acceptance suite + the release-gated top-5 mobile device matrix
+	cd $(FRONTEND_DIR) && E2E_DEVICE_MATRIX=1 npx playwright test
 
 dev-frontend: ## Vite dev server (/api proxied to localhost:8000)
 	cd $(FRONTEND_DIR) && npm run dev

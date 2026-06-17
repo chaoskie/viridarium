@@ -4,10 +4,14 @@ import { expect, hasHorizontalOverflow, test } from "./fixtures";
 
 /**
  * Galaxy S25+ add-plant regressions from the soak (BUG-003 modal scroll, BUG-005
- * long-value display overflow). Untagged => `galaxy-s25-plus` project only.
+ * long-value display overflow). The read-only BUG-003 reachability test is
+ * `@layout` (galaxy-s25-plus + the release-gated device matrix); the write specs
+ * (BUG-005, cachepot A1) are untagged => `galaxy-s25-plus` only.
  */
 test.describe("add-plant on mobile", () => {
-  test("the Name field is reachable in the modal (BUG-003)", async ({
+  // @layout: read-only reachability check - runs across the release-gated device
+  // matrix too (the sibling write specs below stay single-device, workers:1).
+  test("the Name field is reachable in the modal (BUG-003) @layout", async ({
     page,
   }) => {
     const plants = new PlantsPage(page);
