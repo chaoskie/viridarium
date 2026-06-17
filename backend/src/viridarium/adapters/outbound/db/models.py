@@ -71,6 +71,10 @@ class PlantModel(Base):
     acquired_on: Mapped[date | None] = mapped_column(Date(), nullable=True)
     pot_size_cm: Mapped[int | None] = mapped_column(Integer, nullable=True)
     pot_material: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # Decorative outer pot (cachepot), additive + nullable (plant-cachepot); enum stored
+    # as String(20) (D3, portable). Null = no cachepot (D3).
+    outer_pot_material: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    outer_pot_size_cm: Mapped[int | None] = mapped_column(Integer, nullable=True)
     light_level: Mapped[str | None] = mapped_column(String(20), nullable=True)
     notes: Mapped[str | None] = mapped_column(String(10000), nullable=True)
     archived: Mapped[bool] = mapped_column(

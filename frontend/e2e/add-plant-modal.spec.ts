@@ -43,4 +43,25 @@ test.describe("add-plant on mobile", () => {
     await expect(plants.card(longName)).toBeVisible();
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
+
+  test("a decorative outer pot persists and reads back (cachepot A1)", async ({
+    page,
+  }) => {
+    const plants = new PlantsPage(page);
+    await plants.goto("/plants");
+    await plants.addPlantButton.click();
+
+    const form = new PlantFormComponent(page);
+    const name = `Cachepot Calathea ${Date.now()}`;
+    await form.nameField.fill(name);
+    await form.outerPotMaterial.selectOption("ceramic");
+    await form.outerPotSize.fill("18");
+    await form.saveButton.click();
+    await expect(form.dialog).toBeHidden();
+
+    // Reopen in edit mode; the outer-pot values must have persisted round-trip.
+    await page.getByRole("button", { name: `Edit ${name}` }).click();
+    await expect(form.outerPotMaterial).toHaveValue("ceramic");
+    await expect(form.outerPotSize).toHaveValue("18");
+  });
 });

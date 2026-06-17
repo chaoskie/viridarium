@@ -11,13 +11,22 @@ export class PlantFormComponent {
   readonly nameField: Locator;
   readonly speciesField: Locator;
   readonly acquiredOnField: Locator;
+  readonly outerPotMaterial: Locator;
+  readonly outerPotSize: Locator;
   readonly submitButton: Locator;
+  /** Matches both the create ("Add plant") and edit ("Save changes") submit. */
+  readonly saveButton: Locator;
 
   constructor(page: Page) {
     this.dialog = page.getByRole("dialog");
     this.nameField = this.dialog.getByLabel("Name");
     this.speciesField = this.dialog.getByLabel("Species");
     this.acquiredOnField = this.dialog.getByLabel("Acquired on");
+    this.outerPotMaterial = this.dialog.getByLabel("Outer pot material");
+    this.outerPotSize = this.dialog.getByLabel("Outer pot size");
     this.submitButton = this.dialog.getByRole("button", { name: "Add plant" });
+    this.saveButton = this.dialog.getByRole("button", {
+      name: /add plant|save changes/i,
+    });
   }
 }

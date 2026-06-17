@@ -70,6 +70,8 @@ def _to_new_plant(body: PlantCreate) -> NewPlant:
         notes=body.notes,
         tags=tuple(body.tags),
         archived=body.archived,
+        outer_pot_material=body.outer_pot_material,
+        outer_pot_size_cm=body.outer_pot_size_cm,
     )
 
 

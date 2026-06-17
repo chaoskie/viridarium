@@ -15,7 +15,7 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from viridarium.domain.plant import LightLevel, PotMaterial
+from viridarium.domain.plant import LightLevel, OuterPotMaterial, PotMaterial
 
 pytestmark = pytest.mark.integration
 
@@ -114,6 +114,91 @@ def test_post_archived_true_round_trips(client: TestClient) -> None:
     assert response.json()["archived"] is True
 
 
+# ------------------------------------------- cachepot / outer pot (plant-cachepot)
+@pytest.mark.parametrize("outer_pot_material", list(OuterPotMaterial))
+def test_post_each_outer_pot_material_round_trips(  # B1
+    client: TestClient, outer_pot_material: OuterPotMaterial
+) -> None:
+    response = client.post(
+        _PLANTS, json={"name": "P", "outer_pot_material": outer_pot_material.value}
+    )
+
+    assert response.status_code == 201
+    assert response.json()["outer_pot_material"] == outer_pot_material.value
+
+
+@pytest.mark.parametrize("size", [1, 500])
+def test_post_outer_pot_size_boundaries_round_trip(  # B3
+    client: TestClient, size: int
+) -> None:
+    response = client.post(_PLANTS, json={"name": "P", "outer_pot_size_cm": size})
+
+    assert response.status_code == 201
+    assert response.json()["outer_pot_size_cm"] == size
+
+
+# B6: each independent-optionality pairing accepted + echoed.
+@pytest.mark.parametrize(
+    ("material", "size"),
+    [
+        ("ceramic", None),
+        (None, 30),
+        ("woven", 22),
+        (None, None),
+    ],
+)
+def test_outer_pot_fields_independently_optional(
+    client: TestClient, material: str | None, size: int | None
+) -> None:
+    body: dict[str, Any] = {"name": "P"}
+    if material is not None:
+        body["outer_pot_material"] = material
+    if size is not None:
+        body["outer_pot_size_cm"] = size
+
+    response = client.post(_PLANTS, json=body)
+
+    assert response.status_code == 201
+    echoed = response.json()
+    assert echoed["outer_pot_material"] == material
+    assert echoed["outer_pot_size_cm"] == size
+
+
+def test_post_outer_pot_null_when_unset_round_trips(client: TestClient) -> None:  # B7
+    # A bare nursery-pot plant reads back null/null and re-fetches identically.
+    created = client.post(_PLANTS, json={"name": "Bare"})
+
+    assert created.status_code == 201
+    body = created.json()
+    assert body["outer_pot_material"] is None
+    assert body["outer_pot_size_cm"] is None
+
+    fetched = client.get(f"{_PLANTS}/{body['id']}")
+    assert fetched.status_code == 200
+    assert fetched.json() == body
+
+
+def test_inner_and_outer_pot_coexist_and_round_trip(client: TestClient) -> None:
+    # Setting the outer pot leaves the inner (nursery) pot untouched; all four fields
+    # round-trip independently (D1).
+    payload = {
+        "name": "Calathea",
+        "pot_size_cm": 12,
+        "pot_material": "plastic",
+        "outer_pot_size_cm": 16,
+        "outer_pot_material": "woven",
+    }
+
+    response = client.post(_PLANTS, json=payload)
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["pot_size_cm"] == 12
+    assert body["pot_material"] == "plastic"
+    assert body["outer_pot_size_cm"] == 16
+    assert body["outer_pot_material"] == "woven"
+
+
 # Shared validation matrix (test-foundation §1c, S1-S13), run for POST and PUT.
 _BAD_BODIES = [
     pytest.param({"name": ""}, id="name-empty"),
@@ -137,6 +222,26 @@ _BAD_BODIES = [
         {"name": "ok", "tags": [str(i) for i in range(51)]}, id="tags-too-many"
     ),
     pytest.param({"name": "ok", "notes": "x" * 10001}, id="notes-over-max"),
+    # cachepot / outer pot (plant-cachepot): B2 / B4 / B5, run for POST and PUT.
+    pytest.param(
+        {"name": "ok", "outer_pot_material": "gold"}, id="outer-pot-material-invalid"
+    ),
+    # self-watering is an inner-pot trait, deliberately NOT a valid outer value (D2).
+    pytest.param(
+        {"name": "ok", "outer_pot_material": "self-watering"},
+        id="outer-pot-material-self-watering-rejected",
+    ),
+    pytest.param({"name": "ok", "outer_pot_size_cm": 0}, id="outer-pot-size-below-min"),
+    pytest.param(
+        {"name": "ok", "outer_pot_size_cm": 501}, id="outer-pot-size-above-max"
+    ),
+    pytest.param(
+        {"name": "ok", "outer_pot_size_cm": "big"}, id="outer-pot-size-non-int"
+    ),
+    # a float must be a 422, never silently truncated to int (VIRIDARIUM-47 guard).
+    pytest.param(
+        {"name": "ok", "outer_pot_size_cm": 3.7}, id="outer-pot-size-float-not-coerced"
+    ),
 ]
 
 
@@ -438,6 +543,8 @@ def test_openapi_exposes_plant_paths_query_params_and_schema(
     assert {"archived", "include_archived"} <= param_names
 
     response_schema = schema["components"]["schemas"]["PlantResponse"]
+    # C1 / C5: exact key-set (the rename-or-removal guard) - inner pot names unchanged,
+    # the two additive cachepot fields present.
     assert set(response_schema["properties"].keys()) == {
         "id",
         "name",
@@ -454,7 +561,32 @@ def test_openapi_exposes_plant_paths_query_params_and_schema(
         "updated_at",
         "schedules",  # additive US-3.3 due field (proposal §API, non-breaking)
         "cover_photo_id",  # additive plant-list-nplus1 cover id (non-breaking)
+        "outer_pot_material",  # additive plant-cachepot field (non-breaking)
+        "outer_pot_size_cm",  # additive plant-cachepot field (non-breaking)
     }
+
+    schemas = schema["components"]["schemas"]
+    # C2: both request schemas gain the two additive properties.
+    for schema_name in ("PlantCreate", "PlantUpdate"):
+        props = schemas[schema_name]["properties"]
+        assert "outer_pot_material" in props
+        assert "outer_pot_size_cm" in props
+
+    create_props = schemas["PlantCreate"]["properties"]
+    # C3: outer size carries the contract bounds and is nullable (same shape as the
+    # inner ``pot_size_cm``: anyOf integer(min/max)|null).
+    size_arms = create_props["outer_pot_size_cm"]["anyOf"]
+    int_arm = next(a for a in size_arms if a.get("type") == "integer")
+    assert int_arm["minimum"] == 1
+    assert int_arm["maximum"] == 500
+    assert any(a.get("type") == "null" for a in size_arms)
+
+    # C4: outer material enum lists exactly the 7 wire values and is nullable.
+    mat_arms = create_props["outer_pot_material"]["anyOf"]
+    enum_ref = next(a for a in mat_arms if "$ref" in a)
+    enum_name = enum_ref["$ref"].rsplit("/", 1)[-1]
+    assert schemas[enum_name]["enum"] == [m.value for m in OuterPotMaterial]
+    assert any(a.get("type") == "null" for a in mat_arms)
 
 
 # ------------------------------------------ archive / unarchive (US-2.4, §3, AC1-AC6)
