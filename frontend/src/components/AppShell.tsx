@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 
+import { AppFooter } from "@/components/AppFooter";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface NavItem {
@@ -86,9 +87,13 @@ export function AppShell({ children }: AppShellProps): ReactNode {
         />
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 pb-28 sm:py-8 sm:pb-8">
+      {/* Nav-clearance (pb-28) now lives on the always-present footer below, so
+          the bottom mobile bar never hides the last element. */}
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:py-8">
         {children}
       </main>
+
+      <AppFooter />
 
       {/* Phone-only bottom navigation bar (one-handed reach, >=44px taps). */}
       <nav

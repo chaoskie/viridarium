@@ -10,10 +10,34 @@ import { BasePage } from "./base.po";
 export class AppShellPage extends BasePage {
   readonly themeSelect: Locator;
   readonly wordmark: Locator;
+  /** The app-wide footer landmark and its two links (VIRIDARIUM-76). */
+  readonly footer: Locator;
+  readonly footerAboutLink: Locator;
+  readonly footerSupportLink: Locator;
 
   constructor(page: Page) {
     super(page);
     this.themeSelect = page.getByLabel("Theme").and(page.locator(":visible"));
     this.wordmark = page.getByText("VIRID", { exact: false });
+    this.footer = page.getByRole("contentinfo");
+    this.footerAboutLink = this.footer.getByRole("link", { name: "About" });
+    this.footerSupportLink = this.footer.getByRole("link", {
+      name: /support/i,
+    });
+  }
+}
+
+/** About page locators (FE-013). */
+export class AboutPage extends BasePage {
+  readonly heading: Locator;
+  readonly version: Locator;
+
+  constructor(page: Page) {
+    super(page);
+    this.heading = page.getByRole("heading", {
+      level: 1,
+      name: /about viridarium/i,
+    });
+    this.version = page.getByText(/version /i);
   }
 }
