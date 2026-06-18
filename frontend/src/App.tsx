@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 
 import { AppShell } from "@/components/AppShell";
 import { PlaceholderPage } from "@/components/PlaceholderPage";
+import { AboutPage } from "@/features/about/AboutPage";
 import { PlantDetailPage } from "@/features/plants/PlantDetailPage";
 import { PlantsPage } from "@/features/plants/PlantsPage";
 import { RoomsPage } from "@/features/rooms/RoomsPage";
@@ -19,6 +20,7 @@ export function App(): ReactNode {
         <Route path="/rooms" element={<RoomsPage />} />
         <Route path="/journal" element={<PlaceholderPage title="Journal" />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<PlaceholderPage title="Not found" />} />
       </Routes>
     </AppShell>
