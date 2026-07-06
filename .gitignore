@@ -49,3 +49,4 @@ frontend/.e2e/
 
 # Obsidian workspace files (the public docs/ folder may be opened in the app)
 **/.obsidian/
+.playwright-mcp/
