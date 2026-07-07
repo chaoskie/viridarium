@@ -100,7 +100,10 @@ describe("PlantGallery", () => {
     const photos = makePhotos(3).map((p) => ({ ...p, is_cover: false }));
     stubPhotos(photos);
     render(
-      <PlantGallery plant={{ ...PLANT, cover_photo_id: null }} onOpen={vi.fn()} />,
+      <PlantGallery
+        plant={{ ...PLANT, cover_photo_id: null }}
+        onOpen={vi.fn()}
+      />,
     );
 
     const prominent = await screen.findByAltText("Fiddle Leaf Fig cover photo");
@@ -112,7 +115,10 @@ describe("PlantGallery", () => {
     stubPhotos([]);
     const onOpen = vi.fn();
     render(
-      <PlantGallery plant={{ ...PLANT, cover_photo_id: null }} onOpen={onOpen} />,
+      <PlantGallery
+        plant={{ ...PLANT, cover_photo_id: null }}
+        onOpen={onOpen}
+      />,
     );
 
     expect(await screen.findByText(/no photos yet/i)).toBeInTheDocument();

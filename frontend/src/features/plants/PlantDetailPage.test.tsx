@@ -155,9 +155,7 @@ describe("PlantDetailPage", () => {
     renderAt("/plants/3");
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
-    expect(
-      screen.queryByText(/could not be found/i),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/could not be found/i)).not.toBeInTheDocument();
   });
 
   it("renders a graceful not-found shell when the fetch fails (F-22)", async () => {

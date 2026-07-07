@@ -81,7 +81,10 @@ export function PlantDetailPage(): ReactNode {
     }
   }
 
-  async function handleEditSubmit(plant: Plant, input: PlantInput): Promise<void> {
+  async function handleEditSubmit(
+    plant: Plant,
+    input: PlantInput,
+  ): Promise<void> {
     await updatePlant(plant.id, input);
     await reload();
   }

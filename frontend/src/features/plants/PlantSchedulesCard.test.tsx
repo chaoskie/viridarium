@@ -14,7 +14,9 @@ function renderCard(
 
 describe("PlantSchedulesCard", () => {
   it("sched-due renders the date without overdue emphasis (F-10)", () => {
-    renderCard([{ care_type: "water", next_due: "2026-07-10", overdue_days: 0 }]);
+    renderCard([
+      { care_type: "water", next_due: "2026-07-10", overdue_days: 0 },
+    ]);
 
     expect(screen.getByText("Water")).toBeInTheDocument();
     expect(screen.getByText(/2026-07-10/)).toBeInTheDocument();
@@ -35,7 +37,9 @@ describe("PlantSchedulesCard", () => {
   });
 
   it("sched-overdue is emphasized and not color-only (F-11, CRITICAL)", () => {
-    renderCard([{ care_type: "feed", next_due: "2026-07-01", overdue_days: 5 }]);
+    renderCard([
+      { care_type: "feed", next_due: "2026-07-01", overdue_days: 5 },
+    ]);
 
     expect(screen.getByText(/2026-07-01/)).toBeInTheDocument();
     // The emphasis carries a textual label (FE-011: not hue alone).

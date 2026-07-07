@@ -48,10 +48,7 @@ afterEach(() => {
 
 describe("usePlantDetail", () => {
   it("resolves to ready with the plant (F-1)", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(okJson(200, PLANT)),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(okJson(200, PLANT)));
 
     const { result } = renderHook(() => usePlantDetail(3));
 

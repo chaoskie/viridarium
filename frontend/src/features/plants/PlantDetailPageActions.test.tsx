@@ -49,9 +49,10 @@ interface StubOptions {
 }
 
 /** Route calls by path + method across everything the page and modals fetch. */
-function stubApi({ holder, deleteResponse }: StubOptions): ReturnType<
-  typeof vi.fn
-> {
+function stubApi({
+  holder,
+  deleteResponse,
+}: StubOptions): ReturnType<typeof vi.fn> {
   const fetchMock = vi
     .fn()
     .mockImplementation((path: string, init?: RequestInit) => {
