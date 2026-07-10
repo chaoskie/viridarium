@@ -2,7 +2,9 @@
 
 Status: v1, 2026-06-10. Companion to [product-spec.md](product-spec.md): the spec is the contract (what each feature is), this document is the sequencing (what ships when, and why in that order). Conflicts resolve in favor of the spec; scope refinements made here are flagged explicitly. The project board mirrors this document: modules map to epics, `Todo` holds the active phase, `Backlog` holds later phases, and every ticket carries a `Phase:` marker.
 
-## Where we are (2026-06-10)
+## Where we are (2026-07-07)
+
+**Phase v0.1 is feature-complete** (2026-06-15) and has been on alpha soak since 2026-06-18; the v0.1.0 tag awaits the soak verdict plus the release-gate items below. Phase v0.2 is underway: US-4.3 (plant detail page) is implemented and in review (PR #61).
 
 Delivered and merged to `main`:
 
@@ -10,8 +12,10 @@ Delivered and merged to `main`:
 - **Theming and responsiveness** (pulled forward from the v0.3 "polish, theming" bucket): Roman theme as primary, dark theme, dual fallback themes, mobile-first responsive pass.
 - **E2 Plant inventory complete**: US-2.1 plant CRUD + search/filter, US-2.2 location CRUD, US-2.3 photo upload/gallery/cover (shipped early; spec §5 had photos in v0.2), US-2.4 archive/unarchive.
 - **US-3.1** per-plant water/feed schedule config (interval, winter interval, feed dormancy pause).
+- **E3 core + E4.1 (v0.1 scope)**: US-3.2 care events, US-3.3 due computation, US-3.5 winter-window settings, US-3.4 care timeline (with a minimal `/plants/{id}` precursor page), US-4.1 Today view.
+- **Post-v0.1 extras**: cachepot (outer pot) fields, About page + footer, Viridian theme candidate, release-gated e2e device matrix, alpha-soak fixes (schedule sibling-value loss, gallery full view, timeline portrait crop).
 
-Snapshot: migrations 0001-0005, backend ~241 tests at 99.4% coverage, frontend 129 tests, CI green.
+Snapshot: migrations 0001-0008, backend 492 tests, frontend 279 tests, CI green.
 
 ## Phase v0.1 - first usable
 
@@ -123,3 +127,11 @@ All tracked on the board. Severity-ordered register as of 2026-06-11:
 | Schedule GET/DELETE return a wrong-reason 404 when the plant itself is missing | low | **fixed 2026-06-11** |
 
 The last three rows came from the 2026-06-10 code review pass and were fixed test-first the next day; the remaining open rows are the v0.3 tech-debt burn-down.
+
+Added by the 2026-07-06 audit pass (tracked on the board):
+
+| Item | Severity | Phase |
+|---|---|---|
+| Possible TOCTOU race: two concurrent first-photo uploads may both set cover (unverified, reproduce first) | medium | v0.3 |
+| FE-007 bundle budget is a paper gate (vite `chunkSizeWarningLimit` warns; comment claims build failure) | low | v0.3 |
+| No startup migrations: published image 500s on a fresh volume (alembic already ships in the image; entrypoint fix specced) | high | before v0.1.0 tag |
