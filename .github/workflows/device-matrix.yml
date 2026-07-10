@@ -50,7 +50,7 @@ jobs:
         run: make fe-e2e-matrix
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-device-matrix
           path: frontend/playwright-report/
