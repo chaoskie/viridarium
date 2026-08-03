@@ -27,6 +27,13 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // New in eslint-plugin-react-hooks v7: flags the fetch-on-mount pattern
+      // (setState inside a mount effect) used consistently by every data hook
+      // in this codebase (usePlants, usePhotos, useLocations, ...). Fixing it
+      // properly means moving data fetching to a library like react-query,
+      // which is out of scope for a dependency bump. Disabled until that
+      // refactor happens.
+      "react-hooks/set-state-in-effect": "off",
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },

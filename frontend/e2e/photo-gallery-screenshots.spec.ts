@@ -13,7 +13,9 @@ import { test, expect } from "./fixtures";
  * desktop project).
  */
 const OUT = "../bugs/BUG-008-photo-gallery-screenshots";
-const FIXTURE = fileURLToPath(new URL("./fixtures/sample-photo.png", import.meta.url));
+const FIXTURE = fileURLToPath(
+  new URL("./fixtures/sample-photo.png", import.meta.url),
+);
 
 test.describe("photo gallery thumbnails + full view @desktop", () => {
   test("grid thumbnail then full uncropped image", async ({
@@ -37,10 +39,10 @@ test.describe("photo gallery thumbnails + full view @desktop", () => {
     await page.getByRole("button", { name: `View photos of ${name}` }).click();
     const dialog = page.getByRole("dialog");
     await dialog.waitFor();
+    await dialog.getByLabel(/add a photo/i).setInputFiles(FIXTURE);
     await dialog
-      .getByLabel(/add a photo/i)
-      .setInputFiles(FIXTURE);
-    await dialog.getByRole("button", { name: `Upload a photo for ${name}` }).click();
+      .getByRole("button", { name: `Upload a photo for ${name}` })
+      .click();
 
     // The thumbnail (a "view full size" button) appears once the upload lands.
     const viewButton = dialog.getByRole("button", {

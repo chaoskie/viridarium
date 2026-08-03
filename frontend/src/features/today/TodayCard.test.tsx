@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -84,7 +84,7 @@ function CardHarness({
   initial,
 }: {
   readonly initial: TodayCardModel;
-}): JSX.Element {
+}): ReactNode {
   const [present, setPresent] = useState(true);
   if (!present) {
     return <div data-testid="empty-list" />;

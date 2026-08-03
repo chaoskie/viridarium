@@ -70,7 +70,8 @@
   --font-display: "Cinzel", Georgia, serif; /* inscriptional caps */
   --font-body: "EB Garamond", Georgia, serif;
   --font-label: "Cinzel", Georgia, serif; /* tracked caps labels */
-  --font-mono: "Cormorant Garamond", Georgia, serif; /* italic accent / ledgers */
+  --font-mono:
+    "Cormorant Garamond", Georgia, serif; /* italic accent / ledgers */
 
   /* Radii - crisp, plate-like */
   --radius-card: 0.1875rem; /* 3px */
@@ -82,12 +83,13 @@
   --border-width-control: 1px;
 
   /* Elevation - soft, low engraved-stone shadow */
-  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 2px 6px rgba(42, 38, 32, 0.08);
+  --shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 6px rgba(42, 38, 32, 0.08);
   --shadow-raised: 0 2px 10px rgba(42, 38, 32, 0.12);
 
   /* Background texture - faint plaster wash + fine grid */
-  --bg-texture: radial-gradient(
+  --bg-texture:
+    radial-gradient(
       circle at 20% 0%,
       rgba(181, 138, 50, 0.06),
       transparent 40%
@@ -159,12 +161,13 @@
   --border-width-control: 1px;
 
   /* Elevation - restrained glow, no harsh light spill */
-  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.03) inset,
-    0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 2px 8px rgba(0, 0, 0, 0.45);
   --shadow-raised: 0 4px 16px rgba(0, 0, 0, 0.55);
 
   /* Background texture - faint warm glow from above, fine grid */
-  --bg-texture: radial-gradient(
+  --bg-texture:
+    radial-gradient(
       circle at 50% -10%,
       rgba(214, 169, 78, 0.06),
       transparent 45%
@@ -308,12 +311,13 @@
   --border-width-control: 1px;
 
   /* Elevation - soft green-tinted depth, like shade behind glass */
-  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 2px 10px rgba(32, 49, 42, 0.08);
+  --shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 2px 10px rgba(32, 49, 42, 0.08);
   --shadow-raised: 0 6px 20px rgba(32, 49, 42, 0.14);
 
   /* Background texture - sunlight wash + glasshouse pane grid */
-  --bg-texture: radial-gradient(
+  --bg-texture:
+    radial-gradient(
       ellipse 900px 500px at 50% -10%,
       rgba(255, 255, 255, 0.55),
       transparent 60%
@@ -368,7 +372,8 @@
   /* Typography */
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Spectral", Georgia, serif;
-  --font-label: "IBM Plex Mono", ui-monospace, monospace; /* tracked caps labels */
+  --font-label:
+    "IBM Plex Mono", ui-monospace, monospace; /* tracked caps labels */
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   /* Radii - crisp, plate-like */
@@ -385,7 +390,8 @@
   --shadow-raised: 2px 3px 0 rgba(43, 43, 35, 0.12);
 
   /* Background texture - faint ruled paper + corner wash */
-  --bg-texture: radial-gradient(
+  --bg-texture:
+    radial-gradient(
       ellipse 800px 600px at 85% -10%,
       rgba(154, 123, 45, 0.07),
       transparent

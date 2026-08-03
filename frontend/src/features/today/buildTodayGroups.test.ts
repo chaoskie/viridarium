@@ -73,8 +73,7 @@ function cardFor(
   plantId: number,
 ): (typeof groups)[number]["cards"][number] | undefined {
   return allCards(groups).find((c) => c.plant.id === plantId) as
-    | (typeof groups)[number]["cards"][number]
-    | undefined;
+    (typeof groups)[number]["cards"][number] | undefined;
 }
 
 describe("buildTodayGroups - classification + exclusion (M-CLS, AC1/AC2/AC4)", () => {

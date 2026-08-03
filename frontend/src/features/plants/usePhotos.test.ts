@@ -134,7 +134,7 @@ describe("usePhotos", () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(okJson([PHOTO])) // mount load
-      .mockResolvedValueOnce({ ok: true, status: 204 } as Response) // DELETE
+      .mockResolvedValueOnce({ ok: true, status: 204 }) // DELETE
       .mockResolvedValueOnce(okJson([])); // reload after delete
     vi.stubGlobal("fetch", fetchMock);
 

@@ -79,7 +79,7 @@ describe("usePlants", () => {
         ok: false,
         status: 500,
         json: () => Promise.resolve({}),
-      } as Response),
+      }),
     );
 
     const { result } = renderHook(() => usePlants());

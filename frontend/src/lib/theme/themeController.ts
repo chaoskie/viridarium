@@ -45,7 +45,7 @@ export function isTheme(value: string | null): value is Theme {
  * prefers-color-scheme fallback use `getInitialTheme()`.
  */
 export function readStoredTheme(): Theme | null {
-  let stored: string | null = null;
+  let stored: string | null;
   try {
     stored = window.localStorage.getItem(THEME_STORAGE_KEY);
   } catch {

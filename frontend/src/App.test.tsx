@@ -14,7 +14,7 @@ describe("App shell", () => {
         ok: true,
         status: 200,
         json: () => Promise.resolve([]),
-      } as Response),
+      }),
     );
   });
 
@@ -65,7 +65,7 @@ describe("App shell", () => {
         ok: true,
         status: 200,
         json: () => Promise.resolve([]),
-      } as Response),
+      }),
     );
     render(
       <MemoryRouter initialEntries={["/"]}>

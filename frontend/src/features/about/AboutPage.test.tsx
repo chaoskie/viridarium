@@ -10,7 +10,7 @@ function stubHealth(body: unknown, ok = true): void {
       ok,
       status: ok ? 200 : 503,
       json: () => Promise.resolve(body),
-    } as Response),
+    }),
   );
 }
 

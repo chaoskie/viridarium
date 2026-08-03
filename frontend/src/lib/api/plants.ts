@@ -5,11 +5,7 @@ import { deleteResource, getJson, postJson, putJson } from "./client";
  * backend `PotMaterial` StrEnum members exactly.
  */
 export type PotMaterial =
-  | "terracotta"
-  | "plastic"
-  | "ceramic"
-  | "self-watering"
-  | "other";
+  "terracotta" | "plastic" | "ceramic" | "self-watering" | "other";
 
 /**
  * Outer / decorative pot (cachepot) material wire values (design D2). The
@@ -18,13 +14,7 @@ export type PotMaterial =
  * String-literal union matching the backend `OuterPotMaterial` StrEnum exactly.
  */
 export type OuterPotMaterial =
-  | "ceramic"
-  | "terracotta"
-  | "plastic"
-  | "metal"
-  | "woven"
-  | "glass"
-  | "other";
+  "ceramic" | "terracotta" | "plastic" | "metal" | "woven" | "glass" | "other";
 
 /**
  * Light-level wire values (design §1 / D3). String-literal union matching the

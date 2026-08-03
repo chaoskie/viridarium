@@ -165,7 +165,7 @@ describe("PlantDetailPage", () => {
         ok: false,
         status: 404,
         json: () => Promise.resolve({ detail: "gone" }),
-      } as Response),
+      }),
     );
     renderAt("/plants/999");
 

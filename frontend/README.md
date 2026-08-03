@@ -16,16 +16,16 @@ The dev server proxies `/api/*` to the FastAPI backend at
 
 ## Scripts
 
-| Script                 | What it does                                  |
-| ---------------------- | --------------------------------------------- |
-| `npm run dev`          | Vite dev server with `/api` proxy             |
-| `npm run build`        | `tsc --noEmit` then `vite build`              |
-| `npm run preview`      | Serve the production build locally            |
-| `npm run lint`         | ESLint (flat config, type-checked rules)      |
-| `npm run typecheck`    | `tsc --noEmit` under strict flags             |
-| `npm run test`         | Vitest run (jsdom + Testing Library)          |
-| `npm run format`       | Prettier write over `src/`                    |
-| `npm run format:check` | Prettier check (CI gate)                      |
+| Script                 | What it does                             |
+| ---------------------- | ---------------------------------------- |
+| `npm run dev`          | Vite dev server with `/api` proxy        |
+| `npm run build`        | `tsc --noEmit` then `vite build`         |
+| `npm run preview`      | Serve the production build locally       |
+| `npm run lint`         | ESLint (flat config, type-checked rules) |
+| `npm run typecheck`    | `tsc --noEmit` under strict flags        |
+| `npm run test`         | Vitest run (jsdom + Testing Library)     |
+| `npm run format`       | Prettier write over `src/`               |
+| `npm run format:check` | Prettier check (CI gate)                 |
 
 ## Layout
 
@@ -104,42 +104,42 @@ surfaces, so a contrast regression fails the gate.
 
 ### Token catalogue
 
-| Token                    | Tailwind utilities                | Meaning                                  |
-| ------------------------ | --------------------------------- | ---------------------------------------- |
-| `--color-surface`        | `bg-surface`, `text-surface`      | Default page / card background           |
-| `--color-surface-raised` | `bg-surface-raised`               | Raised surface (header, cards)           |
-| `--color-surface-sunken` | `bg-surface-sunken`               | Recessed surface (wells, inset areas)    |
-| `--color-ink`            | `text-ink`                        | Primary text                             |
-| `--color-ink-muted`      | `text-ink-muted`                  | Secondary / muted text                   |
-| `--color-ink-inverse`    | `text-ink-inverse`                | Text on dark / accent fills              |
-| `--color-accent`         | `bg-accent`, `text-accent`        | Brand / primary interactive             |
-| `--color-accent-strong`  | `text-accent-strong`              | Stronger accent (hover, headings)        |
-| `--color-accent-soft`    | `bg-accent-soft`                  | Tinted accent background (active nav)     |
-| `--color-accent-2`       | `bg-accent-2`, `text-accent-2`    | Secondary accent (sage / moss)           |
-| `--color-accent-2-strong`| `text-accent-2-strong`            | Stronger secondary accent (hover)        |
-| `--color-accent-3`       | `bg-accent-3`, `text-accent-3`    | Tertiary accent fill (ochre / mustard)   |
-| `--color-accent-3-strong`| `text-accent-3-strong`            | Tertiary accent as small text (AA-safe)  |
-| `--color-danger`         | `text-danger`, `bg-danger`        | Destructive / error state                |
-| `--color-warning`        | `text-warning`                    | Caution state (e.g. overdue soon)        |
-| `--color-success`        | `text-success`                    | Healthy / done state                     |
-| `--color-border`         | `border-border`                   | Hairlines, dividers, control borders     |
-| `--color-ring`           | `ring-ring`                       | Focus ring                               |
-| `--color-overlay`        | `bg-overlay`                      | Scrim behind overlays / menus            |
-| `--font-display`         | `font-display`                    | Headings / brand                         |
-| `--font-body`            | `font-body`                       | Body copy                                |
-| `--font-label`           | `font-label`                      | Uppercase / tracked micro-labels         |
-| `--font-mono`            | `font-mono`                       | Code / IDs / timestamps                  |
-| `--radius-card`          | `rounded-card`                    | Card corner radius                       |
-| `--radius-control`       | `rounded-control`                 | Buttons, inputs, nav items               |
-| `--radius-pill`          | `rounded-pill`                    | Pills / badges                           |
-| `--border-width-card`    | `border-card`                     | Card / structural border weight          |
-| `--border-width-control` | `border-control`                  | Control / nav border weight              |
-| `--shadow-card`          | `shadow-card`                     | Resting card elevation                   |
-| `--shadow-raised`        | `shadow-raised`                   | Raised / floating elevation              |
-| `--bg-texture`           | (body `background-image`)         | Decorative page texture (dots / rules)   |
-| `--bg-texture-size`      | (body `background-size`)          | Tile size for the texture                |
-| `--motif-meander`        | (`.meander-rule` divider)         | Greek-key meander motif (`none` if unused) |
-| `--size-tap-min`         | `min-h-tap-min`, `min-w-tap-min`  | 44px minimum tap target (FE-011)         |
+| Token                     | Tailwind utilities               | Meaning                                    |
+| ------------------------- | -------------------------------- | ------------------------------------------ |
+| `--color-surface`         | `bg-surface`, `text-surface`     | Default page / card background             |
+| `--color-surface-raised`  | `bg-surface-raised`              | Raised surface (header, cards)             |
+| `--color-surface-sunken`  | `bg-surface-sunken`              | Recessed surface (wells, inset areas)      |
+| `--color-ink`             | `text-ink`                       | Primary text                               |
+| `--color-ink-muted`       | `text-ink-muted`                 | Secondary / muted text                     |
+| `--color-ink-inverse`     | `text-ink-inverse`               | Text on dark / accent fills                |
+| `--color-accent`          | `bg-accent`, `text-accent`       | Brand / primary interactive                |
+| `--color-accent-strong`   | `text-accent-strong`             | Stronger accent (hover, headings)          |
+| `--color-accent-soft`     | `bg-accent-soft`                 | Tinted accent background (active nav)      |
+| `--color-accent-2`        | `bg-accent-2`, `text-accent-2`   | Secondary accent (sage / moss)             |
+| `--color-accent-2-strong` | `text-accent-2-strong`           | Stronger secondary accent (hover)          |
+| `--color-accent-3`        | `bg-accent-3`, `text-accent-3`   | Tertiary accent fill (ochre / mustard)     |
+| `--color-accent-3-strong` | `text-accent-3-strong`           | Tertiary accent as small text (AA-safe)    |
+| `--color-danger`          | `text-danger`, `bg-danger`       | Destructive / error state                  |
+| `--color-warning`         | `text-warning`                   | Caution state (e.g. overdue soon)          |
+| `--color-success`         | `text-success`                   | Healthy / done state                       |
+| `--color-border`          | `border-border`                  | Hairlines, dividers, control borders       |
+| `--color-ring`            | `ring-ring`                      | Focus ring                                 |
+| `--color-overlay`         | `bg-overlay`                     | Scrim behind overlays / menus              |
+| `--font-display`          | `font-display`                   | Headings / brand                           |
+| `--font-body`             | `font-body`                      | Body copy                                  |
+| `--font-label`            | `font-label`                     | Uppercase / tracked micro-labels           |
+| `--font-mono`             | `font-mono`                      | Code / IDs / timestamps                    |
+| `--radius-card`           | `rounded-card`                   | Card corner radius                         |
+| `--radius-control`        | `rounded-control`                | Buttons, inputs, nav items                 |
+| `--radius-pill`           | `rounded-pill`                   | Pills / badges                             |
+| `--border-width-card`     | `border-card`                    | Card / structural border weight            |
+| `--border-width-control`  | `border-control`                 | Control / nav border weight                |
+| `--shadow-card`           | `shadow-card`                    | Resting card elevation                     |
+| `--shadow-raised`         | `shadow-raised`                  | Raised / floating elevation                |
+| `--bg-texture`            | (body `background-image`)        | Decorative page texture (dots / rules)     |
+| `--bg-texture-size`       | (body `background-size`)         | Tile size for the texture                  |
+| `--motif-meander`         | (`.meander-rule` divider)        | Greek-key meander motif (`none` if unused) |
+| `--size-tap-min`          | `min-h-tap-min`, `min-w-tap-min` | 44px minimum tap target (FE-011)           |
 
 `--bg-texture` / `--bg-texture-size` (body texture) and `--motif-meander` (the
 `.meander-rule` Greek-key divider) are consumed directly in the `index.css`

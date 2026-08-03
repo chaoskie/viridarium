@@ -4,7 +4,7 @@ import { ApiError } from "./client";
 import { fetchHealth } from "./health";
 
 function mockFetchOnce(response: Partial<Response>): void {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response as Response));
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
 }
 
 describe("fetchHealth", () => {
@@ -28,7 +28,7 @@ describe("fetchHealth", () => {
       ok: true,
       status: 200,
       json: () => Promise.resolve({ status: "ok" }),
-    } as Response);
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     await fetchHealth();
