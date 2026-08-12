@@ -3,6 +3,11 @@
 # One container, SQLite by default (product-spec section 7). Pull the published image,
 # or uncomment `build: .` to build from this checkout instead.
 #
+# The container runs `alembic upgrade head` in its entrypoint before the server binds, so
+# a fresh volume gets a complete schema and an image upgrade migrates in place. The
+# healthcheck below is liveness only; `GET /api/v1/health/ready` is the schema-gated
+# readiness probe (503 until migrations have been applied).
+#
 # Deploy on a trusted network or behind your own auth proxy - there is no auth in v1
 # by design (SECURITY.md, SEC-003).
 
@@ -27,6 +32,7 @@ services:
       # default (no cross-origin access).
       # CORS_ALLOW_ORIGINS: '["https://plants.example.lan"]'
     # The image ships a HEALTHCHECK; this mirrors it for compose-level health reporting.
+    # Liveness on purpose: readiness lives at /api/v1/health/ready.
     healthcheck:
       test:
         - CMD

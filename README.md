@@ -45,6 +45,16 @@ The repository ships a fuller [`docker-compose.yml`](docker-compose.yml) with a 
 PostgreSQL block and a healthcheck. PostgreSQL is opt-in via a single `DATABASE_URL` (see
 that file).
 
+The container applies its database migrations on every start, before the server binds, so
+a fresh volume comes up with a complete schema and an upgrade migrates in place. Two
+probes report on that:
+
+- `GET /api/v1/health` - liveness. Answers 200 as soon as the process is up; this is what
+  the image `HEALTHCHECK` uses.
+- `GET /api/v1/health/ready` - readiness. Answers 200 with the applied migration revision
+  once the schema is present, 503 while it is not. Point orchestrators that gate traffic
+  (or your own deploy check) at this one.
+
 Deploy on a trusted network or behind your own auth proxy: there is no authentication in
 v1 by design. See [SECURITY.md](SECURITY.md) before exposing anything.
 

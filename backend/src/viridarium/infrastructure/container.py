@@ -35,10 +35,13 @@ from viridarium.adapters.outbound.db.photo_storage import FilesystemPhotoStorage
 from viridarium.adapters.outbound.db.plant_repository import (
     SqlAlchemyPlantRepository,
 )
+from viridarium.adapters.outbound.db.schema_inspector import (
+    SqlAlchemySchemaInspector,
+)
 from viridarium.application.care_events import CareEventService
 from viridarium.application.care_schedules import CareScheduleService
 from viridarium.application.due import DueQueryService
-from viridarium.application.health import GetHealthStatus
+from viridarium.application.health import GetHealthStatus, GetReadinessStatus
 from viridarium.application.locations import LocationService
 from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
@@ -47,7 +50,7 @@ from viridarium.application.settings import (
     ServiceSeasonalSettingsProvider,
 )
 from viridarium.application.timeline import TimelineQueryService
-from viridarium.domain.health import HealthProbe
+from viridarium.domain.health import HealthProbe, ReadinessProbe
 from viridarium.infrastructure.settings import Settings
 
 
@@ -59,6 +62,7 @@ class Container:
     engine: Engine
     session_factory: sessionmaker[Session]
     health_probe: HealthProbe
+    readiness_probe: ReadinessProbe
     location_service: LocationService
     plant_service: PlantService
     photo_service: PhotoService
@@ -74,6 +78,10 @@ def build_container(settings: Settings) -> Container:
     engine = create_db_engine(settings.database_url)
     session_factory = create_session_factory(engine)
     health_probe = GetHealthStatus(version=settings.version)
+    # Readiness is schema-gated (VIRIDARIUM-67) and reads the same engine.
+    readiness_probe = GetReadinessStatus(
+        SqlAlchemySchemaInspector(engine), version=settings.version
+    )
     location_service = LocationService(SqlAlchemyLocationRepository(session_factory))
 
     photo_repository = SqlAlchemyPhotoRepository(session_factory)
@@ -116,6 +124,7 @@ def build_container(settings: Settings) -> Container:
         engine=engine,
         session_factory=session_factory,
         health_probe=health_probe,
+        readiness_probe=readiness_probe,
         location_service=location_service,
         plant_service=plant_service,
         photo_service=photo_service,

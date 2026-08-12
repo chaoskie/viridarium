@@ -17,12 +17,18 @@ from viridarium.application.photos import PhotoService
 from viridarium.application.plants import PlantService
 from viridarium.application.settings import AppSettingsService
 from viridarium.application.timeline import TimelineQueryService
-from viridarium.domain.health import HealthProbe
+from viridarium.domain.health import HealthProbe, ReadinessProbe
 
 
 def get_health_probe(request: Request) -> HealthProbe:
     """Return the application's health probe from the composition root."""
     probe: HealthProbe = request.app.state.health_probe
+    return probe
+
+
+def get_readiness_probe(request: Request) -> ReadinessProbe:
+    """Return the application's readiness probe from the composition root."""
+    probe: ReadinessProbe = request.app.state.readiness_probe
     return probe
 
 

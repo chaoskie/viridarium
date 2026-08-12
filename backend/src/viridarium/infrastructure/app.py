@@ -84,6 +84,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     # Expose wired collaborators to the inbound adapter via app.state.
     app.state.container = container
     app.state.health_probe = container.health_probe
+    app.state.readiness_probe = container.readiness_probe
     app.state.location_service = container.location_service
     app.state.plant_service = container.plant_service
     app.state.photo_service = container.photo_service
