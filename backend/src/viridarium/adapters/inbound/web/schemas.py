@@ -33,6 +33,19 @@ class HealthResponse(BaseModel):
     version: str
 
 
+class ReadinessResponse(BaseModel):
+    """Public shape of GET /api/v1/health/ready.
+
+    ``schema_revision`` is the applied Alembic revision - migration bookkeeping, not
+    data, so it is safe to expose and is the one field that makes a not-ready answer
+    actionable for an operator.
+    """
+
+    status: str
+    version: str
+    schema_revision: str | None
+
+
 def _trim_non_empty_name(value: str) -> str:
     """Trim ``name`` and reject whitespace-only input (422 via ValueError)."""
     trimmed = value.strip()

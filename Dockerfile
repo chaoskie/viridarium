@@ -80,6 +80,8 @@ COPY --from=backend-deps --chown=app:app /opt/venv /opt/venv
 COPY --chown=app:app backend/src ./src
 # Built SPA from stage 1.
 COPY --from=frontend-build --chown=app:app /build/dist ./static
+# Entrypoint: applies Alembic migrations before the server binds (VIRIDARIUM-67).
+COPY --chown=app:app --chmod=0755 backend/docker-entrypoint.sh /app/docker-entrypoint.sh
 
 USER app
 
@@ -90,6 +92,10 @@ EXPOSE 8000
 # Liveness probe (product-spec section 7). Uses the venv Python (no curl in slim base).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD ["python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3).status==200 else sys.exit(1)"]
+
+# The entrypoint runs `alembic upgrade head` (programmatic config: alembic.ini is not
+# shipped) and then execs the CMD, so the schema always exists before uvicorn binds.
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Serve the wired app. `viridarium.main:app` builds from environment settings, including
 # STATIC_DIR so the SPA is served from the same origin.
