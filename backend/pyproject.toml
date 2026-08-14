@@ -10,9 +10,9 @@ dependencies = [
     # CVE-2026-54283 and the HTTPEndpoint-dispatch advisories CVE-2026-48817 /
     # CVE-2026-48818 (and supersedes the earlier 1.0.1 Host-header fix). It needs
     # fastapi >=0.137, which only requires starlette >=0.46 (SEC-009).
-    "fastapi>=0.137.0,<0.138.0",
+    "fastapi>=0.137.0,<0.140.0",
     "starlette>=1.3.1,<1.4.0",
-    "uvicorn[standard]>=0.34.0,<0.50.0",
+    "uvicorn[standard]>=0.34.0,<0.51.0",
     "sqlalchemy>=2.0.36,<2.1.0",
     "alembic>=1.14.0,<1.19.0",
     "pydantic>=2.10.0,<3.0.0",
