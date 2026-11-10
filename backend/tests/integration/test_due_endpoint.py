@@ -82,7 +82,9 @@ def test_feed_repot_observe_do_not_move_a_water_schedule(client: TestClient) -> 
 def test_water_event_does_not_move_a_feed_schedule(client: TestClient) -> None:
     """B-I8: a water event -> the feed schedule has no matching event (due today)."""
     plant_id = _make_plant(client)
-    _put_schedule(client, plant_id, "feed", 14)
+    # dormancy=winter_interval keeps the feed cadence running all year, so the test
+    # does not depend on the date (the feed default pauses in the dormant season).
+    _put_schedule(client, plant_id, "feed", 14, dormancy="winter_interval")
     _log_event(client, plant_id, "water", date.today() - timedelta(days=2))
 
     feed = next(s for s in _schedules_of(client, plant_id) if s["care_type"] == "feed")
