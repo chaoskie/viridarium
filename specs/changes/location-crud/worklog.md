@@ -41,7 +41,7 @@ edits/reads/test runs.
 - `~16:40 · orchestrator/HIGH · decision: keep as ONE user story, deliver via parallel disjoint-file backend+frontend agents; ~780 LOC over soft budget recorded comply-or-explain · proposal.md · PRIN-VI/SPEC-004`
 - `~16:40 · architect/HIGH · CRUD vertical-slice design returned (REST delta, file plans, test seed, sizing, ADRs) · design.md · sprint-2 handoff`
 - `~16:30 · orchestrator/HIGH · architect pass launched (Plan agent) for the reusable CRUD vertical-slice pattern · - · sprint-2 handoff`
-- `~16:25 · Lars (PO) · ratified homeless-plant state + room-delete flow; confirmed split (rooms now, plant-aware delete with US-2.1) and Playwright-infra deferral · decisions/D-009 · D-009`
+- `~16:25 · maintainer (PO) · ratified homeless-plant state + room-delete flow; confirmed split (rooms now, plant-aware delete with US-2.1) and Playwright-infra deferral · decisions/D-009 · D-009`
 - `~16:25 · orchestrator/HIGH · product-spec refined: Plant.location now optional; Location delete rule rewritten · docs/product-spec.md · D-009`
 - `~16:25 · orchestrator/HIGH · follow-up filed: bulk plant location management + homeless plants (project board Backlog, Inventory module) · board · D-009`
 - `~16:20 · orchestrator/HIGH · US-2.2 picked up: Todo -> In Progress + starting comment; scope/deviation note logged on ticket · project board · plane-ticketing pt-v3`

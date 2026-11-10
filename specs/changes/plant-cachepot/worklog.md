@@ -33,5 +33,5 @@ Checklist per `templates/dor.md` (QG-004 PASS/WATCH/FAIL):
 - `14:55 · claude/OPUS · backend lane RED->GREEN (TEST-014): red = ImportError OuterPotMaterial + migration "no such column: outer_pot_material" / column-set assertion; green after domain enum+fields, 0008 migration, schema, repo mapping · feat/plant-cachepot · PRIN-III`
 - `14:48 · claude/OPUS · G0: test-foundation authored by test-engineer (input matrix, dual-engine migration, OpenAPI delta, AC->test map, self-watering-rejected-as-outer guard) · specs/changes/plant-cachepot/test-foundation.md · SPEC-003`
 - `11:30 · claude/OPUS · DoR gate PASS (13/13); change scaffolded (proposal/design/tasks/worklog/screenshots) · specs/changes/plant-cachepot/* · QG-011`
-- `11:25 · lars+claude/OPUS · scope-affecting answers: descriptive-only v1 (data enables later bottom-watering guidance), flat fields on Plant, outer pot = material + optional size · proposal.md · SPEC-001/DoR-13`
-- `11:20 · lars · change requested: model inner nursery pot + decorative outer pot (cachepot), from S25+ soak feedback #5 · proposal.md · -`
+- `11:25 · maintainer+claude/OPUS · scope-affecting answers: descriptive-only v1 (data enables later bottom-watering guidance), flat fields on Plant, outer pot = material + optional size · proposal.md · SPEC-001/DoR-13`
+- `11:20 · maintainer · change requested: model inner nursery pot + decorative outer pot (cachepot), from S25+ soak feedback #5 · proposal.md · -`
