@@ -19,9 +19,9 @@ Per-change trail (`TRACE-001`). Entries **newest-first**, one line each:
 - `22:24 · claude/OPUS · harness: dedicated acceptance backend port 8799 (never 8000) wired via E2E_BACKEND_PORT - avoids colliding with a dev backend / unrelated local service · playwright.config.ts, vite.config.ts, run-backend.sh · PRIN-IX`
 - `22:20 · claude/OPUS · Playwright acceptance layer scaffolded (config, e2e POM, fixtures, Makefile fe-e2e) - implements already-locked ARCH-001/TEST-009; no PRIN-V amendment · frontend/e2e, playwright.config.ts · ARCH-001/FE-013`
 
-- `12:20 · lars+claude/OPUS · decision: input side already complete, only display gap (BUG-005) + edge-case test coverage in scope · BUG-005 · soak Q on input hardening`
+- `12:20 · maintainer+claude/OPUS · decision: input side already complete, only display gap (BUG-005) + edge-case test coverage in scope · BUG-005 · soak Q on input hardening`
 - `12:18 · claude/OPUS · 5 bug tickets filed (BUG-001..005), evidence: static-read · bugs/BUG-00*.md · /bug step 1`
-- `12:15 · lars · decision: wire Playwright acceptance into CI now (not deferred) · plan · AskUserQuestion`
-- `12:12 · lars+claude/OPUS · decision: Playwright is already in the locked stack (ARCH-001) - no PRIN-V amendment needed; scaffolding the already-required acceptance layer · plan · ARCH-001/TEST-009`
-- `12:10 · lars · decision: satisfy "reproduce as test" for layout bugs #1/#2/#3 by adding the Playwright acceptance harness (jsdom cannot test layout) · plan · AskUserQuestion`
-- `12:00 · lars · scope confirmed: fix mobile bug batch (#1-#4), + cachepot spec (BUG-list #5) and botanicum spec as separate follow-ups · - · AskUserQuestion`
+- `12:15 · maintainer · decision: wire Playwright acceptance into CI now (not deferred) · plan · AskUserQuestion`
+- `12:12 · maintainer+claude/OPUS · decision: Playwright is already in the locked stack (ARCH-001) - no PRIN-V amendment needed; scaffolding the already-required acceptance layer · plan · ARCH-001/TEST-009`
+- `12:10 · maintainer · decision: satisfy "reproduce as test" for layout bugs #1/#2/#3 by adding the Playwright acceptance harness (jsdom cannot test layout) · plan · AskUserQuestion`
+- `12:00 · maintainer · scope confirmed: fix mobile bug batch (#1-#4), + cachepot spec (BUG-list #5) and botanicum spec as separate follow-ups · - · AskUserQuestion`
