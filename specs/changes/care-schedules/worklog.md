@@ -12,7 +12,7 @@
 - `~08:05 · orchestrator/HIGH · build fan-out launched: backend + frontend lanes (disjoint, test-first, TEST-014) · backend/ + frontend/ · PRIN-VI`
 - `~08:03 · test-engineer/HIGH · test-foundation authored: uniqueness headline + 2x3 dormancy matrix + ~30 integration/9 unit/dual-engine CASCADE/0005 migration/FE; critical-100% = uniqueness + 404-no-PII · test-foundation.md · SPEC-003`
 - `~01:00 · orchestrator/HIGH · DoR PASS; spec authored (proposal/design/tasks); PO decisions: dormancy editable per-schedule (Q1), allow null winter-interval + dismissible hint (Q2); climate questionnaire noted for US-3.5 · specs/changes/care-schedules · QG-011/SPEC-002`
-- `~00:51 · Lars (PO) · decided: dormancy editable+overridable per schedule; allow null winter-interval with a small non-blocking hint; US-3.5 to be a climate/winter-period questionnaire · - · E3 product decisions`
+- `~00:51 · maintainer (PO) · decided: dormancy editable+overridable per schedule; allow null winter-interval with a small non-blocking hint; US-3.5 to be a climate/winter-period questionnaire · - · E3 product decisions`
 - `~00:50 · architect/HIGH · US-3.1 design returned (keyed-PUT schedule sub-resource, stored editable dormancy, CASCADE, migration 0005) + the §6 PO decision enumeration · design.md · -`
 - `~00:44 · orchestrator/HIGH · US-3.1 picked up: Todo -> In Progress + comment; branched feat/us-3.1-care-schedules off main (E2 + Fable5 fix merged) · git/board · PRIN-VI`
 - `~08:40 · orchestrator/HIGH · DoD gate PASS; ready to PR · templates/dod.md · QG-012`

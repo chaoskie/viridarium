@@ -52,5 +52,5 @@ Do **NOT** log: individual file edits, reads, or routine test runs - git history
 - `21:04 · test-engineer/HIGH · test-foundation authored (M-ATTR/M-SCHED/M-GALLERY matrices, modal-wiring heterogeneity flagged) · test-foundation.md · SPEC-003 (DoR item 10 WATCH resolved)`
 
 - `20:50 · orchestrator/FABLE · DoR gate run · proposal.md · QG-011 (verdict block in session; 12 PASS, 1 WATCH: test-foundation scheduled not yet authored)`
-- `20:48 · Lars (PO) · scope decisions at pickup: gallery = inline thumbnails + existing modal; actions = reuse existing modals (not read-only) · proposal.md · DoR-13`
+- `20:48 · maintainer (PO) · scope decisions at pickup: gallery = inline thumbnails + existing modal; actions = reuse existing modals (not read-only) · proposal.md · DoR-13`
 - `20:47 · orchestrator/FABLE · change proposed (US-4.3, frontend-only; no API delta) · proposal.md · SPEC-002`
