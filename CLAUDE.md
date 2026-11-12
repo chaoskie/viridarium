@@ -15,7 +15,7 @@ This project runs a rules-driven, spec-first workflow. The **constitution** (`ru
 - **Minimal changes** - only what the task requires; no drive-by refactors, renames, or formatting cascades (PRIN-IX). Formatters run on touched files only.
 - **Worklog** - log significant steps (decisions, gate results, escalations, reviews, commits) to the change's `worklog.md` with actor attribution (`TRACE-001/003/006`).
 - **Spec is the contract** - build only what the spec describes; flag gaps instead of improvising (`SPEC-001`, PRIN-IV).
-- **Commits** - Conventional Commits, imperative ≤72 chars, work-item reference in footer, **no AI-attribution trailers** (`LANG-002`).
+- **Commits** - Conventional Commits, imperative ≤72 chars, no ticket or work-item references (this repo is public and the tracker is private), **no AI-attribution trailers** (`LANG-002`).
 - **Secrets** - never read into context or edit `.env*`/credential files (`SEC-006`).
 - **Dual-engine** - persistence and migrations must work on both SQLite and PostgreSQL (`ARCH-011`).
 
